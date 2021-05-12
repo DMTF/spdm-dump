@@ -1,4 +1,4 @@
-# This spdm-dump is a tool to dump SPDM communication message.
+# This spdm-dump is a tool to dump SPDM communication message using [libspdm](https://github.com/DMTF/libspdm)
 
 ## Feature
 
