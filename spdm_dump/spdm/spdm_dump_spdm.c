@@ -450,10 +450,10 @@ void dump_spdm_negotiate_algorithms(IN void *buffer, IN uintn buffer_size)
 			m_spdm_measurement_spec_value_string_table,
 			ARRAY_SIZE(m_spdm_measurement_spec_value_string_table),
 			spdm_request->measurement_specification);
-		printf("), hash=0x%08x(", spdm_request->bash_hash_algo);
+		printf("), hash=0x%08x(", spdm_request->base_hash_algo);
 		dump_entry_flags(m_spdm_hash_value_string_table,
 				 ARRAY_SIZE(m_spdm_hash_value_string_table),
-				 spdm_request->bash_hash_algo);
+				 spdm_request->base_hash_algo);
 		printf("), Asym=0x%08x(", spdm_request->base_asym_algo);
 		dump_entry_flags(m_spdm_asym_value_string_table,
 				 ARRAY_SIZE(m_spdm_asym_value_string_table),
