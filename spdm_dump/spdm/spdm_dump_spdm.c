@@ -800,11 +800,11 @@ void dump_spdm_get_certificate(IN void *buffer, IN uintn buffer_size)
 
 	if (!m_param_quite_mode) {
 		printf("(SlotID=0x%02x, Offset=0x%x, Length=0x%x) ",
-		       spdm_request->header.param1, spdm_request->Offset,
+		       spdm_request->header.param1, spdm_request->offset,
 		       spdm_request->length);
 	}
 
-	m_cached_spdm_cert_chain_buffer_offset = spdm_request->Offset;
+	m_cached_spdm_cert_chain_buffer_offset = spdm_request->offset;
 
 	printf("\n");
 }
