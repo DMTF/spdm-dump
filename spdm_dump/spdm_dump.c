@@ -221,7 +221,7 @@ void print_usage(void)
 	printf("   [--rsp_cert_chain] is required to if GET_CERTIFICATE is not sent\n");
 	printf("   [--out_req_cert_chain] can be used if encapsulated GET_CERTIFICATE is sent\n");
 	printf("   [--out_rsp_cert_chain] can be used if GET_CERTIFICATE is sent\n");
-	printf("      format: A file containing certificates defined in SPDM spec 'certificate chain fomrat'.\n");
+	printf("      format: A file containing certificates defined in SPDM spec 'certificate chain format'.\n");
 	printf("              It is one or more ASN.1 DER-encoded X.509 v3 certificates.\n");
 	printf("              It may include multiple certificates, starting from root cert to leaf cert.\n");
 	printf("              It does not include the length, reserved, or root_hash fields.\n");
