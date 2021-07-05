@@ -66,7 +66,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
 1. If you use `spdm_dump -r <pcap_file>` to dump the SPDM message over MCTP, you may see something like:
 
    <pre>
-      PcapFile: Magic - 'a1b2c3d4', version2.4, DataLink - 290 (MCTP), MaxPacketSize - 65536
+      PcapFile: Magic - 'a1b2c3d4', version2.4, DataLink - 291 (MCTP), MaxPacketSize - 65536
       1 (1608625474) MCTP(5) REQ->RSP SPDM(10, 0x84) SPDM_GET_VERSION ()
       2 (1608625474) MCTP(5) RSP->REQ SPDM(10, 0x04) SPDM_VERSION (1.0.0.0, 1.1.0.0)
       3 (1608625474) MCTP(5) REQ->RSP SPDM(11, 0xe1) SPDM_GET_CAPABILITIES (Flags=0x0000f7d6, CTExponent=0x00)
@@ -111,7 +111,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
    If the transport layer is PCI_DOE, you may see something like:
 
    <pre>
-      PcapFile: Magic - 'a1b2c3d4', version2.4, DataLink - 291 (PCI_DOE), MaxPacketSize - 65536
+      PcapFile: Magic - 'a1b2c3d4', version2.4, DataLink - 292 (PCI_DOE), MaxPacketSize - 65536
       1 (1608626133) PCI_DOE(1, 0)
       2 (1608626133) PCI_DOE(1, 0)
       3 (1608626133) PCI_DOE(1, 0)
