@@ -1329,12 +1329,13 @@ void dump_spdm_measurements(IN void *buffer, IN uintn buffer_size)
 				dump_data(signature, signature_size);
 				printf(")");
 			} else {
-				opaque_length =
-					*(uint16 *)(measurement_record +
-						    measurement_record_length);
-				opaque_data = measurement_record +
-					      measurement_record_length +
-					      sizeof(uint16);
+				nonce = measurement_record +
+					measurement_record_length;
+				printf("\n    Nonce(");
+				dump_data(nonce, 32);
+				printf(")");
+				opaque_length = *(uint16 *)(nonce + 32);
+				opaque_data = nonce + 32 + sizeof(uint16);
 				printf("\n    OpaqueData(");
 				dump_data(opaque_data, opaque_length);
 				printf(")");
