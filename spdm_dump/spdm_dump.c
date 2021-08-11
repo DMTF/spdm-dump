@@ -236,7 +236,9 @@ void process_args(int argc, char *argv[])
 	pcap_file_name = NULL;
 
 	if (argc == 1) {
-		return;
+		printf("invalid, pcap file should be provided!\n");
+		print_usage();
+		exit(0);
 	}
 
 	argc--;
