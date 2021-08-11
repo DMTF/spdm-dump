@@ -16,6 +16,12 @@ SET(CRYPTO ${CRYPTO} CACHE STRING "Choose the crypto of build: mbedtls openssl" 
 
 SET(LIBSPDM_DIR ${PROJECT_SOURCE_DIR}/libspdm)
 
+#
+# OpenSSL specific compiled libraries.
+#
+SET(COMPILED_LIBCRYPTO_PATH ${COMPILED_LIBCRYPTO_PATH} CACHE STRING "Optionally provide a path to libcrypto" FORCE)
+SET(COMPILED_LIBSSL_PATH ${COMPILED_LIBSSL_PATH} CACHE STRING "Optionally provide a path to libssl" FORCE)
+
 if(ARCH STREQUAL "x64")
     MESSAGE("ARCH = x64")
 elseif(ARCH STREQUAL "ia32")
@@ -30,6 +36,8 @@ elseif(ARCH STREQUAL "riscv64")
     MESSAGE("ARCH = riscv64")
 elseif(ARCH STREQUAL "arc")
     MESSAGE("ARCH = arc")
+elseif(ARCH STREQUAL "nios2")
+    MESSAGE("ARCH = nios2")
 else()
     MESSAGE(FATAL_ERROR "Unkown ARCH")
 endif()
@@ -57,6 +65,8 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
         MESSAGE("TOOLCHAIN = RISCV64_GCC")
     elseif(TOOLCHAIN STREQUAL "ARC_GCC")
         MESSAGE("TOOLCHAIN = ARC_GCC")
+    elseif(TOOLCHAIN STREQUAL "NIOS2_GCC")
+        MESSAGE("TOOLCHAIN = NIOS2_GCC")
     else()
         MESSAGE(FATAL_ERROR "Unkown TOOLCHAIN")
     endif()
@@ -94,6 +104,29 @@ else()
     MESSAGE(FATAL_ERROR "Unkown CRYPTO")
 endif()
 
+if(ENABLE_BINARY_BUILD STREQUAL "1")
+    if(NOT CRYPTO STREQUAL "Openssl")
+        MESSAGE(FATAL_ERROR "enabling binary build not supported for non-Openssl")
+    endif()
+
+    if(NOT COMPILED_LIBCRYPTO_PATH)
+        MESSAGE(FATAL_ERROR "enabling binary build requires path to libcrypto.")
+    endif()
+
+    if(NOT COMPILED_LIBSSL_PATH)
+        MESSAGE(FATAL_ERROR "enabling binary build requires path to libssl.")
+    endif()
+
+    MESSAGE("ENABLE_BINARY_BUILD=1")
+    MESSAGE("COMPILED_LIBCRYPTO_PATH=${COMPILED_LIBCRYPTO_PATH}")
+    MESSAGE("COMPILED_LIBSSL_PATH=${COMPILED_LIBSSL_PATH}")
+
+    SET(CRYPTO_LIB_PATHS ${COMPILED_LIBCRYPTO_PATH} ${COMPILED_LIBSSL_PATH})
+else()
+    SET(CRYPTO_LIB_PATHS ${CRYPTO}lib)
+    MESSAGE("ENABLE_BINARY_BUILD=0; Building ${CRYPTO} library from source.")
+endif()
+
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
     SET(CMAKE_EXE_EXPORTS_C_FLAG "")
 
@@ -105,6 +138,10 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
         SET(CMOCKA_FLAGS "-std=gnu99 -Wpedantic -Wall -Wshadow -Wmissing-prototypes -Wcast-align -Werror=address -Wstrict-prototypes -Werror=strict-prototypes -Wwrite-strings -Werror=write-strings -Werror-implicit-function-declaration -Wpointer-arith -Werror=pointer-arith -Wdeclaration-after-statement -Werror=declaration-after-statement -Wreturn-type -Werror=return-type -Wuninitialized -Werror=uninitialized -Werror=strict-overflow -Wstrict-overflow=2 -Wno-format-zero-length -Wmissing-field-initializers -Wformat-security -Werror=format-security -fno-common -Wformat -fno-common -fstack-protector-strong")
 
         SET(CMAKE_AR gcc-ar)
+
+        if(NOT CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.3)
+                SET(CMAKE_C_ARCHIVE_FINISH true)
+        endif()
 
         SET(CMAKE_LINKER gcc)
         SET(CMAKE_EXE_LINKER_FLAGS "-flto -Wno-error -no-pie --coverage -lgcov -fprofile-arcs -ftest-coverage" )
@@ -249,10 +286,26 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 
         SET(CMAKE_C_LINK_EXECUTABLE "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET> -Wl,--start-group <LINK_LIBRARIES> -Wl,--end-group")
 
+    elseif(TOOLCHAIN STREQUAL "NIOS2_GCC")
+        SET(CMAKE_C_COMPILER nios2-elf-gcc)
+        SET(CMAKE_C_FLAGS "-xc -MP -MMD -pipe -O3  -Wall -Wno-maybe-uninitialized -Wno-unused-but-set-variable -Wno-nonnull-compare -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -Wno-switch -Wno-builtin-declaration-mismatch  -mno-hw-div -mhw-mul -mno-hw-mulx -mgpopt=global")
+        SET(MBEDTLS_FLAGS "")
+        SET(OPENSSL_FLAGS "-include base.h -Wno-error=maybe-uninitialized -Wno-error=format -Wno-format -Wno-error=unused-but-set-variable")
+        SET(CMOCKA_FLAGS "-std=gnu99 -Wpedantic -Wall -Wshadow -Wmissing-prototypes -Wcast-align -Werror=address -Wstrict-prototypes -Werror=strict-prototypes -Wwrite-strings -Werror=write-strings -Werror-implicit-function-declaration -Wpointer-arith -Werror=pointer-arith -Wdeclaration-after-statement -Werror=declaration-after-statement -Wreturn-type -Werror=return-type -Wuninitialized -Werror=uninitialized -Werror=strict-overflow -Wstrict-overflow=2 -Wno-format-zero-length -Wmissing-field-initializers -Wformat-security -Werror=format-security -fno-common -Wformat -fno-common -fstack-protector-strong")
+
+        SET(CMAKE_AR nios2-elf-ar)
+
+        SET(CMAKE_LINKER nios2-elf-gcc)
+        SET(CMAKE_EXE_LINKER_FLAGS "")
+
+        SET(CMAKE_C_LINK_EXECUTABLE "")
+
     endif()
 
-    SET(CMAKE_C_FLAGS_RELEASE     "-Os")
-    SET(CMAKE_C_FLAGS_DEBUG       "-O0")
+    if(NOT TOOLCHAIN STREQUAL "NIOS2_GCC")
+        SET(CMAKE_C_FLAGS_RELEASE     "-Os")
+        SET(CMAKE_C_FLAGS_DEBUG       "-O0")
+    endif()
 
     if(ARCH STREQUAL "x64")
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 -mcmodel=small")
@@ -380,10 +433,6 @@ elseif(TOOLCHAIN STREQUAL "VS2019")
     endif()
 endif()
 
-if(OPENSSL_PATH)
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LIBPATH:${OPENSSL_PATH}") 
-endif()
-
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
@@ -404,13 +453,18 @@ endif()
 
 if(CRYPTO STREQUAL "mbedtls")
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/os_stub/cryptlib_mbedtls out/cryptlib_mbedtls.out)
-    ADD_SUBDIRECTORY(${LIBSPDM_DIR}/os_stub/mbedtlslib out/mbedtlslib.out)
 elseif(CRYPTO STREQUAL "openssl")
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/os_stub/cryptlib_openssl out/cryptlib_openssl.out)
-    if(NOT DEFINED OPENSSL_PATH)
+endif()
+
+if(NOT ENABLE_BINARY_BUILD STREQUAL "1")
+    if(CRYPTO STREQUAL "mbedtls")
+        ADD_SUBDIRECTORY(${LIBSPDM_DIR}/os_stub/mbedtlslib out/mbedtlslib.out)
+    elseif(CRYPTO STREQUAL "openssl")
         ADD_SUBDIRECTORY(${LIBSPDM_DIR}/os_stub/openssllib out/openssllib.out)
     endif()
 endif()
+
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/library/spdm_common_lib out/spdm_common_lib.out)
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/library/spdm_requester_lib out/spdm_requester_lib.out)
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/library/spdm_responder_lib out/spdm_responder_lib.out)
