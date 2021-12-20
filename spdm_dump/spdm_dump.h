@@ -29,32 +29,32 @@
 typedef void (*dump_message_func)(IN void *buffer, IN uintn buffer_size);
 
 typedef struct {
-	uint32 id;
-	char8 *name;
-	dump_message_func dump_func;
+    uint32 id;
+    char8 *name;
+    dump_message_func dump_func;
 } dispatch_table_entry_t;
 
 dispatch_table_entry_t *
 get_dispatch_entry_by_id(IN dispatch_table_entry_t *dispatch_table,
-			 IN uintn dispatch_table_count, IN uint32 id);
+             IN uintn dispatch_table_count, IN uint32 id);
 
 void dump_dispatch_message(IN dispatch_table_entry_t *dispatch_table,
-			   IN uintn dispatch_table_count, IN uint32 id,
-			   IN void *buffer, IN uintn buffer_size);
+               IN uintn dispatch_table_count, IN uint32 id,
+               IN void *buffer, IN uintn buffer_size);
 
 typedef struct {
-	uint32 value;
-	char8 *name;
+    uint32 value;
+    char8 *name;
 } value_string_entry_t;
 
 void dump_entry_flags_all(IN value_string_entry_t *entry_table,
-			  IN uintn entry_table_count, IN uint32 flags);
+              IN uintn entry_table_count, IN uint32 flags);
 
 void dump_entry_flags(IN value_string_entry_t *entry_table,
-		      IN uintn entry_table_count, IN uint32 flags);
+              IN uintn entry_table_count, IN uint32 flags);
 
 void dump_entry_value(IN value_string_entry_t *entry_table,
-		      IN uintn entry_table_count, IN uint32 value);
+              IN uintn entry_table_count, IN uint32 value);
 
 boolean init_spdm_dump(void);
 
@@ -97,22 +97,22 @@ void dump_spdm_vendor_pci(IN void *buffer, IN uintn buffer_size);
 void dump_pci_ide_km_message(IN void *buffer, IN uintn buffer_size);
 
 return_status spdm_dump_session_data_provision(IN void *spdm_context,
-					       IN uint32 session_id,
-					       IN boolean need_mut_auth,
-					       IN boolean is_requester);
+                           IN uint32 session_id,
+                           IN boolean need_mut_auth,
+                           IN boolean is_requester);
 
 return_status spdm_dump_session_data_check(IN void *spdm_context,
-					   IN uint32 session_id,
-					   IN boolean is_requester);
+                       IN uint32 session_id,
+                       IN boolean is_requester);
 
 boolean hex_string_to_buffer(IN char8 *hex_string, OUT void **buffer,
-			     OUT uintn *buffer_size);
+                 OUT uintn *buffer_size);
 
 boolean read_input_file(IN char8 *file_name, OUT void **file_data,
-			OUT uintn *file_size);
+            OUT uintn *file_size);
 
 boolean write_output_file(IN char8 *file_name, IN void *file_data,
-			  IN uintn file_size);
+              IN uintn file_size);
 
 boolean open_output_file(IN char8 *file_name);
 
