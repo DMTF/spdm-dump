@@ -153,9 +153,9 @@ boolean get_flags_from_name(IN value_string_entry_t *table,
     }
     strcpy(local_name, name);
 
-    //
-    // name = Flag1,Flag2,...,FlagN
-    //
+    
+    /* name = Flag1,Flag2,...,FlagN*/
+    
     *flags = 0;
     flag_name = strtok(local_name, ",");
     while (flag_name != NULL) {

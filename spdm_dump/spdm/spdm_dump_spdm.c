@@ -218,11 +218,11 @@ value_string_entry_t m_spdm_end_session_attribute_string_table[] = {
 uint32_t spdm_dump_get_measurement_summary_hash_size(
     IN uint8_t measurement_summary_hash_type)
 {
-    // Requester does not support measurement
+    /* Requester does not support measurement*/
     if (m_encapsulated) {
         return 0;
     }
-    // Check responder capabilities
+    /* Check responder capabilities*/
     if ((m_spdm_responder_capabilities_flags &
          SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP) == 0) {
         return 0;
@@ -1663,10 +1663,10 @@ void dump_spdm_key_exchange_rsp(IN void *buffer, IN uintn buffer_size)
 
     m_cached_session_id =
         m_cached_session_id | spdm_response->rsp_session_id;
-    // double check if current is occupied
+    /* double check if current is occupied*/
     if (libspdm_get_session_info_via_session_id(m_spdm_context,
                          m_cached_session_id) != NULL) {
-        // this might happen if a session is terminated without EndSession
+        /* this might happen if a session is terminated without EndSession*/
         libspdm_free_session_id(m_spdm_context, m_cached_session_id);
     }
     m_current_session_info = libspdm_assign_session_id(
@@ -2000,10 +2000,10 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
 
     m_cached_session_id =
         m_cached_session_id | spdm_response->rsp_session_id;
-    // double check if current is occupied
+    /* double check if current is occupied*/
     if (libspdm_get_session_info_via_session_id(m_spdm_context,
                          m_cached_session_id) != NULL) {
-        // this might happen if a session is terminated without EndSession
+        /* this might happen if a session is terminated without EndSession*/
         libspdm_free_session_id(m_spdm_context, m_cached_session_id);
     }
     m_current_session_info = libspdm_assign_session_id(
@@ -2069,7 +2069,7 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
     if ((m_spdm_responder_capabilities_flags &
          SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_PSK_CAP_RESPONDER_WITH_CONTEXT) ==
         0) {
-        // No need to receive PSK_FINISH, enter application phase directly.
+        /* No need to receive PSK_FINISH, enter application phase directly.*/
 
         libspdm_calculate_th2_hash(m_spdm_context, m_current_session_info,
                     TRUE, th2_hash_data);
@@ -2622,9 +2622,9 @@ boolean init_spdm_dump(void)
     }
     libspdm_init_context(m_spdm_context);
 
-    //
-    // Provision data in case the GET_CAPABILITIES or NEGOTIATE_ALGORITHMS are not sent.
-    //
+    
+    /* Provision data in case the GET_CAPABILITIES or NEGOTIATE_ALGORITHMS are not sent.*/
+    
     zero_mem(&parameter, sizeof(parameter));
     parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_CAPABILITY_FLAGS, &parameter,

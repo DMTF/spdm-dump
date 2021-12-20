@@ -22,12 +22,12 @@ void dump_pldm_control_get_tid(IN void *buffer, IN uintn buffer_size)
     }
 
     if (is_req) {
-        // request
+        /* request*/
         if (!m_param_quite_mode) {
             printf("() ");
         }
     } else {
-        // response
+        /* response*/
         if (buffer_size < header_size + 1) {
             printf("\n");
             return;
