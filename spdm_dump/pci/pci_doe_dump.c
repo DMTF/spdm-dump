@@ -42,7 +42,7 @@ void dump_pci_doe_packet(IN void *buffer, IN uintn buffer_size)
         dump_dispatch_message(m_pci_doe_dispatch,
                       ARRAY_SIZE(m_pci_doe_dispatch),
                       pci_doe_header->data_object_type,
-                      (uint8 *)buffer + header_size,
+                      (uint8_t *)buffer + header_size,
                       buffer_size - header_size);
 
         if (m_param_dump_hex &&

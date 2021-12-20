@@ -35,7 +35,7 @@ void dump_pldm_control_get_tid(IN void *buffer, IN uintn buffer_size)
 
         if (!m_param_quite_mode) {
             printf("(tid=0x%02x) ",
-                   *((uint8 *)buffer + header_size));
+                   *((uint8_t *)buffer + header_size));
         }
     }
 
@@ -64,7 +64,7 @@ void dump_pldm_control(IN void *buffer, IN uintn buffer_size)
     dump_dispatch_message(m_pldm_control_dispatch,
                   ARRAY_SIZE(m_pldm_control_dispatch),
                   pldm_message_header->pldm_command_code,
-                  (uint8 *)buffer, buffer_size);
+                  (uint8_t *)buffer, buffer_size);
 }
 
 dispatch_table_entry_t m_pldm_dispatch[] = {
@@ -126,5 +126,5 @@ void dump_pldm_message(IN void *buffer, IN uintn buffer_size)
 
     dump_dispatch_message(m_pldm_dispatch, ARRAY_SIZE(m_pldm_dispatch),
                   pldm_message_header->pldm_type & 0x3F,
-                  (uint8 *)buffer, buffer_size);
+                  (uint8_t *)buffer, buffer_size);
 }

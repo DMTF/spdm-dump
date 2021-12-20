@@ -29,7 +29,7 @@ void dump_mctp_message(IN void *buffer, IN uintn buffer_size)
         printf("\n");
         return;
     }
-    mctp_message_header = (mctp_message_header_t *)((uint8 *)buffer);
+    mctp_message_header = (mctp_message_header_t *)((uint8_t *)buffer);
 
     printf("MCTP(%d) ", mctp_message_header->message_type);
 
@@ -40,7 +40,7 @@ void dump_mctp_message(IN void *buffer, IN uintn buffer_size)
         dump_dispatch_message(m_mctp_dispatch,
                       ARRAY_SIZE(m_mctp_dispatch),
                       mctp_message_header->message_type,
-                      (uint8 *)buffer + header_size,
+                      (uint8_t *)buffer + header_size,
                       buffer_size - header_size);
 
         if (m_param_dump_hex &&
@@ -65,6 +65,6 @@ void dump_mctp_packet(IN void *buffer, IN uintn buffer_size)
         return;
     }
 
-    dump_mctp_message((uint8 *)buffer + header_size,
+    dump_mctp_message((uint8_t *)buffer + header_size,
               buffer_size - header_size);
 }

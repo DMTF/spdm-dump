@@ -9,7 +9,7 @@
 extern void *m_spdm_dec_message_buffer;
 extern void *m_spdm_context;
 extern void *m_current_session_info;
-extern uint32 m_current_session_id;
+extern uint32_t m_current_session_id;
 extern boolean m_decrypted;
 
 void dump_spdm_opaque_version_selection(IN void *buffer, IN uintn buffer_size)
@@ -74,7 +74,7 @@ dispatch_table_entry_t m_spdm_opaque_dispatch[] = {
       "SUPPORTED_VERSION", dump_spdm_opaque_supported_version },
 };
 
-void dump_spdm_opaque_data(IN uint8 *opaque_data, IN uint16 opaque_length)
+void dump_spdm_opaque_data(IN uint8_t *opaque_data, IN uint16_t opaque_length)
 {
     secured_message_general_opaque_data_table_header_t
         *secured_message_opaque_data_table;
@@ -84,7 +84,7 @@ void dump_spdm_opaque_data(IN uint8 *opaque_data, IN uint16 opaque_length)
     uintn end_of_element_table;
     uintn end_of_opaque_data;
     uintn index;
-    char8 *ch;
+    char *ch;
 
     end_of_opaque_data = (uintn)opaque_data + opaque_length;
 
@@ -130,7 +130,7 @@ void dump_spdm_opaque_data(IN uint8 *opaque_data, IN uint16 opaque_length)
             break;
         }
         printf("\n      SecuredMessageOpaqueElement_%d(id=0x%02x, len=0x%04x) ",
-               (uint32)index, secured_message_element_table->id,
+               (uint32_t)index, secured_message_element_table->id,
                secured_message_element_table->opaque_element_data_len);
 
         if (secured_message_element_table->opaque_element_data_len <
@@ -147,7 +147,7 @@ void dump_spdm_opaque_data(IN uint8 *opaque_data, IN uint16 opaque_length)
             m_spdm_opaque_dispatch,
             ARRAY_SIZE(m_spdm_opaque_dispatch),
             secured_message_element->sm_data_id,
-            (uint8 *)secured_message_element,
+            (uint8_t *)secured_message_element,
             secured_message_element_table->opaque_element_data_len);
 
         secured_message_element_table = (void *)end_of_element_table;
@@ -162,19 +162,19 @@ dispatch_table_entry_t m_secured_spdm_dispatch[] = {
 void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size)
 {
     spdm_secured_message_a_data_header1_t *record_header1;
-    uint16 sequence_num;
+    uint16_t sequence_num;
     uintn sequence_num_size;
     return_status status;
     uintn message_size;
     static boolean is_requester = FALSE;
-    uint32 data_link_type;
+    uint32_t data_link_type;
     spdm_secured_message_callbacks_t spdm_secured_message_callbacks_t;
     void *secured_message_context;
 
     data_link_type = get_data_link_type();
     switch (data_link_type) {
     case LINKTYPE_MCTP:
-        sequence_num_size = sizeof(uint16);
+        sequence_num_size = sizeof(uint16_t);
         spdm_secured_message_callbacks_t.version =
             SPDM_SECURED_MESSAGE_CALLBACKS_VERSION;
         spdm_secured_message_callbacks_t.get_sequence_number =
@@ -210,16 +210,16 @@ void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size)
     record_header1 = buffer;
     sequence_num = 0;
     if (data_link_type == LINKTYPE_MCTP) {
-        sequence_num = *(uint16 *)(record_header1 + 1);
+        sequence_num = *(uint16_t *)(record_header1 + 1);
     }
 
-    m_current_session_info = spdm_get_session_info_via_session_id(
+    m_current_session_info = libspdm_get_session_info_via_session_id(
         m_spdm_context, record_header1->session_id);
     m_current_session_id = record_header1->session_id;
     status = RETURN_UNSUPPORTED;
     if (m_current_session_info != NULL) {
         secured_message_context =
-            spdm_get_secured_message_context_via_session_id(
+            libspdm_get_secured_message_context_via_session_id(
                 m_spdm_context, record_header1->session_id);
         if (secured_message_context != NULL) {
             message_size = get_max_packet_length();

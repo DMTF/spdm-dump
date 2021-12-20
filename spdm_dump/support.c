@@ -12,7 +12,7 @@
   @param  data  raw data
   @param  size  raw data size
 **/
-void dump_hex_str(IN uint8 *data, IN uintn size)
+void dump_hex_str(IN uint8_t *data, IN uintn size)
 {
     uintn index;
 
@@ -27,7 +27,7 @@ void dump_hex_str(IN uint8 *data, IN uintn size)
   @param  data  raw data
   @param  size  raw data size
 **/
-void dump_data(IN uint8 *data, IN uintn size)
+void dump_data(IN uint8_t *data, IN uintn size)
 {
     uintn index;
 
@@ -45,9 +45,9 @@ void dump_data(IN uint8 *data, IN uintn size)
   @param  data  raw data
   @param  size  raw data size
 **/
-void dump_hex(IN uint8 *data, IN uintn size)
+void dump_hex(IN uint8_t *data, IN uintn size)
 {
-    uint32 index;
+    uint32_t index;
     uintn count;
     uintn left;
 
@@ -68,7 +68,7 @@ void dump_hex(IN uint8 *data, IN uintn size)
     }
 }
 
-static boolean char_to_byte(IN char8 ch, OUT uint8 *data)
+static boolean char_to_byte(IN char ch, OUT uint8_t *data)
 {
     if (ch >= '0' && ch <= '9') {
         *data = ch - '0';
@@ -86,11 +86,11 @@ static boolean char_to_byte(IN char8 ch, OUT uint8 *data)
     return FALSE;
 }
 
-static boolean one_byte_string_to_buffer(IN char8 one_byte_string[2],
-                     OUT uint8 *buffer)
+static boolean one_byte_string_to_buffer(IN char one_byte_string[2],
+                     OUT uint8_t *buffer)
 {
-    uint8 data_h;
-    uint8 data_l;
+    uint8_t data_h;
+    uint8_t data_l;
 
     if (!char_to_byte(one_byte_string[0], &data_h)) {
         return FALSE;
@@ -103,7 +103,7 @@ static boolean one_byte_string_to_buffer(IN char8 one_byte_string[2],
     return TRUE;
 }
 
-boolean hex_string_to_buffer(IN char8 *hex_string, OUT void **buffer,
+boolean hex_string_to_buffer(IN char *hex_string, OUT void **buffer,
                  OUT uintn *buffer_size)
 {
     uintn str_len;
@@ -112,7 +112,7 @@ boolean hex_string_to_buffer(IN char8 *hex_string, OUT void **buffer,
     str_len = strlen(hex_string);
     if ((str_len & 0x1) != 0) {
         printf("hex_string error - strlen (%d) is not even\n",
-               (uint32)str_len);
+               (uint32_t)str_len);
         return FALSE;
     }
     *buffer_size = str_len / 2;
@@ -124,7 +124,7 @@ boolean hex_string_to_buffer(IN char8 *hex_string, OUT void **buffer,
 
     for (index = 0; index < str_len / 2; index++) {
         if (!one_byte_string_to_buffer(hex_string + index * 2,
-                           (uint8 *)*buffer + index)) {
+                           (uint8_t *)*buffer + index)) {
             return FALSE;
         }
     }
@@ -132,7 +132,7 @@ boolean hex_string_to_buffer(IN char8 *hex_string, OUT void **buffer,
     return TRUE;
 }
 
-boolean read_input_file(IN char8 *file_name, OUT void **file_data,
+boolean read_input_file(IN char *file_name, OUT void **file_data,
             OUT uintn *file_size)
 {
     FILE *fp_in;
@@ -168,7 +168,7 @@ boolean read_input_file(IN char8 *file_name, OUT void **file_data,
     return TRUE;
 }
 
-boolean write_output_file(IN char8 *file_name, IN void *file_data,
+boolean write_output_file(IN char *file_name, IN void *file_data,
               IN uintn file_size)
 {
     FILE *fp_out;
@@ -189,7 +189,7 @@ boolean write_output_file(IN char8 *file_name, IN void *file_data,
     return TRUE;
 }
 
-boolean open_output_file(IN char8 *file_name)
+boolean open_output_file(IN char *file_name)
 {
     FILE *fp_out;
 

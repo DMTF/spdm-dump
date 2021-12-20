@@ -15,7 +15,7 @@ dispatch_table_entry_t m_pcap_dispatch[] = {
     { LINKTYPE_PCI_DOE, "PCI_DOE", dump_pci_doe_packet },
 };
 
-char8 *data_link_type_to_string(IN uint32 data_link_type)
+char *data_link_type_to_string(IN uint32_t data_link_type)
 {
     switch (data_link_type) {
     case LINKTYPE_MCTP:
@@ -27,12 +27,12 @@ char8 *data_link_type_to_string(IN uint32 data_link_type)
     }
 }
 
-uint32 get_max_packet_length(void)
+uint32_t get_max_packet_length(void)
 {
     return m_pcap_global_header.snap_len;
 }
 
-uint32 get_data_link_type(void)
+uint32_t get_data_link_type(void)
 {
     return m_pcap_global_header.network;
 }
@@ -47,7 +47,7 @@ void dump_pcap_global_header(IN pcap_global_header_t *pcap_global_header)
            pcap_global_header->snap_len);
 }
 
-boolean open_pcap_packet_file(IN char8 *pcap_file_name)
+boolean open_pcap_packet_file(IN char *pcap_file_name)
 {
     if (pcap_file_name == NULL) {
         return FALSE;
@@ -107,7 +107,7 @@ void close_pcap_packet_file(void)
 void dump_pcap_packet_header(IN uintn index,
                  IN pcap_packet_header_t *pcap_packet_header)
 {
-    printf("%d (%d) ", (uint32)index, pcap_packet_header->ts_sec);
+    printf("%d (%d) ", (uint32_t)index, pcap_packet_header->ts_sec);
 }
 
 void dump_pcap_packet(IN void *buffer, IN uintn buffer_size)

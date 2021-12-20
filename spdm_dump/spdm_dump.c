@@ -10,19 +10,19 @@ boolean m_param_quite_mode;
 boolean m_param_all_mode;
 boolean m_param_dump_vendor_app;
 boolean m_param_dump_hex;
-char8 *m_param_out_rsp_cert_chain_file_name;
-char8 *m_param_out_rsq_cert_chain_file_name;
+char *m_param_out_rsp_cert_chain_file_name;
+char *m_param_out_rsq_cert_chain_file_name;
 
-extern uint32 m_spdm_requester_capabilities_flags;
-extern uint32 m_spdm_responder_capabilities_flags;
-extern uint8 m_spdm_measurement_spec;
-extern uint32 m_spdm_measurement_hash_algo;
-extern uint32 m_spdm_base_asym_algo;
-extern uint32 m_spdm_base_hash_algo;
-extern uint16 m_spdm_dhe_named_group;
-extern uint16 m_spdm_aead_cipher_suite;
-extern uint16 m_spdm_req_base_asym_alg;
-extern uint16 m_spdm_key_schedule;
+extern uint32_t m_spdm_requester_capabilities_flags;
+extern uint32_t m_spdm_responder_capabilities_flags;
+extern uint8_t m_spdm_measurement_spec;
+extern uint32_t m_spdm_measurement_hash_algo;
+extern uint32_t m_spdm_base_asym_algo;
+extern uint32_t m_spdm_base_hash_algo;
+extern uint16_t m_spdm_dhe_named_group;
+extern uint16_t m_spdm_aead_cipher_suite;
+extern uint16_t m_spdm_req_base_asym_alg;
+extern uint16_t m_spdm_key_schedule;
 
 extern value_string_entry_t m_spdm_requester_capabilities_string_table[];
 extern uintn m_spdm_requester_capabilities_string_table_count;
@@ -45,7 +45,7 @@ extern uintn m_spdm_measurement_spec_value_string_table_count;
 
 dispatch_table_entry_t *
 get_dispatch_entry_by_id(IN dispatch_table_entry_t *dispatch_table,
-             IN uintn dispatch_table_count, IN uint32 id)
+             IN uintn dispatch_table_count, IN uint32_t id)
 {
     uintn index;
 
@@ -58,7 +58,7 @@ get_dispatch_entry_by_id(IN dispatch_table_entry_t *dispatch_table,
 }
 
 void dump_dispatch_message(IN dispatch_table_entry_t *dispatch_table,
-               IN uintn dispatch_table_count, IN uint32 id,
+               IN uintn dispatch_table_count, IN uint32_t id,
                IN void *buffer, IN uintn buffer_size)
 {
     dispatch_table_entry_t *entry;
@@ -77,7 +77,7 @@ void dump_dispatch_message(IN dispatch_table_entry_t *dispatch_table,
 }
 
 void dump_entry_flags(IN value_string_entry_t *entry_table,
-              IN uintn entry_table_count, IN uint32 flags)
+              IN uintn entry_table_count, IN uint32_t flags)
 {
     uintn index;
     boolean first;
@@ -96,7 +96,7 @@ void dump_entry_flags(IN value_string_entry_t *entry_table,
 }
 
 void dump_entry_flags_all(IN value_string_entry_t *entry_table,
-              IN uintn entry_table_count, IN uint32 flags)
+              IN uintn entry_table_count, IN uint32_t flags)
 {
     uintn index;
 
@@ -110,7 +110,7 @@ void dump_entry_flags_all(IN value_string_entry_t *entry_table,
 }
 
 void dump_entry_value(IN value_string_entry_t *entry_table,
-              IN uintn entry_table_count, IN uint32 value)
+              IN uintn entry_table_count, IN uint32_t value)
 {
     uintn index;
 
@@ -124,8 +124,8 @@ void dump_entry_value(IN value_string_entry_t *entry_table,
 }
 
 boolean get_value_from_name(IN value_string_entry_t *table,
-                IN uintn entry_count, IN char8 *name,
-                OUT uint32 *value)
+                IN uintn entry_count, IN char *name,
+                OUT uint32_t *value)
 {
     uintn index;
 
@@ -139,12 +139,12 @@ boolean get_value_from_name(IN value_string_entry_t *table,
 }
 
 boolean get_flags_from_name(IN value_string_entry_t *table,
-                IN uintn entry_count, IN char8 *name,
-                OUT uint32 *flags)
+                IN uintn entry_count, IN char *name,
+                OUT uint32_t *flags)
 {
-    uint32 value;
-    char8 *flag_name;
-    char8 *local_name;
+    uint32_t value;
+    char *flag_name;
+    char *local_name;
     boolean ret;
 
     local_name = (void *)malloc(strlen(name) + 1);
@@ -229,8 +229,8 @@ void print_usage(void)
 
 void process_args(int argc, char *argv[])
 {
-    char8 *pcap_file_name;
-    uint32 data32;
+    char *pcap_file_name;
+    uint32_t data32;
     boolean res;
 
     pcap_file_name = NULL;
@@ -410,7 +410,7 @@ void process_args(int argc, char *argv[])
                     print_usage();
                     exit(0);
                 }
-                m_spdm_measurement_spec = (uint8)data32;
+                m_spdm_measurement_spec = (uint8_t)data32;
                 printf("meas_spec - 0x%02x\n",
                        m_spdm_measurement_spec);
                 argc -= 2;
@@ -480,7 +480,7 @@ void process_args(int argc, char *argv[])
                     print_usage();
                     exit(0);
                 }
-                m_spdm_req_base_asym_alg = (uint16)data32;
+                m_spdm_req_base_asym_alg = (uint16_t)data32;
                 printf("req_asym - 0x%04x\n",
                        m_spdm_req_base_asym_alg);
                 argc -= 2;
@@ -503,7 +503,7 @@ void process_args(int argc, char *argv[])
                     print_usage();
                     exit(0);
                 }
-                m_spdm_dhe_named_group = (uint16)data32;
+                m_spdm_dhe_named_group = (uint16_t)data32;
                 printf("dhe - 0x%04x\n",
                        m_spdm_dhe_named_group);
                 argc -= 2;
@@ -526,7 +526,7 @@ void process_args(int argc, char *argv[])
                     print_usage();
                     exit(0);
                 }
-                m_spdm_aead_cipher_suite = (uint16)data32;
+                m_spdm_aead_cipher_suite = (uint16_t)data32;
                 printf("aead - 0x%04x\n",
                        m_spdm_aead_cipher_suite);
                 argc -= 2;
@@ -550,7 +550,7 @@ void process_args(int argc, char *argv[])
                     print_usage();
                     exit(0);
                 }
-                m_spdm_key_schedule = (uint16)data32;
+                m_spdm_key_schedule = (uint16_t)data32;
                 printf("key_schedule - 0x%04x\n",
                        m_spdm_key_schedule);
                 argc -= 2;
@@ -574,8 +574,8 @@ void process_args(int argc, char *argv[])
                     exit(0);
                 }
                 if (m_requester_cert_chain_buffer_size >
-                    MAX_SPDM_CERT_CHAIN_SIZE) {
-                    printf("req_cert_chain is too larger. Please increase MAX_SPDM_CERT_CHAIN_SIZE and rebuild.\n");
+                    LIBSPDM_MAX_CERT_CHAIN_SIZE) {
+                    printf("req_cert_chain is too larger. Please increase LIBSPDM_MAX_CERT_CHAIN_SIZE and rebuild.\n");
                     exit(0);
                 }
                 argc -= 2;
@@ -599,8 +599,8 @@ void process_args(int argc, char *argv[])
                     exit(0);
                 }
                 if (m_requester_cert_chain_buffer_size >
-                    MAX_SPDM_CERT_CHAIN_SIZE) {
-                    printf("rsp_cert_chain is too larger. Please increase MAX_SPDM_CERT_CHAIN_SIZE and rebuild.\n");
+                    LIBSPDM_MAX_CERT_CHAIN_SIZE) {
+                    printf("rsp_cert_chain is too larger. Please increase LIBSPDM_MAX_CERT_CHAIN_SIZE and rebuild.\n");
                     exit(0);
                 }
                 argc -= 2;

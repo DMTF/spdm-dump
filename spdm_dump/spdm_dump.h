@@ -29,52 +29,52 @@
 typedef void (*dump_message_func)(IN void *buffer, IN uintn buffer_size);
 
 typedef struct {
-    uint32 id;
-    char8 *name;
+    uint32_t id;
+    char *name;
     dump_message_func dump_func;
 } dispatch_table_entry_t;
 
 dispatch_table_entry_t *
 get_dispatch_entry_by_id(IN dispatch_table_entry_t *dispatch_table,
-             IN uintn dispatch_table_count, IN uint32 id);
+             IN uintn dispatch_table_count, IN uint32_t id);
 
 void dump_dispatch_message(IN dispatch_table_entry_t *dispatch_table,
-               IN uintn dispatch_table_count, IN uint32 id,
+               IN uintn dispatch_table_count, IN uint32_t id,
                IN void *buffer, IN uintn buffer_size);
 
 typedef struct {
-    uint32 value;
-    char8 *name;
+    uint32_t value;
+    char *name;
 } value_string_entry_t;
 
 void dump_entry_flags_all(IN value_string_entry_t *entry_table,
-              IN uintn entry_table_count, IN uint32 flags);
+              IN uintn entry_table_count, IN uint32_t flags);
 
 void dump_entry_flags(IN value_string_entry_t *entry_table,
-              IN uintn entry_table_count, IN uint32 flags);
+              IN uintn entry_table_count, IN uint32_t flags);
 
 void dump_entry_value(IN value_string_entry_t *entry_table,
-              IN uintn entry_table_count, IN uint32 value);
+              IN uintn entry_table_count, IN uint32_t value);
 
 boolean init_spdm_dump(void);
 
 void deinit_spdm_dump(void);
 
-boolean open_pcap_packet_file(IN char8 *pcap_file_name);
+boolean open_pcap_packet_file(IN char *pcap_file_name);
 
 void close_pcap_packet_file(void);
 
 void dump_pcap(void);
 
-uint32 get_data_link_type(void);
+uint32_t get_data_link_type(void);
 
-uint32 get_max_packet_length(void);
+uint32_t get_max_packet_length(void);
 
-void dump_hex_str(IN uint8 *data, IN uintn size);
+void dump_hex_str(IN uint8_t *data, IN uintn size);
 
-void dump_data(IN uint8 *data, IN uintn size);
+void dump_data(IN uint8_t *data, IN uintn size);
 
-void dump_hex(IN uint8 *data, IN uintn size);
+void dump_hex(IN uint8_t *data, IN uintn size);
 
 void dump_mctp_packet(IN void *buffer, IN uintn buffer_size);
 
@@ -86,7 +86,7 @@ void dump_spdm_message(IN void *buffer, IN uintn buffer_size);
 
 void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size);
 
-void dump_spdm_opaque_data(IN uint8 *opaque_data, IN uint16 opaque_length);
+void dump_spdm_opaque_data(IN uint8_t *opaque_data, IN uint16_t opaque_length);
 
 void dump_pldm_message(IN void *buffer, IN uintn buffer_size);
 
@@ -97,31 +97,31 @@ void dump_spdm_vendor_pci(IN void *buffer, IN uintn buffer_size);
 void dump_pci_ide_km_message(IN void *buffer, IN uintn buffer_size);
 
 return_status spdm_dump_session_data_provision(IN void *spdm_context,
-                           IN uint32 session_id,
+                           IN uint32_t session_id,
                            IN boolean need_mut_auth,
                            IN boolean is_requester);
 
 return_status spdm_dump_session_data_check(IN void *spdm_context,
-                       IN uint32 session_id,
+                       IN uint32_t session_id,
                        IN boolean is_requester);
 
-boolean hex_string_to_buffer(IN char8 *hex_string, OUT void **buffer,
+boolean hex_string_to_buffer(IN char *hex_string, OUT void **buffer,
                  OUT uintn *buffer_size);
 
-boolean read_input_file(IN char8 *file_name, OUT void **file_data,
+boolean read_input_file(IN char *file_name, OUT void **file_data,
             OUT uintn *file_size);
 
-boolean write_output_file(IN char8 *file_name, IN void *file_data,
+boolean write_output_file(IN char *file_name, IN void *file_data,
               IN uintn file_size);
 
-boolean open_output_file(IN char8 *file_name);
+boolean open_output_file(IN char *file_name);
 
 extern boolean m_param_quite_mode;
 extern boolean m_param_all_mode;
 extern boolean m_param_dump_vendor_app;
 extern boolean m_param_dump_hex;
-extern char8 *m_param_out_rsp_cert_chain_file_name;
-extern char8 *m_param_out_rsq_cert_chain_file_name;
+extern char *m_param_out_rsp_cert_chain_file_name;
+extern char *m_param_out_rsq_cert_chain_file_name;
 
 extern void *m_requester_cert_chain_buffer;
 extern uintn m_requester_cert_chain_buffer_size;

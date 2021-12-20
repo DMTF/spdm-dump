@@ -109,6 +109,6 @@ void dump_pci_ide_km_message(IN void *buffer, IN uintn buffer_size)
 
     dump_dispatch_message(m_pci_ide_km_dispatch,
                   ARRAY_SIZE(m_pci_ide_km_dispatch),
-                  pci_ide_km_header->object_id, (uint8 *)buffer,
+                  pci_ide_km_header->object_id, (uint8_t *)buffer,
                   buffer_size);
 }

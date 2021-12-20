@@ -13,10 +13,10 @@ dispatch_table_entry_t m_spdm_pci_protocol_dispatch[] = {
 #pragma pack(1)
 
 typedef struct {
-    uint16 standard_id;
-    uint8 len;
-    uint16 vendor_id;
-    uint16 payload_length;
+    uint16_t standard_id;
+    uint8_t len;
+    uint16_t vendor_id;
+    uint16_t payload_length;
     pci_protocol_header_t pci_protocol;
 } spdm_vendor_defined_pci_header_t;
 
@@ -70,7 +70,7 @@ void dump_spdm_vendor_pci(IN void *buffer, IN uintn buffer_size)
         m_spdm_pci_protocol_dispatch,
         ARRAY_SIZE(m_spdm_pci_protocol_dispatch),
         vendor_defined_pci_header->pci_protocol.protocol_id,
-        (uint8 *)buffer + sizeof(spdm_vendor_defined_pci_header_t),
+        (uint8_t *)buffer + sizeof(spdm_vendor_defined_pci_header_t),
         vendor_defined_pci_header->payload_length -
             sizeof(pci_protocol_header_t));
 
