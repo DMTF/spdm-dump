@@ -7,19 +7,19 @@
 #ifndef __SPDM_DUMP_H__
 #define __SPDM_DUMP_H__
 
-#include <base.h>
-#include <industry_standard/spdm.h>
-#include <industry_standard/spdm_secured_message.h>
-#include <industry_standard/mctp.h>
-#include <industry_standard/pldm.h>
-#include <industry_standard/pcidoe.h>
-#include <industry_standard/pci_idekm.h>
-#include <industry_standard/pcap.h>
-#include <industry_standard/link_type_ex.h>
+#include "base.h"
+#include "industry_standard/spdm.h"
+#include "industry_standard/spdm_secured_message.h"
+#include "industry_standard/mctp.h"
+#include "industry_standard/pldm.h"
+#include "industry_standard/pcidoe.h"
+#include "industry_standard/pci_idekm.h"
+#include "industry_standard/pcap.h"
+#include "industry_standard/link_type_ex.h"
 
-#include <library/spdm_common_lib.h>
-#include <library/spdm_transport_mctp_lib.h>
-#include <library/spdm_transport_pcidoe_lib.h>
+#include "library/spdm_common_lib.h"
+#include "library/spdm_transport_mctp_lib.h"
+#include "library/spdm_transport_pcidoe_lib.h"
 
 #include "os_include.h"
 #include "stdio.h"
