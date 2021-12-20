@@ -230,9 +230,9 @@ void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size)
                 m_spdm_dec_message_buffer,
                 &spdm_secured_message_callbacks_t);
             if (RETURN_ERROR(status)) {
-                //
-                // Try other direction, because a responder might initiate a message in Session.
-                //
+                
+                /* Try other direction, because a responder might initiate a message in Session.*/
+                
                 status = spdm_decode_secured_message(
                     secured_message_context,
                     record_header1->session_id,
