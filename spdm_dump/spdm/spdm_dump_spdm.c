@@ -235,7 +235,7 @@ uint32_t spdm_dump_get_measurement_summary_hash_size(
 
     case SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH:
     case SPDM_CHALLENGE_REQUEST_ALL_MEASUREMENTS_HASH:
-        return spdm_get_hash_size(m_spdm_base_hash_algo);
+        return libspdm_get_hash_size(m_spdm_base_hash_algo);
         break;
     }
 
@@ -758,7 +758,7 @@ void dump_spdm_digests(IN void *buffer, IN uintn buffer_size)
         }
     }
 
-    hash_size = spdm_get_hash_size(m_spdm_base_hash_algo);
+    hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
     message_size += slot_count * hash_size;
     if (buffer_size < message_size) {
@@ -853,7 +853,7 @@ void dump_spdm_certificate(IN void *buffer, IN uintn buffer_size)
     m_spdm_cert_chain_buffer_size = m_cached_spdm_cert_chain_buffer_offset +
                     spdm_response->portion_length;
 
-    hash_size = spdm_get_hash_size(m_spdm_base_hash_algo);
+    hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
     if (spdm_response->remainder_length == 0) {
         if (m_spdm_cert_chain_buffer_size <=
@@ -997,8 +997,8 @@ void dump_spdm_challenge_auth(IN void *buffer, IN uintn buffer_size)
 
     printf("SPDM_CHALLENGE_AUTH ");
 
-    hash_size = spdm_get_hash_size(m_spdm_base_hash_algo);
-    signature_size = spdm_get_asym_signature_size(m_spdm_base_asym_algo);
+    hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
+    signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
     measurement_summary_hash_size =
         spdm_dump_get_measurement_summary_hash_size(
             m_cached_measurement_summary_hash_type);
@@ -1257,7 +1257,7 @@ void dump_spdm_measurements(IN void *buffer, IN uintn buffer_size)
 
     if (include_signature) {
         signature_size =
-            spdm_get_asym_signature_size(m_spdm_base_asym_algo);
+            libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
 
         message_size += 32 + sizeof(uint16_t);
         if (buffer_size < message_size) {
@@ -1493,7 +1493,7 @@ void dump_spdm_key_exchange(IN void *buffer, IN uintn buffer_size)
     }
 
     spdm_request = buffer;
-    dhe_key_size = spdm_get_dhe_pub_key_size(m_spdm_dhe_named_group);
+    dhe_key_size = libspdm_get_dhe_pub_key_size(m_spdm_dhe_named_group);
     message_size += dhe_key_size + sizeof(uint16_t);
     if (buffer_size < message_size) {
         printf("\n");
@@ -1575,12 +1575,12 @@ void dump_spdm_key_exchange_rsp(IN void *buffer, IN uintn buffer_size)
     }
 
     spdm_response = buffer;
-    dhe_key_size = spdm_get_dhe_pub_key_size(m_spdm_dhe_named_group);
-    signature_size = spdm_get_asym_signature_size(m_spdm_base_asym_algo);
+    dhe_key_size = libspdm_get_dhe_pub_key_size(m_spdm_dhe_named_group);
+    signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
     measurement_summary_hash_size =
         spdm_dump_get_measurement_summary_hash_size(
             m_cached_measurement_summary_hash_type);
-    hmac_size = spdm_get_hash_size(m_spdm_base_hash_algo);
+    hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
     message_size +=
         dhe_key_size + measurement_summary_hash_size + sizeof(uint16_t);
@@ -1685,7 +1685,7 @@ void dump_spdm_key_exchange_rsp(IN void *buffer, IN uintn buffer_size)
               &parameter, &mut_auth_requested,
               sizeof(mut_auth_requested));
 
-    hmac_size = spdm_get_hash_size(m_spdm_base_hash_algo);
+    hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
     libspdm_append_message_k(m_spdm_context, m_current_session_info, TRUE,
                   m_spdm_last_message_buffer,
                   m_spdm_last_message_buffer_size);
@@ -1697,7 +1697,7 @@ void dump_spdm_key_exchange_rsp(IN void *buffer, IN uintn buffer_size)
                       message_size);
     }
 
-    DEBUG((DEBUG_INFO, "spdm_generate_session_handshake_key[%x]\n",
+    DEBUG((DEBUG_INFO, "libspdm_generate_session_handshake_key[%x]\n",
            m_current_session_id));
     if (spdm_dump_session_data_provision(m_spdm_context,
                          m_current_session_id, FALSE,
@@ -1706,7 +1706,7 @@ void dump_spdm_key_exchange_rsp(IN void *buffer, IN uintn buffer_size)
     }
     libspdm_calculate_th1_hash(m_spdm_context, m_current_session_info, TRUE,
                 th1_hash_data);
-    spdm_generate_session_handshake_key(
+    libspdm_generate_session_handshake_key(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         th1_hash_data);
@@ -1716,10 +1716,10 @@ void dump_spdm_key_exchange_rsp(IN void *buffer, IN uintn buffer_size)
             (uint8_t *)buffer + message_size - hmac_size, hmac_size);
     }
 
-    spdm_secured_message_set_session_state(
+    libspdm_secured_message_set_session_state(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
-        SPDM_SESSION_STATE_HANDSHAKING);
+        LIBSPDM_SESSION_STATE_HANDSHAKING);
 }
 
 void dump_spdm_finish(IN void *buffer, IN uintn buffer_size)
@@ -1742,8 +1742,8 @@ void dump_spdm_finish(IN void *buffer, IN uintn buffer_size)
 
     spdm_request = buffer;
     signature_size =
-        spdm_get_req_asym_signature_size(m_spdm_req_base_asym_alg);
-    hmac_size = spdm_get_hash_size(m_spdm_base_hash_algo);
+        libspdm_get_req_asym_signature_size(m_spdm_req_base_asym_alg);
+    hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
     include_signature =
         ((spdm_request->header.param1 &
@@ -1807,7 +1807,7 @@ void dump_spdm_finish_rsp(IN void *buffer, IN uintn buffer_size)
     }
 
     spdm_response = buffer;
-    hmac_size = spdm_get_hash_size(m_spdm_base_hash_algo);
+    hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
     include_hmac =
         ((m_spdm_responder_capabilities_flags &
@@ -1845,7 +1845,7 @@ void dump_spdm_finish_rsp(IN void *buffer, IN uintn buffer_size)
     }
     libspdm_append_message_f(m_spdm_context, m_current_session_info, TRUE, buffer, message_size);
 
-    DEBUG((DEBUG_INFO, "spdm_generate_session_data_key[%x]\n",
+    DEBUG((DEBUG_INFO, "libspdm_generate_session_data_key[%x]\n",
            m_current_session_id));
     if (spdm_dump_session_data_provision(m_spdm_context,
                          m_current_session_id, TRUE,
@@ -1858,14 +1858,14 @@ void dump_spdm_finish_rsp(IN void *buffer, IN uintn buffer_size)
     }
     libspdm_calculate_th2_hash(m_spdm_context, m_current_session_info, TRUE,
                 th2_hash_data);
-    spdm_generate_session_data_key(
+    libspdm_generate_session_data_key(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         th2_hash_data);
-    spdm_secured_message_set_session_state(
+    libspdm_secured_message_set_session_state(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
-        SPDM_SESSION_STATE_ESTABLISHED);
+        LIBSPDM_SESSION_STATE_ESTABLISHED);
 }
 
 void dump_spdm_psk_exchange(IN void *buffer, IN uintn buffer_size)
@@ -1955,7 +1955,7 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
     measurement_summary_hash_size =
         spdm_dump_get_measurement_summary_hash_size(
             m_cached_measurement_summary_hash_type);
-    hmac_size = spdm_get_hash_size(m_spdm_base_hash_algo);
+    hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
     message_size += measurement_summary_hash_size +
             spdm_response->context_length +
             spdm_response->opaque_length + hmac_size;
@@ -2020,7 +2020,7 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
     libspdm_append_message_k(m_spdm_context, m_current_session_info, TRUE, buffer,
                   message_size - hmac_size);
 
-    DEBUG((DEBUG_INFO, "spdm_generate_session_handshake_key[%x]\n",
+    DEBUG((DEBUG_INFO, "libspdm_generate_session_handshake_key[%x]\n",
            m_current_session_id));
     if (spdm_dump_session_data_provision(m_spdm_context,
                          m_current_session_id, FALSE,
@@ -2029,7 +2029,7 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
     }
     libspdm_calculate_th1_hash(m_spdm_context, m_current_session_info, TRUE,
                 th1_hash_data);
-    spdm_secured_message_set_use_psk(
+    libspdm_secured_message_set_use_psk(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         FALSE);
@@ -2041,7 +2041,7 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
               &use_psk, sizeof(use_psk));
 
-    spdm_generate_session_handshake_key(
+    libspdm_generate_session_handshake_key(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         th1_hash_data);
@@ -2053,7 +2053,7 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
               &use_psk, sizeof(use_psk));
 
-    spdm_secured_message_set_use_psk(
+    libspdm_secured_message_set_use_psk(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         TRUE);
@@ -2061,10 +2061,10 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
                   (uint8_t *)buffer + message_size - hmac_size,
                   hmac_size);
 
-    spdm_secured_message_set_session_state(
+    libspdm_secured_message_set_session_state(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
-        SPDM_SESSION_STATE_HANDSHAKING);
+        LIBSPDM_SESSION_STATE_HANDSHAKING);
 
     if ((m_spdm_responder_capabilities_flags &
          SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_PSK_CAP_RESPONDER_WITH_CONTEXT) ==
@@ -2073,7 +2073,7 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
 
         libspdm_calculate_th2_hash(m_spdm_context, m_current_session_info,
                     TRUE, th2_hash_data);
-        spdm_secured_message_set_use_psk(
+        libspdm_secured_message_set_use_psk(
             libspdm_get_secured_message_context_via_session_info(
                 m_current_session_info),
             FALSE);
@@ -2085,7 +2085,7 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
         libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK,
                   &parameter, &use_psk, sizeof(use_psk));
 
-        spdm_generate_session_data_key(
+        libspdm_generate_session_data_key(
             libspdm_get_secured_message_context_via_session_info(
                 m_current_session_info),
             th2_hash_data);
@@ -2097,14 +2097,14 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
         libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK,
                   &parameter, &use_psk, sizeof(use_psk));
 
-        spdm_secured_message_set_use_psk(
+        libspdm_secured_message_set_use_psk(
             libspdm_get_secured_message_context_via_session_info(
                 m_current_session_info),
             TRUE);
-        spdm_secured_message_set_session_state(
+        libspdm_secured_message_set_session_state(
             libspdm_get_secured_message_context_via_session_info(
                 m_current_session_info),
-            SPDM_SESSION_STATE_ESTABLISHED);
+            LIBSPDM_SESSION_STATE_ESTABLISHED);
     }
 }
 
@@ -2124,7 +2124,7 @@ void dump_spdm_psk_finish(IN void *buffer, IN uintn buffer_size)
     }
 
     spdm_request = buffer;
-    hmac_size = spdm_get_hash_size(m_spdm_base_hash_algo);
+    hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
     message_size += hmac_size;
     if (buffer_size < message_size) {
         printf("\n");
@@ -2175,7 +2175,7 @@ void dump_spdm_psk_finish_rsp(IN void *buffer, IN uintn buffer_size)
     }
     libspdm_append_message_f(m_spdm_context, m_current_session_info, TRUE, buffer, message_size);
 
-    DEBUG((DEBUG_INFO, "spdm_generate_session_data_key[%x]\n",
+    DEBUG((DEBUG_INFO, "libspdm_generate_session_data_key[%x]\n",
            m_current_session_id));
     if (spdm_dump_session_data_provision(m_spdm_context,
                          m_current_session_id, TRUE,
@@ -2188,7 +2188,7 @@ void dump_spdm_psk_finish_rsp(IN void *buffer, IN uintn buffer_size)
     }
     libspdm_calculate_th2_hash(m_spdm_context, m_current_session_info, TRUE,
                 th2_hash_data);
-    spdm_secured_message_set_use_psk(
+    libspdm_secured_message_set_use_psk(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         FALSE);
@@ -2200,7 +2200,7 @@ void dump_spdm_psk_finish_rsp(IN void *buffer, IN uintn buffer_size)
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
               &use_psk, sizeof(use_psk));
 
-    spdm_generate_session_data_key(
+    libspdm_generate_session_data_key(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         th2_hash_data);
@@ -2212,14 +2212,14 @@ void dump_spdm_psk_finish_rsp(IN void *buffer, IN uintn buffer_size)
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
               &use_psk, sizeof(use_psk));
 
-    spdm_secured_message_set_use_psk(
+    libspdm_secured_message_set_use_psk(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         TRUE);
-    spdm_secured_message_set_session_state(
+    libspdm_secured_message_set_session_state(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
-        SPDM_SESSION_STATE_ESTABLISHED);
+        LIBSPDM_SESSION_STATE_ESTABLISHED);
 }
 
 void dump_spdm_heartbeat(IN void *buffer, IN uintn buffer_size)
@@ -2283,29 +2283,29 @@ void dump_spdm_key_update(IN void *buffer, IN uintn buffer_size)
         ASSERT(m_current_session_info != NULL);
         switch (((spdm_message_header_t *)buffer)->param1) {
         case SPDM_KEY_UPDATE_OPERATIONS_TABLE_UPDATE_KEY:
-            spdm_create_update_session_data_key(
+            libspdm_create_update_session_data_key(
                 libspdm_get_secured_message_context_via_session_info(
                     m_current_session_info),
-                SPDM_KEY_UPDATE_ACTION_RESPONDER);
+                LIBSPDM_KEY_UPDATE_ACTION_RESPONDER);
             break;
         }
     } else {
         switch (((spdm_message_header_t *)buffer)->param1) {
         case SPDM_KEY_UPDATE_OPERATIONS_TABLE_UPDATE_KEY:
-            spdm_create_update_session_data_key(
+            libspdm_create_update_session_data_key(
                 libspdm_get_secured_message_context_via_session_info(
                     m_current_session_info),
-                SPDM_KEY_UPDATE_ACTION_REQUESTER);
+                LIBSPDM_KEY_UPDATE_ACTION_REQUESTER);
             break;
         case SPDM_KEY_UPDATE_OPERATIONS_TABLE_UPDATE_ALL_KEYS:
-            spdm_create_update_session_data_key(
+            libspdm_create_update_session_data_key(
                 libspdm_get_secured_message_context_via_session_info(
                     m_current_session_info),
-                SPDM_KEY_UPDATE_ACTION_REQUESTER);
-            spdm_create_update_session_data_key(
+                LIBSPDM_KEY_UPDATE_ACTION_REQUESTER);
+            libspdm_create_update_session_data_key(
                 libspdm_get_secured_message_context_via_session_info(
                     m_current_session_info),
-                SPDM_KEY_UPDATE_ACTION_RESPONDER);
+                LIBSPDM_KEY_UPDATE_ACTION_RESPONDER);
             break;
         }
     }

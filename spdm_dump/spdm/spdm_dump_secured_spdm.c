@@ -168,28 +168,28 @@ void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size)
     uintn message_size;
     static boolean is_requester = FALSE;
     uint32_t data_link_type;
-    spdm_secured_message_callbacks_t spdm_secured_message_callbacks_t;
+    libspdm_secured_message_callbacks_t spdm_secured_message_callbacks;
     void *secured_message_context;
 
     data_link_type = get_data_link_type();
     switch (data_link_type) {
     case LINKTYPE_MCTP:
         sequence_num_size = sizeof(uint16_t);
-        spdm_secured_message_callbacks_t.version =
+        spdm_secured_message_callbacks.version =
             SPDM_SECURED_MESSAGE_CALLBACKS_VERSION;
-        spdm_secured_message_callbacks_t.get_sequence_number =
-            spdm_mctp_get_sequence_number;
-        spdm_secured_message_callbacks_t.get_max_random_number_count =
-            spdm_mctp_get_max_random_number_count;
+        spdm_secured_message_callbacks.get_sequence_number =
+            libspdm_mctp_get_sequence_number;
+        spdm_secured_message_callbacks.get_max_random_number_count =
+            libspdm_mctp_get_max_random_number_count;
         break;
     case LINKTYPE_PCI_DOE:
         sequence_num_size = 0;
-        spdm_secured_message_callbacks_t.version =
+        spdm_secured_message_callbacks.version =
             SPDM_SECURED_MESSAGE_CALLBACKS_VERSION;
-        spdm_secured_message_callbacks_t.get_sequence_number =
-            spdm_pci_doe_get_sequence_number;
-        spdm_secured_message_callbacks_t.get_max_random_number_count =
-            spdm_pci_doe_get_max_random_number_count;
+        spdm_secured_message_callbacks.get_sequence_number =
+            libspdm_pci_doe_get_sequence_number;
+        spdm_secured_message_callbacks.get_max_random_number_count =
+            libspdm_pci_doe_get_max_random_number_count;
         break;
     default:
         ASSERT(FALSE);
@@ -223,23 +223,23 @@ void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size)
                 m_spdm_context, record_header1->session_id);
         if (secured_message_context != NULL) {
             message_size = get_max_packet_length();
-            status = spdm_decode_secured_message(
+            status = libspdm_decode_secured_message(
                 secured_message_context,
                 record_header1->session_id, is_requester,
                 buffer_size, buffer, &message_size,
                 m_spdm_dec_message_buffer,
-                &spdm_secured_message_callbacks_t);
+                &spdm_secured_message_callbacks);
             if (RETURN_ERROR(status)) {
                 
                 /* Try other direction, because a responder might initiate a message in Session.*/
                 
-                status = spdm_decode_secured_message(
+                status = libspdm_decode_secured_message(
                     secured_message_context,
                     record_header1->session_id,
                     !is_requester, buffer_size, buffer,
                     &message_size,
                     m_spdm_dec_message_buffer,
-                    &spdm_secured_message_callbacks_t);
+                    &spdm_secured_message_callbacks);
                 if (!RETURN_ERROR(status)) {
                     is_requester = !is_requester;
                 }

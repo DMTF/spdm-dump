@@ -58,14 +58,14 @@ return_status spdm_dump_session_data_provision(IN void *spdm_context,
     libspdm_get_data(spdm_context, LIBSPDM_DATA_SESSION_MUT_AUTH_REQUESTED,
               &parameter, &mut_auth_requested, &data_size);
 
-    hash_size = spdm_get_hash_size(m_spdm_base_hash_algo);
+    hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
     if (!use_psk) {
         if (m_dhe_secret_buffer == NULL ||
             m_dhe_secret_buffer_size == 0) {
             return RETURN_UNSUPPORTED;
         }
-        spdm_secured_message_import_dhe_secret(
+        libspdm_secured_message_import_dhe_secret(
             secured_message_context, m_dhe_secret_buffer,
             m_dhe_secret_buffer_size);
 
@@ -156,11 +156,11 @@ return_status spdm_dump_session_data_provision(IN void *spdm_context,
         if (m_psk_buffer == NULL || m_psk_buffer_size == 0) {
             return RETURN_UNSUPPORTED;
         }
-        if (m_psk_buffer_size > MAX_DHE_KEY_SIZE) {
+        if (m_psk_buffer_size > LIBSPDM_MAX_DHE_KEY_SIZE) {
             printf("BUGBUG: PSK size is too large. It will be supported later.\n");
             return RETURN_UNSUPPORTED;
         }
-        spdm_secured_message_import_dhe_secret(secured_message_context,
+        libspdm_secured_message_import_dhe_secret(secured_message_context,
                                m_psk_buffer,
                                m_psk_buffer_size);
     }
