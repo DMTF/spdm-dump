@@ -224,7 +224,7 @@ void print_usage(void)
     printf("      format: A file containing certificates defined in SPDM spec 'certificate chain format'.\n");
     printf("              It is one or more ASN.1 DER-encoded X.509 v3 certificates.\n");
     printf("              It may include multiple certificates, starting from root cert to leaf cert.\n");
-    printf("              It does not include the length, reserved, or root_hash fields.\n");
+    printf("              It does include the length, reserved, or root_hash fields.\n");
 }
 
 void process_args(int argc, char *argv[])

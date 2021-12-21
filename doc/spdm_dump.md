@@ -60,7 +60,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
             Format: A file containing certificates defined in SPDM spec 'certificate chain fomrat'.
                   It is one or more ASN.1 DER-encoded X.509 v3 certificates.
                   It may include multiple certificates, starting from root cert to leaf cert.
-                  It does not include the Length, Reserved, or RootHash fields.
+                  It does include the Length, Reserved, or RootHash fields.
    </pre>
 
 1. If you use `spdm_dump -r <pcap_file>` to dump the SPDM message over MCTP, you may see something like:

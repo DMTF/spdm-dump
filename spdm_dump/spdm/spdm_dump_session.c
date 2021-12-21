@@ -75,13 +75,10 @@ return_status spdm_dump_session_data_provision(IN void *spdm_context,
                     m_requester_cert_chain_buffer_size == 0) {
                     return RETURN_UNSUPPORTED;
                 }
-                memcpy((uint8_t *)m_local_used_cert_chain_buffer +
-                           sizeof(spdm_cert_chain_t) +
-                           hash_size,
+                memcpy((uint8_t *)m_local_used_cert_chain_buffer,
                        m_requester_cert_chain_buffer,
                        m_requester_cert_chain_buffer_size);
                 m_local_used_cert_chain_buffer_size =
-                    sizeof(spdm_cert_chain_t) + hash_size +
                     m_requester_cert_chain_buffer_size;
                 zero_mem(&parameter, sizeof(parameter));
                 parameter.location =
@@ -97,12 +94,10 @@ return_status spdm_dump_session_data_provision(IN void *spdm_context,
                 m_responder_cert_chain_buffer_size == 0) {
                 return RETURN_UNSUPPORTED;
             }
-            memcpy((uint8_t *)m_peer_cert_chain_buffer +
-                       sizeof(spdm_cert_chain_t) + hash_size,
+            memcpy((uint8_t *)m_peer_cert_chain_buffer,
                    m_responder_cert_chain_buffer,
                    m_responder_cert_chain_buffer_size);
             m_peer_cert_chain_buffer_size =
-                sizeof(spdm_cert_chain_t) + hash_size +
                 m_responder_cert_chain_buffer_size;
             zero_mem(&parameter, sizeof(parameter));
             parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
@@ -115,12 +110,10 @@ return_status spdm_dump_session_data_provision(IN void *spdm_context,
                 m_responder_cert_chain_buffer_size == 0) {
                 return RETURN_UNSUPPORTED;
             }
-            memcpy((uint8_t *)m_local_used_cert_chain_buffer +
-                       sizeof(spdm_cert_chain_t) + hash_size,
+            memcpy((uint8_t *)m_local_used_cert_chain_buffer,
                    m_responder_cert_chain_buffer,
                    m_responder_cert_chain_buffer_size);
             m_local_used_cert_chain_buffer_size =
-                sizeof(spdm_cert_chain_t) + hash_size +
                 m_responder_cert_chain_buffer_size;
             zero_mem(&parameter, sizeof(parameter));
             parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
@@ -134,13 +127,10 @@ return_status spdm_dump_session_data_provision(IN void *spdm_context,
                     m_requester_cert_chain_buffer_size == 0) {
                     return RETURN_UNSUPPORTED;
                 }
-                memcpy((uint8_t *)m_peer_cert_chain_buffer +
-                           sizeof(spdm_cert_chain_t) +
-                           hash_size,
+                memcpy((uint8_t *)m_peer_cert_chain_buffer,
                        m_requester_cert_chain_buffer,
                        m_requester_cert_chain_buffer_size);
                 m_peer_cert_chain_buffer_size =
-                    sizeof(spdm_cert_chain_t) + hash_size +
                     m_requester_cert_chain_buffer_size;
                 zero_mem(&parameter, sizeof(parameter));
                 parameter.location =

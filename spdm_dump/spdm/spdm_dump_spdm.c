@@ -895,10 +895,8 @@ void dump_spdm_certificate(IN void *buffer, IN uintn buffer_size)
     }
 
     if (spdm_response->remainder_length == 0) {
-        cert_chain = (uint8_t *)m_spdm_cert_chain_buffer +
-                 sizeof(spdm_cert_chain_t) + hash_size;
-        cert_chain_size = m_spdm_cert_chain_buffer_size -
-                  (sizeof(spdm_cert_chain_t) + hash_size);
+        cert_chain = (uint8_t *)m_spdm_cert_chain_buffer;
+        cert_chain_size = m_spdm_cert_chain_buffer_size;
 
         if (m_encapsulated) {
             if (m_param_out_rsq_cert_chain_file_name != NULL) {
