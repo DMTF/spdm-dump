@@ -101,6 +101,7 @@ value_string_entry_t m_spdm_hash_value_string_table[] = {
     { SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA3_256, "SHA3_256" },
     { SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA3_384, "SHA3_384" },
     { SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA3_512, "SHA3_512" },
+    { SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SM3_256, "SM3_256" },
 };
 uintn m_spdm_hash_value_string_table_count =
     ARRAY_SIZE(m_spdm_hash_value_string_table);
@@ -114,6 +115,7 @@ value_string_entry_t m_spdm_measurement_hash_value_string_table[] = {
     { SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SHA3_256, "SHA3_256" },
     { SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SHA3_384, "SHA3_384" },
     { SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SHA3_512, "SHA3_512" },
+    { SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SM3_256, "SM3_256" },
 };
 uintn m_spdm_measurement_hash_value_string_table_count =
     ARRAY_SIZE(m_spdm_measurement_hash_value_string_table);
@@ -131,6 +133,9 @@ value_string_entry_t m_spdm_asym_value_string_table[] = {
       "ECDSA_P384" },
     { SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P521,
       "ECDSA_P521" },
+    { SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_SM2_ECC_SM2_P256, "SM2_P256" },
+    { SPDM_ALGORITHMS_BASE_ASYM_ALGO_EDDSA_ED25519, "EDDSA_25519" },
+    { SPDM_ALGORITHMS_BASE_ASYM_ALGO_EDDSA_ED448, "EDDSA_448" },
 };
 uintn m_spdm_asym_value_string_table_count =
     ARRAY_SIZE(m_spdm_asym_value_string_table);
@@ -142,6 +147,7 @@ value_string_entry_t m_spdm_dhe_value_string_table[] = {
     { SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_256_R1, "SECP_256_R1" },
     { SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_384_R1, "SECP_384_R1" },
     { SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_521_R1, "SECP_521_R1" },
+    { SPDM_ALGORITHMS_DHE_NAMED_GROUP_SM2_P256, "SM2_P256" },
 };
 uintn m_spdm_dhe_value_string_table_count =
     ARRAY_SIZE(m_spdm_dhe_value_string_table);
@@ -151,6 +157,7 @@ value_string_entry_t m_spdm_aead_value_string_table[] = {
     { SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_256_GCM, "AES_256_GCM" },
     { SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_CHACHA20_POLY1305,
       "CHACHA20_POLY1305" },
+    { SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AEAD_SM4_GCM, "SM4_128_GCM" },
 };
 uintn m_spdm_aead_value_string_table_count =
     ARRAY_SIZE(m_spdm_aead_value_string_table);
