@@ -307,10 +307,10 @@ void dump_spdm_version(IN void *buffer, IN uintn buffer_size)
                 printf(", ");
             }
             printf("%d.%d.%d.%d",
-                   spdm_version_number[index].major_version,
-                   spdm_version_number[index].minor_version,
-                   spdm_version_number[index].update_version_number,
-                   spdm_version_number[index].alpha);
+                   (spdm_version_number[index] >> 12) & 0xF,
+                   (spdm_version_number[index] >> 8) & 0xF,
+                   (spdm_version_number[index] >> 4) & 0xF,
+                   spdm_version_number[index] & 0xF);
         }
         printf(") ");
     }
