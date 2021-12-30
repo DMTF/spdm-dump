@@ -1099,7 +1099,7 @@ void dump_spdm_get_measurements(IN void *buffer, IN uintn buffer_size)
             message_size = sizeof(spdm_get_measurements_request_t);
         } else {
             message_size = OFFSET_OF(
-                spdm_get_measurements_request_t, SlotIDParam);
+                spdm_get_measurements_request_t, slot_id_param);
         }
     }
     if (buffer_size < message_size) {
@@ -1128,7 +1128,7 @@ void dump_spdm_get_measurements(IN void *buffer, IN uintn buffer_size)
         }
         if (include_signature && (spdm_request->header.spdm_version >=
                       SPDM_MESSAGE_VERSION_11)) {
-            printf(", SlotID=0x%02x", spdm_request->SlotIDParam);
+            printf(", SlotID=0x%02x", spdm_request->slot_id_param);
         }
         printf(") ");
 
