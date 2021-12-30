@@ -1168,7 +1168,7 @@ void dump_spdm_measurements_record(IN uint8_t number_of_blocks,
         }
         if (dmtf_block->measurement_block_common_header
                 .measurement_size !=
-            dmtf_block->Measurement_block_dmtf_header
+            dmtf_block->measurement_block_dmtf_header
                     .dmtf_spec_measurement_value_size +
                 sizeof(spdm_measurement_block_dmtf_header_t)) {
             break;
@@ -1196,26 +1196,26 @@ void dump_spdm_measurements_record(IN uint8_t number_of_blocks,
                    .measurement_size);
 
         printf("\n        DmtfHeader(Type=0x%02x(",
-               dmtf_block->Measurement_block_dmtf_header
+               dmtf_block->measurement_block_dmtf_header
                    .dmtf_spec_measurement_value_type);
         dump_entry_value(
             m_spdm_measurement_type_value_string_table,
             ARRAY_SIZE(m_spdm_measurement_type_value_string_table),
-            dmtf_block->Measurement_block_dmtf_header
+            dmtf_block->measurement_block_dmtf_header
                     .dmtf_spec_measurement_value_type &
                 SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_MASK);
-        if (dmtf_block->Measurement_block_dmtf_header
+        if (dmtf_block->measurement_block_dmtf_header
                 .dmtf_spec_measurement_value_type &
             SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_RAW_BIT_STREAM) {
             printf(", RawBitStream");
         }
         printf("), Size=0x%04x)",
-               dmtf_block->Measurement_block_dmtf_header
+               dmtf_block->measurement_block_dmtf_header
                    .dmtf_spec_measurement_value_size);
 
         printf("\n        Value(");
         dump_data((void *)(dmtf_block + 1),
-              dmtf_block->Measurement_block_dmtf_header
+              dmtf_block->measurement_block_dmtf_header
                   .dmtf_spec_measurement_value_size);
         printf(")");
         printf("\n        )");
