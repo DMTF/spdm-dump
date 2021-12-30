@@ -2427,15 +2427,23 @@ void dump_spdm_encapsulated_response_ack(IN void *buffer, IN uintn buffer_size)
 
     printf("SPDM_ENCAPSULATED_RESPONSE_ACK ");
 
-    header_size = sizeof(spdm_encapsulated_response_ack_response_t);
+    header_size = sizeof(spdm_message_header_t);
     if (buffer_size < header_size) {
         printf("\n");
         return;
     }
 
     spdm_response = buffer;
+    if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
+        header_size = sizeof(spdm_encapsulated_response_ack_response_t);
+    }
+
     if (!m_param_quite_mode) {
-        printf("(ReqID=0x%02x) ", spdm_response->header.param1);
+        printf("(ReqID=0x%02x", spdm_response->header.param1);
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
+            printf(", AckReqID=0x%02x", spdm_response->ack_request_id);
+        }
+        printf(") ");
     }
 
     switch (spdm_response->header.param2) {
