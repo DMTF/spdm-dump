@@ -1161,12 +1161,12 @@ void dump_spdm_measurements_record(IN uint8_t number_of_blocks,
             end_of_record) {
             break;
         }
-        if (dmtf_block->Measurement_block_common_header
+        if (dmtf_block->measurement_block_common_header
                 .measurement_specification !=
             SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF) {
             break;
         }
-        if (dmtf_block->Measurement_block_common_header
+        if (dmtf_block->measurement_block_common_header
                 .measurement_size !=
             dmtf_block->Measurement_block_dmtf_header
                     .dmtf_spec_measurement_value_size +
@@ -1174,7 +1174,7 @@ void dump_spdm_measurements_record(IN uint8_t number_of_blocks,
             break;
         }
         end_of_block = (uintn)dmtf_block +
-                   dmtf_block->Measurement_block_common_header
+                   dmtf_block->measurement_block_common_header
                        .measurement_size +
                    sizeof(spdm_measurement_block_common_header_t);
         if (end_of_block > end_of_record) {
@@ -1183,16 +1183,16 @@ void dump_spdm_measurements_record(IN uint8_t number_of_blocks,
 
         printf("\n      MeasurementRecord_%d(", (uint32_t)index);
         printf("\n        CommonHeader(Index=0x%02x, MeasSpec=0x%02x(",
-               dmtf_block->Measurement_block_common_header.index,
-               dmtf_block->Measurement_block_common_header
+               dmtf_block->measurement_block_common_header.index,
+               dmtf_block->measurement_block_common_header
                    .measurement_specification);
         dump_entry_flags(
             m_spdm_measurement_spec_value_string_table,
             ARRAY_SIZE(m_spdm_measurement_spec_value_string_table),
-            dmtf_block->Measurement_block_common_header
+            dmtf_block->measurement_block_common_header
                 .measurement_specification);
         printf("), size=0x%04x)",
-               dmtf_block->Measurement_block_common_header
+               dmtf_block->measurement_block_common_header
                    .measurement_size);
 
         printf("\n        DmtfHeader(Type=0x%02x(",
