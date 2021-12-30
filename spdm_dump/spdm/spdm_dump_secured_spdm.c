@@ -26,10 +26,10 @@ void dump_spdm_opaque_version_selection(IN void *buffer, IN uintn buffer_size)
     printf("VERSION_SELECTION ");
 
     printf("(%d.%d.%d.%d) ",
-           version_selection->selected_version.major_version,
-           version_selection->selected_version.minor_version,
-           version_selection->selected_version.update_version_number,
-           version_selection->selected_version.alpha);
+           (version_selection->selected_version >> 12) & 0xF,
+           (version_selection->selected_version >> 8) & 0xF,
+           (version_selection->selected_version >> 4) & 0xF,
+           version_selection->selected_version & 0xF);
 }
 
 void dump_spdm_opaque_supported_version(IN void *buffer, IN uintn buffer_size)
@@ -59,10 +59,11 @@ void dump_spdm_opaque_supported_version(IN void *buffer, IN uintn buffer_size)
         if (index != 0) {
             printf(", ");
         }
-        printf("%d.%d.%d.%d", spdm_version_number[index].major_version,
-               spdm_version_number[index].minor_version,
-               spdm_version_number[index].update_version_number,
-               spdm_version_number[index].alpha);
+        printf("%d.%d.%d.%d",
+               (spdm_version_number[index] >> 12) & 0xF,
+               (spdm_version_number[index] >> 8) & 0xF,
+               (spdm_version_number[index] >> 4) & 0xF,
+               spdm_version_number[index] & 0xF);
         printf(") ");
     }
 }
