@@ -195,6 +195,40 @@ value_string_entry_t m_spdm_measurement_type_value_string_table[] = {
       "FirmwareConfig" },
     { SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_MEASUREMENT_MANIFEST,
       "Manifest" },
+    { SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_DEVICE_MODE,
+      "DeviceMode" },
+    { SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_VERSION,
+      "Version" },
+    { SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_SECURE_VERSION_NUMBER,
+      "SVN" },
+};
+
+value_string_entry_t m_spdm_measurement_device_operation_mode_value_string_table[] = {
+    { SPDM_MEASUREMENT_DEVICE_OPERATION_MODE_MANUFACTURING_MODE,
+      "Mfg" },
+    { SPDM_MEASUREMENT_DEVICE_OPERATION_MODE_VALIDATION_MODE,
+      "Val" },
+    { SPDM_MEASUREMENT_DEVICE_OPERATION_MODE_NORMAL_MODE,
+      "Nor" },
+    { SPDM_MEASUREMENT_DEVICE_OPERATION_MODE_RECOVERY_MODE,
+      "Rec" },
+    { SPDM_MEASUREMENT_DEVICE_OPERATION_MODE_RMA_MODE,
+      "Rma" },
+    { SPDM_MEASUREMENT_DEVICE_OPERATION_MODE_DECOMMISSIONED_MODE,
+      "Dec" },
+};
+
+value_string_entry_t m_spdm_measurement_device_mode_value_string_table[] = {
+    { SPDM_MEASUREMENT_DEVICE_MODE_NON_INVASIVE_DEBUG_MODE_IS_ACTIVE,
+      "NonInvAct" },
+    { SPDM_MEASUREMENT_DEVICE_MODE_INVASIVE_DEBUG_MODE_IS_ACTIVE,
+      "InvAct" },
+    { SPDM_MEASUREMENT_DEVICE_MODE_NON_INVASIVE_DEBUG_MODE_HAS_BEEN_ACTIVE,
+      "NonInvBeenAct" },
+    { SPDM_MEASUREMENT_DEVICE_MODE_INVASIVE_DEBUG_MODE_HAS_BEEN_ACTIVE,
+      "InvBeenAct" },
+    { SPDM_MEASUREMENT_DEVICE_MODE_INVASIVE_DEBUG_MODE_HAS_BEEN_ACTIVE_AFTER_MFG,
+      "InvBeenActMfg" },
 };
 
 value_string_entry_t m_spdm_request_hash_type_string_table[] = {
@@ -1291,6 +1325,53 @@ void dump_spdm_measurements_record(IN uint8_t number_of_blocks,
               dmtf_block->measurement_block_dmtf_header
                   .dmtf_spec_measurement_value_size);
         printf(")");
+
+        switch (dmtf_block->measurement_block_dmtf_header
+                .dmtf_spec_measurement_value_type) {
+        case (SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_SECURE_VERSION_NUMBER |
+                SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_RAW_BIT_STREAM) :
+            if (dmtf_block->measurement_block_dmtf_header
+                .dmtf_spec_measurement_value_size ==
+                sizeof(spdm_measurements_secure_version_number_t)) {
+                spdm_measurements_secure_version_number_t svn;
+                copy_mem((void *)&svn, (void *)(dmtf_block + 1), sizeof(svn));
+                printf("\n          Svn(0x%08x%08x)", (uint32_t)(svn >> 32), (uint32_t)svn);
+            }
+            break;
+        case (SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_DEVICE_MODE |
+                SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_RAW_BIT_STREAM) :
+            if (dmtf_block->measurement_block_dmtf_header
+                .dmtf_spec_measurement_value_size ==
+                sizeof(spdm_measurements_device_mode_t)) {
+                spdm_measurements_device_mode_t device_mode;
+                copy_mem((void *)&device_mode, (void *)(dmtf_block + 1), sizeof(device_mode));
+                printf("\n          DeviceMode(OpCap=0x%08x(", device_mode.operational_mode_capabilties);
+                dump_entry_flags(
+                    m_spdm_measurement_device_operation_mode_value_string_table,
+                    ARRAY_SIZE(m_spdm_measurement_device_operation_mode_value_string_table),
+                    device_mode.operational_mode_capabilties);
+                printf("), OpStat=0x%08x(", device_mode.operational_mode_state);
+                dump_entry_flags(
+                    m_spdm_measurement_device_operation_mode_value_string_table,
+                    ARRAY_SIZE(m_spdm_measurement_device_operation_mode_value_string_table),
+                    device_mode.operational_mode_state);
+                printf("), ModCap=0x%08x(", device_mode.device_mode_capabilties);
+                dump_entry_flags(
+                    m_spdm_measurement_device_mode_value_string_table,
+                    ARRAY_SIZE(m_spdm_measurement_device_mode_value_string_table),
+                    device_mode.device_mode_capabilties);
+                printf("), ModStat=0x%08x(", device_mode.device_mode_state);
+                dump_entry_flags(
+                    m_spdm_measurement_device_mode_value_string_table,
+                    ARRAY_SIZE(m_spdm_measurement_device_mode_value_string_table),
+                    device_mode.device_mode_state);
+                printf("))");
+            }
+            break;
+        default: 
+            break;
+        }
+
         printf("\n        )");
 
         dmtf_block = (void *)end_of_block;
