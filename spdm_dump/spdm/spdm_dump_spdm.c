@@ -206,6 +206,17 @@ value_string_entry_t m_spdm_request_hash_type_string_table[] = {
 value_string_entry_t m_spdm_measurement_attribute_string_table[] = {
     { SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE,
       "GenSig" },
+    { SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_RAW_BIT_STREAM_REQUESTED,
+      "RawBitReq" },
+};
+
+value_string_entry_t m_spdm_measurement_content_change_string_table[] = {
+    { SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_NO_DETECTION,
+      "NoCap" },
+    { SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_DETECTED,
+      "Changed" },
+    { SPDM_MEASUREMENTS_RESPONSE_CONTENT_NO_CHANGE_DETECTED,
+      "NoChange" },
 };
 
 value_string_entry_t m_spdm_challenge_auth_attribute_string_table[] = {
@@ -1349,8 +1360,18 @@ void dump_spdm_measurements(IN void *buffer, IN uintn buffer_size)
             printf("(TotalMeasIndex=0x%02x",
                    spdm_response->header.param1);
             if (include_signature) {
+                if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
+                    printf(", ContentChange=0x%02x(",
+                        spdm_response->header.param2 & SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_MASK);
+                    dump_entry_value(
+                        m_spdm_measurement_content_change_string_table,
+                        ARRAY_SIZE(
+                            m_spdm_measurement_content_change_string_table),
+                        spdm_response->header.param2 & SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_MASK);
+                    printf(")");
+                }
                 printf(", SlotID=0x%02x",
-                       spdm_response->header.param2);
+                       spdm_response->header.param2 & 0xF);
             }
             printf(") ");
         } else {
@@ -1358,8 +1379,18 @@ void dump_spdm_measurements(IN void *buffer, IN uintn buffer_size)
                    spdm_response->number_of_blocks,
                    measurement_record_length);
             if (include_signature) {
+                if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
+                    printf(", ContentChange=0x%02x(",
+                        spdm_response->header.param2 & SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_MASK);
+                    dump_entry_value(
+                        m_spdm_measurement_content_change_string_table,
+                        ARRAY_SIZE(
+                            m_spdm_measurement_content_change_string_table),
+                        spdm_response->header.param2 & SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_MASK);
+                    printf(")");
+                }
                 printf(", SlotID=0x%02x",
-                       spdm_response->header.param2);
+                       spdm_response->header.param2 & 0xF);
             }
             printf(") ");
         }
