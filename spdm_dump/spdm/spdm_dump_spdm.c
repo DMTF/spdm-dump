@@ -210,6 +210,11 @@ value_string_entry_t m_spdm_challenge_auth_attribute_string_table[] = {
       "BasicMutAuth" },
 };
 
+value_string_entry_t m_spdm_key_exchange_session_policy_string_table[] = {
+    { SPDM_KEY_EXCHANGE_REQUEST_SESSION_POLICY_TERMINATION_POLICY_RUNTIME_UPDATE,
+      "RuntimeUpdate" },
+};
+
 value_string_entry_t m_spdm_key_exchange_mut_auth_string_table[] = {
     { SPDM_KEY_EXCHANGE_RESPONSE_MUT_AUTH_REQUESTED, "MutAuthNoEncap" },
     { SPDM_KEY_EXCHANGE_RESPONSE_MUT_AUTH_REQUESTED_WITH_ENCAP_REQUEST,
@@ -1550,9 +1555,19 @@ void dump_spdm_key_exchange(IN void *buffer, IN uintn buffer_size)
             m_spdm_request_hash_type_string_table,
             ARRAY_SIZE(m_spdm_request_hash_type_string_table),
             spdm_request->header.param1);
-        printf("), SlotID=0x%02x, ReqSessionID=0x%04x) ",
+        printf("), SlotID=0x%02x, ReqSessionID=0x%04x",
                spdm_request->header.param2,
                spdm_request->req_session_id);
+        if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
+            printf(", Policy=0x%02x(",
+                spdm_request->session_policy);
+            dump_entry_flags(
+                m_spdm_key_exchange_session_policy_string_table,
+                ARRAY_SIZE(m_spdm_key_exchange_session_policy_string_table),
+                spdm_request->session_policy);
+            printf(")");
+        }
+        printf(") ");
 
         if (m_param_all_mode) {
             printf("\n    RandomData(");
@@ -1945,8 +1960,18 @@ void dump_spdm_psk_exchange(IN void *buffer, IN uintn buffer_size)
             m_spdm_request_hash_type_string_table,
             ARRAY_SIZE(m_spdm_request_hash_type_string_table),
             spdm_request->header.param1);
-        printf("), ReqSessionID=0x%04x, PSKHint=",
+        printf("), ReqSessionID=0x%04x",
                spdm_request->req_session_id);
+        if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
+            printf(", Policy=0x%02x(",
+                spdm_request->header.param2);
+            dump_entry_flags(
+                m_spdm_key_exchange_session_policy_string_table,
+                ARRAY_SIZE(m_spdm_key_exchange_session_policy_string_table),
+                spdm_request->header.param2);
+            printf(")");
+        }
+        printf(", PSKHint=");
         psk_hint = (void *)(spdm_request + 1);
         dump_hex_str(psk_hint, spdm_request->psk_hint_length);
         printf(") ");
