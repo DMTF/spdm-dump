@@ -291,13 +291,13 @@ void dump_spdm_get_version(IN void *buffer, IN uintn buffer_size)
 void dump_spdm_version(IN void *buffer, IN uintn buffer_size)
 {
     uintn message_size;
-    spdm_version_response *spdm_response;
+    spdm_version_response_t *spdm_response;
     spdm_version_number_t *spdm_version_number;
     uintn index;
 
     printf("SPDM_VERSION ");
 
-    message_size = sizeof(spdm_version_response);
+    message_size = sizeof(spdm_version_response_t);
     if (buffer_size < message_size) {
         printf("\n");
         return;
@@ -313,7 +313,7 @@ void dump_spdm_version(IN void *buffer, IN uintn buffer_size)
 
     if (!m_param_quite_mode) {
         spdm_version_number =
-            (void *)((uintn)buffer + sizeof(spdm_version_response));
+            (void *)((uintn)buffer + sizeof(spdm_version_response_t));
         printf("(");
         for (index = 0;
              index < spdm_response->version_number_entry_count;
@@ -337,12 +337,12 @@ void dump_spdm_version(IN void *buffer, IN uintn buffer_size)
 void dump_spdm_get_capabilities(IN void *buffer, IN uintn buffer_size)
 {
     uintn message_size;
-    spdm_get_capabilities_request *spdm_request;
+    spdm_get_capabilities_request_t *spdm_request;
     libspdm_data_parameter_t parameter;
 
     printf("SPDM_GET_CAPABILITIES ");
 
-    message_size = OFFSET_OF(spdm_get_capabilities_request, reserved);
+    message_size = OFFSET_OF(spdm_get_capabilities_request_t, reserved);
     if (buffer_size < message_size) {
         printf("\n");
         return;
@@ -351,7 +351,7 @@ void dump_spdm_get_capabilities(IN void *buffer, IN uintn buffer_size)
     spdm_request = buffer;
 
     if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_11) {
-        message_size = OFFSET_OF(spdm_get_capabilities_request, data_transfer_size);
+        message_size = OFFSET_OF(spdm_get_capabilities_request_t, data_transfer_size);
         if (buffer_size < message_size) {
             printf("\n");
             return;
@@ -359,7 +359,7 @@ void dump_spdm_get_capabilities(IN void *buffer, IN uintn buffer_size)
     }
 
     if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
-        message_size = sizeof(spdm_get_capabilities_request);
+        message_size = sizeof(spdm_get_capabilities_request_t);
         if (buffer_size < message_size) {
             printf("\n");
             return;
@@ -409,12 +409,12 @@ void dump_spdm_get_capabilities(IN void *buffer, IN uintn buffer_size)
 void dump_spdm_capabilities(IN void *buffer, IN uintn buffer_size)
 {
     uintn message_size;
-    spdm_capabilities_response *spdm_response;
+    spdm_capabilities_response_t *spdm_response;
     libspdm_data_parameter_t parameter;
 
     printf("SPDM_CAPABILITIES ");
 
-    message_size = OFFSET_OF(spdm_capabilities_response, data_transfer_size);
+    message_size = OFFSET_OF(spdm_capabilities_response_t, data_transfer_size);
     if (buffer_size < message_size) {
         printf("\n");
         return;
@@ -423,7 +423,7 @@ void dump_spdm_capabilities(IN void *buffer, IN uintn buffer_size)
     spdm_response = buffer;
 
     if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
-        message_size = sizeof(spdm_capabilities_response);
+        message_size = sizeof(spdm_capabilities_response_t);
         if (buffer_size < message_size) {
             printf("\n");
             return;
