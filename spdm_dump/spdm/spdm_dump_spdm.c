@@ -67,6 +67,7 @@ value_string_entry_t m_spdm_requester_capabilities_string_table[] = {
     { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_HANDSHAKE_IN_THE_CLEAR_CAP,
       "HANDSHAKE_IN_CLEAR" },
     { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_PUB_KEY_ID_CAP, "PUB_KEY_ID" },
+    { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CHUNK_CAP, "CHUNK" },
 };
 uintn m_spdm_requester_capabilities_string_table_count =
     ARRAY_SIZE(m_spdm_requester_capabilities_string_table);
@@ -91,6 +92,8 @@ value_string_entry_t m_spdm_responder_capabilities_string_table[] = {
     { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_HANDSHAKE_IN_THE_CLEAR_CAP,
       "HANDSHAKE_IN_CLEAR" },
     { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_PUB_KEY_ID_CAP, "PUB_KEY_ID" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHUNK_CAP, "CHUNK" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_ALIAS_CERT_CAP, "ALIAS_CERT" },
 };
 uintn m_spdm_responder_capabilities_string_table_count =
     ARRAY_SIZE(m_spdm_responder_capabilities_string_table);
@@ -348,6 +351,14 @@ void dump_spdm_get_capabilities(IN void *buffer, IN uintn buffer_size)
     spdm_request = buffer;
 
     if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_11) {
+        message_size = OFFSET_OF(spdm_get_capabilities_request, data_transfer_size);
+        if (buffer_size < message_size) {
+            printf("\n");
+            return;
+        }
+    }
+
+    if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
         message_size = sizeof(spdm_get_capabilities_request);
         if (buffer_size < message_size) {
             printf("\n");
@@ -358,8 +369,13 @@ void dump_spdm_get_capabilities(IN void *buffer, IN uintn buffer_size)
     if (!m_param_quite_mode) {
         if (spdm_request->header.spdm_version >=
             SPDM_MESSAGE_VERSION_11) {
-            printf("(Flags=0x%08x, CTExponent=0x%02x) ",
+            printf("(Flags=0x%08x, CTExponent=0x%02x",
                    spdm_request->flags, spdm_request->ct_exponent);
+            if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
+                printf(", DataTransSize=0x%08x, MaxSpdmMsgSize=0x%08x",
+                    spdm_request->data_transfer_size, spdm_request->max_spdm_msg_size);
+            }
+            printf(") ");
 
             if (m_param_all_mode) {
                 printf("\n    Flags(");
@@ -398,7 +414,7 @@ void dump_spdm_capabilities(IN void *buffer, IN uintn buffer_size)
 
     printf("SPDM_CAPABILITIES ");
 
-    message_size = sizeof(spdm_capabilities_response);
+    message_size = OFFSET_OF(spdm_capabilities_response, data_transfer_size);
     if (buffer_size < message_size) {
         printf("\n");
         return;
@@ -406,9 +422,22 @@ void dump_spdm_capabilities(IN void *buffer, IN uintn buffer_size)
 
     spdm_response = buffer;
 
+    if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
+        message_size = sizeof(spdm_capabilities_response);
+        if (buffer_size < message_size) {
+            printf("\n");
+            return;
+        }
+    }
+
     if (!m_param_quite_mode) {
-        printf("(Flags=0x%08x, CTExponent=0x%02x) ",
+        printf("(Flags=0x%08x, CTExponent=0x%02x",
                spdm_response->flags, spdm_response->ct_exponent);
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
+            printf(", DataTransSize=0x%08x, MaxSpdmMsgSize=0x%08x",
+                spdm_response->data_transfer_size, spdm_response->max_spdm_msg_size);
+        }
+        printf(") ");
 
         if (m_param_all_mode) {
             printf("\n    Flags(");
