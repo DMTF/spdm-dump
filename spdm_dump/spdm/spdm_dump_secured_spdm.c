@@ -11,6 +11,7 @@ extern void *m_spdm_context;
 extern void *m_current_session_info;
 extern uint32_t m_current_session_id;
 extern boolean m_decrypted;
+extern uint8_t m_spdm_other_params_support;
 
 void dump_spdm_opaque_version_selection(IN void *buffer, IN uintn buffer_size)
 {
@@ -75,10 +76,13 @@ dispatch_table_entry_t m_spdm_opaque_dispatch[] = {
       "SUPPORTED_VERSION", dump_spdm_opaque_supported_version },
 };
 
-void dump_spdm_opaque_data(IN uint8_t *opaque_data, IN uint16_t opaque_length)
+void dump_spdm_opaque_data(IN uint8_t spdm_version, IN uint8_t *opaque_data, IN uint16_t opaque_length)
 {
     secured_message_general_opaque_data_table_header_t
         *secured_message_opaque_data_table;
+    spdm_general_opaque_data_table_header_t
+        *spdm_opaque_data_table_header;
+    uint8_t total_elements;
     secured_message_opaque_element_table_header_t
         *secured_message_element_table;
     secured_message_opaque_element_header_t *secured_message_element;
@@ -89,27 +93,46 @@ void dump_spdm_opaque_data(IN uint8_t *opaque_data, IN uint16_t opaque_length)
 
     end_of_opaque_data = (uintn)opaque_data + opaque_length;
 
-    if (opaque_length <
-        sizeof(secured_message_general_opaque_data_table_header_t)) {
-        return;
+    if ((spdm_version >= SPDM_MESSAGE_VERSION_12) &&
+        ((m_spdm_other_params_support & SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_MASK) ==
+           SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1)) {
+        if (opaque_length <
+            sizeof(spdm_general_opaque_data_table_header_t)) {
+            return;
+        }
+
+        spdm_opaque_data_table_header = (void *)opaque_data;
+
+        printf("\n      SpdmOpaqueDataHeader(TotalElem=0x%02x)",
+            spdm_opaque_data_table_header->total_elements);
+
+        secured_message_element_table =
+            (void *)(spdm_opaque_data_table_header + 1);
+        total_elements = spdm_opaque_data_table_header->total_elements;
+    } else {
+        if (opaque_length <
+            sizeof(secured_message_general_opaque_data_table_header_t)) {
+            return;
+        }
+
+        secured_message_opaque_data_table = (void *)opaque_data;
+        if (secured_message_opaque_data_table->spec_id !=
+            SECURED_MESSAGE_OPAQUE_DATA_SPEC_ID) {
+            return;
+        }
+
+        ch = (void *)&secured_message_opaque_data_table->spec_id;
+        printf("\n      SecuredMessageOpaqueDataHeader(spec_id=0x%08x(%c%c%c%c), Ver=0x%02x, TotalElem=0x%02x)",
+            secured_message_opaque_data_table->spec_id, ch[3], ch[2], ch[1],
+            ch[0], secured_message_opaque_data_table->opaque_version,
+            secured_message_opaque_data_table->total_elements);
+
+        secured_message_element_table =
+            (void *)(secured_message_opaque_data_table + 1);
+        total_elements = secured_message_opaque_data_table->total_elements;
     }
-
-    secured_message_opaque_data_table = (void *)opaque_data;
-    if (secured_message_opaque_data_table->spec_id !=
-        SECURED_MESSAGE_OPAQUE_DATA_SPEC_ID) {
-        return;
-    }
-
-    ch = (void *)&secured_message_opaque_data_table->spec_id;
-    printf("\n      SecuredMessageOpaqueDataHeader(spec_id=0x%08x(%c%c%c%c), Ver=0x%02x, TotalElem=0x%02x)",
-           secured_message_opaque_data_table->spec_id, ch[3], ch[2], ch[1],
-           ch[0], secured_message_opaque_data_table->opaque_version,
-           secured_message_opaque_data_table->total_elements);
-
-    secured_message_element_table =
-        (void *)(secured_message_opaque_data_table + 1);
     for (index = 0;
-         index < secured_message_opaque_data_table->total_elements;
+         index < total_elements;
          index++) {
         if ((uintn)secured_message_element_table +
                 sizeof(secured_message_opaque_element_table_header_t) >

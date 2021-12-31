@@ -23,6 +23,7 @@ extern uint16_t m_spdm_dhe_named_group;
 extern uint16_t m_spdm_aead_cipher_suite;
 extern uint16_t m_spdm_req_base_asym_alg;
 extern uint16_t m_spdm_key_schedule;
+extern uint16_t m_spdm_other_params_support;
 
 extern value_string_entry_t m_spdm_requester_capabilities_string_table[];
 extern uintn m_spdm_requester_capabilities_string_table_count;
@@ -42,6 +43,8 @@ extern value_string_entry_t m_spdm_key_schedule_value_string_table[];
 extern uintn m_spdm_key_schedule_value_string_table_count;
 extern value_string_entry_t m_spdm_measurement_spec_value_string_table[];
 extern uintn m_spdm_measurement_spec_value_string_table_count;
+extern value_string_entry_t m_spdm_other_param_value_string_table[];
+extern uintn m_spdm_other_param_value_string_table_count;
 
 dispatch_table_entry_t *
 get_dispatch_entry_by_id(IN dispatch_table_entry_t *dispatch_table,
@@ -197,6 +200,7 @@ void print_usage(void)
     printf("   [--dhe FFDHE_2048|FFDHE_3072|FFDHE_4096|SECP_256_R1|SECP_384_R1|SECP_521_R1|SM2_P256]\n");
     printf("   [--aead AES_128_GCM|AES_256_GCM|CHACHA20_POLY1305|SM4_128_GCM]\n");
     printf("   [--key_schedule HMAC_HASH]\n");
+    printf("   [--other_param OPAQUE_FMT_1]\n");
     printf("   [--req_cert_chain <input requester public cert chain file>]\n");
     printf("   [--rsp_cert_chain <input responder public cert chain file>]\n");
     printf("   [--out_req_cert_chain <output requester public cert chain file>]\n");
@@ -212,7 +216,7 @@ void print_usage(void)
     printf("\n");
     printf("   [--req_cap] and [--rsp_cap] means requester capability flags and responder capability flags.\n");
     printf("      format: Capabilities can be multiple flags. Please use ',' for them.\n");
-    printf("   [--hash], [--meas_spec], [--meas_hash], [--asym], [--req_asym], [--dhe], [--aead], [--key_schedule] means negotiated algorithms.\n");
+    printf("   [--hash], [--meas_spec], [--meas_hash], [--asym], [--req_asym], [--dhe], [--aead], [--key_schedule], [--other_param] means negotiated algorithms.\n");
     printf("      format: Algorithms must include only one flag.\n");
     printf("      Capabilities and algorithms are required if GET_CAPABILITIES or NEGOTIATE_ALGORITHMS is not sent.\n");
     printf("              For example, the negotiated state session or quick PSK session.\n");
@@ -558,6 +562,30 @@ void process_args(int argc, char *argv[])
                 continue;
             } else {
                 printf("invalid --key_schedule\n");
+                print_usage();
+                exit(0);
+            }
+        }
+
+        if (strcmp(argv[0], "--other_param") == 0) {
+            if (argc >= 2) {
+                if (!get_value_from_name(
+                        m_spdm_other_param_value_string_table,
+                        m_spdm_other_param_value_string_table_count,
+                        argv[1], &data32)) {
+                    printf("invalid --other_param %s\n",
+                           argv[1]);
+                    print_usage();
+                    exit(0);
+                }
+                m_spdm_other_params_support = (uint8_t)data32;
+                printf("other_param - 0x%04x\n",
+                       m_spdm_other_params_support);
+                argc -= 2;
+                argv += 2;
+                continue;
+            } else {
+                printf("invalid --other_param\n");
                 print_usage();
                 exit(0);
             }
