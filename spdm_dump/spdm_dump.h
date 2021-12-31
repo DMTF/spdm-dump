@@ -86,7 +86,7 @@ void dump_spdm_message(IN void *buffer, IN uintn buffer_size);
 
 void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size);
 
-void dump_spdm_opaque_data(IN uint8_t *opaque_data, IN uint16_t opaque_length);
+void dump_spdm_opaque_data(IN uint8_t spdm_version, IN uint8_t *opaque_data, IN uint16_t opaque_length);
 
 void dump_pldm_message(IN void *buffer, IN uintn buffer_size);
 

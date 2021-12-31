@@ -39,6 +39,7 @@ uint16_t m_spdm_dhe_named_group;
 uint16_t m_spdm_aead_cipher_suite;
 uint16_t m_spdm_req_base_asym_alg;
 uint16_t m_spdm_key_schedule;
+uint16_t m_spdm_other_params_support;
 
 dispatch_table_entry_t m_spdm_vendor_dispatch[] = {
     { SPDM_REGISTRY_ID_DMTF, "DMTF", NULL },
@@ -173,6 +174,12 @@ value_string_entry_t m_spdm_measurement_spec_value_string_table[] = {
 };
 uintn m_spdm_measurement_spec_value_string_table_count =
     ARRAY_SIZE(m_spdm_measurement_spec_value_string_table);
+
+value_string_entry_t m_spdm_other_param_value_string_table[] = {
+    { SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1, "OPAQUE_FMT_1" },
+};
+uintn m_spdm_other_param_value_string_table_count =
+    ARRAY_SIZE(m_spdm_other_param_value_string_table);
 
 value_string_entry_t m_spdm_measurement_type_value_string_table[] = {
     { SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_IMMUTABLE_ROM,
@@ -457,7 +464,14 @@ void dump_spdm_negotiate_algorithms(IN void *buffer, IN uintn buffer_size)
             m_spdm_measurement_spec_value_string_table,
             ARRAY_SIZE(m_spdm_measurement_spec_value_string_table),
             spdm_request->measurement_specification);
-        printf("), hash=0x%08x(", spdm_request->base_hash_algo);
+        if (spdm_request->header.spdm_version >=
+            SPDM_MESSAGE_VERSION_12) {
+            printf("), OtherParam=0x%02x(", spdm_request->other_params_support);
+            dump_entry_flags(m_spdm_other_param_value_string_table,
+                    ARRAY_SIZE(m_spdm_other_param_value_string_table),
+                    spdm_request->other_params_support);
+        }
+        printf("), Hash=0x%08x(", spdm_request->base_hash_algo);
         dump_entry_flags(m_spdm_hash_value_string_table,
                  ARRAY_SIZE(m_spdm_hash_value_string_table),
                  spdm_request->base_hash_algo);
@@ -506,7 +520,7 @@ void dump_spdm_negotiate_algorithms(IN void *buffer, IN uintn buffer_size)
                         struct_table->alg_supported);
                     break;
                 case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_KEY_SCHEDULE:
-                    printf("), key_schedule=0x%04x(",
+                    printf("), KeySchedule=0x%04x(",
                            struct_table->alg_supported);
                     dump_entry_flags(
                         m_spdm_key_schedule_value_string_table,
@@ -574,6 +588,13 @@ void dump_spdm_algorithms(IN void *buffer, IN uintn buffer_size)
             m_spdm_measurement_spec_value_string_table,
             ARRAY_SIZE(m_spdm_measurement_spec_value_string_table),
             spdm_response->measurement_specification_sel);
+        if (spdm_response->header.spdm_version >=
+            SPDM_MESSAGE_VERSION_12) {
+            printf("), OtherParam=0x%02x(", spdm_response->other_params_support);
+            dump_entry_value(m_spdm_other_param_value_string_table,
+                    ARRAY_SIZE(m_spdm_other_param_value_string_table),
+                    spdm_response->other_params_support);
+        }
         printf("), Hash=0x%08x(", spdm_response->base_hash_sel);
         dump_entry_value(m_spdm_hash_value_string_table,
                  ARRAY_SIZE(m_spdm_hash_value_string_table),
@@ -697,6 +718,10 @@ void dump_spdm_algorithms(IN void *buffer, IN uintn buffer_size)
         }
     }
 
+    if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
+        m_spdm_other_params_support = spdm_response->other_params_support;
+    }
+
     zero_mem(&parameter, sizeof(parameter));
     parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_MEASUREMENT_SPEC, &parameter,
@@ -716,6 +741,8 @@ void dump_spdm_algorithms(IN void *buffer, IN uintn buffer_size)
               &m_spdm_req_base_asym_alg, sizeof(uint16_t));
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_KEY_SCHEDULE, &parameter,
               &m_spdm_key_schedule, sizeof(uint16_t));
+    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_OTHER_PARAMS_SUPPORT, &parameter,
+              &m_spdm_other_params_support, sizeof(uint8_t));
 
     libspdm_append_message_a(m_spdm_context, buffer, message_size);
 }
@@ -1063,7 +1090,8 @@ void dump_spdm_challenge_auth(IN void *buffer, IN uintn buffer_size)
             printf("\n    OpaqueData(");
             dump_data(opaque_data, opaque_length);
             printf(")");
-            dump_spdm_opaque_data(opaque_data, opaque_length);
+            dump_spdm_opaque_data(spdm_response->header.spdm_version,
+                opaque_data, opaque_length);
             signature = opaque_data + opaque_length;
             printf("\n    Signature(");
             dump_data(signature, signature_size);
@@ -1327,8 +1355,8 @@ void dump_spdm_measurements(IN void *buffer, IN uintn buffer_size)
                 printf("\n    OpaqueData(");
                 dump_data(opaque_data, opaque_length);
                 printf(")");
-                dump_spdm_opaque_data(opaque_data,
-                              opaque_length);
+                dump_spdm_opaque_data(spdm_response->header.spdm_version,
+                    opaque_data, opaque_length);
                 signature = opaque_data + opaque_length;
                 printf("\n    Signature(");
                 dump_data(signature, signature_size);
@@ -1344,8 +1372,8 @@ void dump_spdm_measurements(IN void *buffer, IN uintn buffer_size)
                 printf("\n    OpaqueData(");
                 dump_data(opaque_data, opaque_length);
                 printf(")");
-                dump_spdm_opaque_data(opaque_data,
-                              opaque_length);
+                dump_spdm_opaque_data(spdm_response->header.spdm_version,
+                    opaque_data, opaque_length);
             }
         }
     }
@@ -1541,7 +1569,8 @@ void dump_spdm_key_exchange(IN void *buffer, IN uintn buffer_size)
             printf("\n    OpaqueData(");
             dump_data(opaque_data, opaque_length);
             printf(")");
-            dump_spdm_opaque_data(opaque_data, opaque_length);
+            dump_spdm_opaque_data(spdm_request->header.spdm_version,
+                opaque_data, opaque_length);
         }
     }
 
@@ -1650,7 +1679,8 @@ void dump_spdm_key_exchange_rsp(IN void *buffer, IN uintn buffer_size)
             printf("\n    OpaqueData(");
             dump_data(opaque_data, opaque_length);
             printf(")");
-            dump_spdm_opaque_data(opaque_data, opaque_length);
+            dump_spdm_opaque_data(spdm_response->header.spdm_version,
+                opaque_data, opaque_length);
             signature = opaque_data + opaque_length;
             printf("\n    Signature(");
             dump_data(signature, signature_size);
@@ -1930,8 +1960,8 @@ void dump_spdm_psk_exchange(IN void *buffer, IN uintn buffer_size)
             printf("\n    OpaqueData(");
             dump_data(opaque_data, spdm_request->opaque_length);
             printf(")");
-            dump_spdm_opaque_data(opaque_data,
-                          spdm_request->opaque_length);
+            dump_spdm_opaque_data(spdm_request->header.spdm_version,
+                opaque_data, spdm_request->opaque_length);
         }
     }
 
@@ -2000,8 +2030,8 @@ void dump_spdm_psk_exchange_rsp(IN void *buffer, IN uintn buffer_size)
             printf("\n    OpaqueData(");
             dump_data(opaque_data, spdm_response->opaque_length);
             printf(")");
-            dump_spdm_opaque_data(opaque_data,
-                          spdm_response->opaque_length);
+            dump_spdm_opaque_data(spdm_response->header.spdm_version,
+                opaque_data, spdm_response->opaque_length);
             verify_data =
                 opaque_data + spdm_response->opaque_length;
             printf("\n    VerifyData(");
@@ -2676,6 +2706,8 @@ boolean init_spdm_dump(void)
               &m_spdm_req_base_asym_alg, sizeof(uint16_t));
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_KEY_SCHEDULE, &parameter,
               &m_spdm_key_schedule, sizeof(uint16_t));
+    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_OTHER_PARAMS_SUPPORT, &parameter,
+              &m_spdm_other_params_support, sizeof(uint8_t));
 
     return TRUE;
 
