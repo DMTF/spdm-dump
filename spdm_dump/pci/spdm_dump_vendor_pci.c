@@ -10,25 +10,13 @@ dispatch_table_entry_t m_spdm_pci_protocol_dispatch[] = {
     { PCI_PROTOCOL_ID_IDE_KM, "IDE_KM", dump_pci_ide_km_message },
 };
 
-#pragma pack(1)
-
-typedef struct {
-    uint16_t standard_id;
-    uint8_t len;
-    uint16_t vendor_id;
-    uint16_t payload_length;
-    pci_protocol_header_t pci_protocol;
-} spdm_vendor_defined_pci_header_t;
-
-#pragma pack()
-
 void dump_spdm_vendor_pci(IN void *buffer, IN uintn buffer_size)
 {
-    spdm_vendor_defined_pci_header_t *vendor_defined_pci_header;
+    pci_doe_spdm_vendor_defined_header_t *vendor_defined_pci_header;
 
     printf("PCI ");
 
-    if (buffer_size < sizeof(spdm_vendor_defined_pci_header_t)) {
+    if (buffer_size < sizeof(pci_doe_spdm_vendor_defined_header_t)) {
         printf("\n");
         return;
     }
@@ -60,7 +48,7 @@ void dump_spdm_vendor_pci(IN void *buffer, IN uintn buffer_size)
         return;
     }
     if (vendor_defined_pci_header->payload_length >
-        buffer_size - (OFFSET_OF(spdm_vendor_defined_pci_header_t,
+        buffer_size - (OFFSET_OF(pci_doe_spdm_vendor_defined_header_t,
                      pci_protocol))) {
         printf("\n");
         return;
@@ -70,7 +58,7 @@ void dump_spdm_vendor_pci(IN void *buffer, IN uintn buffer_size)
         m_spdm_pci_protocol_dispatch,
         ARRAY_SIZE(m_spdm_pci_protocol_dispatch),
         vendor_defined_pci_header->pci_protocol.protocol_id,
-        (uint8_t *)buffer + sizeof(spdm_vendor_defined_pci_header_t),
+        (uint8_t *)buffer + sizeof(pci_doe_spdm_vendor_defined_header_t),
         vendor_defined_pci_header->payload_length -
             sizeof(pci_protocol_header_t));
 
