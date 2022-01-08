@@ -70,13 +70,13 @@ void dump_pldm_control(IN void *buffer, IN uintn buffer_size)
 dispatch_table_entry_t m_pldm_dispatch[] = {
     { PLDM_MESSAGE_TYPE_CONTROL_DISCOVERY, "ControlDiscovery",
       dump_pldm_control },
-    { MCTP_MESSAGE_TYPE_SMBIOS, "SMBIOS", NULL },
-    { MCTP_MESSAGE_TYPE_PLATFORM_MONITORING_CONTROL, "Platform", NULL },
-    { MCTP_MESSAGE_TYPE_BIOS_CONTROL_CONFIGURATION, "BIOS", NULL },
-    { MCTP_MESSAGE_TYPE_FRU_DATA, "FRU", NULL },
-    { MCTP_MESSAGE_TYPE_FIRMWARE_UPDATE, "FirmwareUpdate", NULL },
-    { MCTP_MESSAGE_TYPE_REDFISH_DEVICE_ENABLEMENT, "RedFish", NULL },
-    { MCTP_MESSAGE_TYPE_OEM, "OEM", NULL },
+    { PLDM_MESSAGE_TYPE_SMBIOS, "SMBIOS", NULL },
+    { PLDM_MESSAGE_TYPE_PLATFORM_MONITORING_CONTROL, "Platform", NULL },
+    { PLDM_MESSAGE_TYPE_BIOS_CONTROL_CONFIGURATION, "BIOS", NULL },
+    { PLDM_MESSAGE_TYPE_FRU_DATA, "FRU", NULL },
+    { PLDM_MESSAGE_TYPE_FIRMWARE_UPDATE, "FirmwareUpdate", NULL },
+    { PLDM_MESSAGE_TYPE_REDFISH_DEVICE_ENABLEMENT, "RedFish", NULL },
+    { PLDM_MESSAGE_TYPE_OEM, "OEM", NULL },
 };
 
 void dump_pldm_message(IN void *buffer, IN uintn buffer_size)
