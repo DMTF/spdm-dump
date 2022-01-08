@@ -7,7 +7,7 @@
 #include "spdm_dump.h"
 
 dispatch_table_entry_t m_spdm_pci_protocol_dispatch[] = {
-    { PCI_PROTOCAL_ID_IDE_KM, "IDE_KM", dump_pci_ide_km_message },
+    { PCI_PROTOCOL_ID_IDE_KM, "IDE_KM", dump_pci_ide_km_message },
 };
 
 #pragma pack(1)
