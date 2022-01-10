@@ -1,5 +1,5 @@
 ---
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: Align0
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignOperands: true
