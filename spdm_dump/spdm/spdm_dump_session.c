@@ -26,7 +26,6 @@ return_status spdm_dump_session_data_provision(IN void *spdm_context,
                            IN boolean need_mut_auth,
                            IN boolean is_requester)
 {
-    uintn hash_size;
     void *session_info;
     void *secured_message_context;
     libspdm_data_parameter_t parameter;
@@ -57,8 +56,6 @@ return_status spdm_dump_session_data_provision(IN void *spdm_context,
     data_size = sizeof(mut_auth_requested);
     libspdm_get_data(spdm_context, LIBSPDM_DATA_SESSION_MUT_AUTH_REQUESTED,
               &parameter, &mut_auth_requested, &data_size);
-
-    hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
     if (!use_psk) {
         if (m_dhe_secret_buffer == NULL ||
