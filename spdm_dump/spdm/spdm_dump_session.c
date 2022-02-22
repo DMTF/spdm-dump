@@ -21,29 +21,29 @@ uintn m_dhe_secret_buffer_size;
 void *m_psk_buffer;
 uintn m_psk_buffer_size;
 
-return_status spdm_dump_session_data_provision(IN void *spdm_context,
-                           IN uint32_t session_id,
-                           IN boolean need_mut_auth,
-                           IN boolean is_requester)
+return_status spdm_dump_session_data_provision(void *spdm_context,
+                           uint32_t session_id,
+                           bool need_mut_auth,
+                           bool is_requester)
 {
     void *session_info;
     void *secured_message_context;
     libspdm_data_parameter_t parameter;
-    boolean use_psk;
+    bool use_psk;
     uint8_t mut_auth_requested;
     uintn data_size;
 
     session_info =
         libspdm_get_session_info_via_session_id(spdm_context, session_id);
     if (session_info == NULL) {
-        ASSERT(FALSE);
+        ASSERT(false);
         return RETURN_UNSUPPORTED;
     }
     secured_message_context =
         libspdm_get_secured_message_context_via_session_id(spdm_context,
                                 session_id);
     if (secured_message_context == NULL) {
-        ASSERT(FALSE);
+        ASSERT(false);
         return RETURN_UNSUPPORTED;
     }
 
@@ -155,20 +155,20 @@ return_status spdm_dump_session_data_provision(IN void *spdm_context,
     return RETURN_SUCCESS;
 }
 
-return_status spdm_dump_session_data_check(IN void *spdm_context,
-                       IN uint32_t session_id,
-                       IN boolean is_requester)
+return_status spdm_dump_session_data_check(void *spdm_context,
+                       uint32_t session_id,
+                       bool is_requester)
 {
     void *session_info;
     libspdm_data_parameter_t parameter;
-    boolean use_psk;
+    bool use_psk;
     uint8_t mut_auth_requested;
     uintn data_size;
 
     session_info =
         libspdm_get_session_info_via_session_id(spdm_context, session_id);
     if (session_info == NULL) {
-        ASSERT(FALSE);
+        ASSERT(false);
         return RETURN_UNSUPPORTED;
     }
 

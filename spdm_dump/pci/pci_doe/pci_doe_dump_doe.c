@@ -6,13 +6,13 @@
 
 #include "spdm_dump.h"
 
-void dump_pci_doe_discovery_message(IN void *buffer, IN uintn buffer_size)
+void dump_pci_doe_discovery_message(const void *buffer, uintn buffer_size)
 {
-    pci_doe_discovery_request_t *doe_request;
-    pci_doe_discovery_response_t *doe_response;
-    static boolean is_requester = FALSE;
+    const pci_doe_discovery_request_t *doe_request;
+    const pci_doe_discovery_response_t *doe_response;
+    static bool is_requester = false;
 
-    is_requester = (boolean)(!is_requester);
+    is_requester = (bool)(!is_requester);
     if (is_requester) {
         if (buffer_size < sizeof(pci_doe_discovery_request_t)) {
             printf("\n");

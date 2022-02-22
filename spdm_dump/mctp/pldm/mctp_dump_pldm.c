@@ -6,10 +6,10 @@
 
 #include "spdm_dump.h"
 
-void dump_pldm_control_get_tid(IN void *buffer, IN uintn buffer_size)
+void dump_pldm_control_get_tid(const void *buffer, uintn buffer_size)
 {
-    pldm_message_header_t *pldm_message_header;
-    boolean is_req;
+    const pldm_message_header_t *pldm_message_header;
+    bool is_req;
     uintn header_size;
 
     pldm_message_header = buffer;
@@ -53,9 +53,9 @@ dispatch_table_entry_t m_pldm_control_dispatch[] = {
       NULL },
 };
 
-void dump_pldm_control(IN void *buffer, IN uintn buffer_size)
+void dump_pldm_control(const void *buffer, uintn buffer_size)
 {
-    pldm_message_header_t *pldm_message_header;
+    const pldm_message_header_t *pldm_message_header;
 
     printf("ControlDiscovery ");
 
@@ -79,11 +79,11 @@ dispatch_table_entry_t m_pldm_dispatch[] = {
     { PLDM_MESSAGE_TYPE_OEM, "OEM", NULL },
 };
 
-void dump_pldm_message(IN void *buffer, IN uintn buffer_size)
+void dump_pldm_message(const void *buffer, uintn buffer_size)
 {
-    pldm_message_header_t *pldm_message_header;
+    const pldm_message_header_t *pldm_message_header;
     pldm_message_response_header_t *pldm_response_header;
-    boolean is_req;
+    bool is_req;
 
     if (buffer_size < sizeof(pldm_message_header_t)) {
         printf("\n");

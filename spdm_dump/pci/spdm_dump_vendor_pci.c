@@ -10,9 +10,9 @@ dispatch_table_entry_t m_spdm_pci_protocol_dispatch[] = {
     { PCI_PROTOCOL_ID_IDE_KM, "IDE_KM", dump_pci_ide_km_message },
 };
 
-void dump_spdm_vendor_pci(IN void *buffer, IN uintn buffer_size)
+void dump_spdm_vendor_pci(const void *buffer, uintn buffer_size)
 {
-    pci_doe_spdm_vendor_defined_header_t *vendor_defined_pci_header;
+    const pci_doe_spdm_vendor_defined_header_t *vendor_defined_pci_header;
 
     printf("PCI ");
 

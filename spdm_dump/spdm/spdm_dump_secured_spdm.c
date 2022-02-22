@@ -10,12 +10,12 @@ extern void *m_spdm_dec_message_buffer;
 extern void *m_spdm_context;
 extern void *m_current_session_info;
 extern uint32_t m_current_session_id;
-extern boolean m_decrypted;
+extern bool m_decrypted;
 extern uint8_t m_spdm_other_params_support;
 
-void dump_spdm_opaque_version_selection(IN void *buffer, IN uintn buffer_size)
+void dump_spdm_opaque_version_selection(const void *buffer, uintn buffer_size)
 {
-    secured_message_opaque_element_version_selection_t *version_selection;
+    const secured_message_opaque_element_version_selection_t *version_selection;
 
     if (buffer_size <
         sizeof(secured_message_opaque_element_version_selection_t)) {
@@ -33,9 +33,9 @@ void dump_spdm_opaque_version_selection(IN void *buffer, IN uintn buffer_size)
            version_selection->selected_version & 0xF);
 }
 
-void dump_spdm_opaque_supported_version(IN void *buffer, IN uintn buffer_size)
+void dump_spdm_opaque_supported_version(const void *buffer, uintn buffer_size)
 {
-    secured_message_opaque_element_supported_version_t *supported_version;
+    const secured_message_opaque_element_supported_version_t *supported_version;
     spdm_version_number_t *spdm_version_number;
     uintn index;
 
@@ -76,7 +76,7 @@ dispatch_table_entry_t m_spdm_opaque_dispatch[] = {
       "SUPPORTED_VERSION", dump_spdm_opaque_supported_version },
 };
 
-void dump_spdm_opaque_data(IN uint8_t spdm_version, IN uint8_t *opaque_data, IN uint16_t opaque_length)
+void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data, uint16_t opaque_length)
 {
     secured_message_general_opaque_data_table_header_t
         *secured_message_opaque_data_table;
@@ -183,14 +183,14 @@ dispatch_table_entry_t m_secured_spdm_dispatch[] = {
     { LINKTYPE_PCI_DOE, "", dump_spdm_message },
 };
 
-void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size)
+void dump_secured_spdm_message(const void *buffer, uintn buffer_size)
 {
-    spdm_secured_message_a_data_header1_t *record_header1;
+    const spdm_secured_message_a_data_header1_t *record_header1;
     uint16_t sequence_num;
     uintn sequence_num_size;
     return_status status;
     uintn message_size;
-    static boolean is_requester = FALSE;
+    static bool is_requester = false;
     uint32_t data_link_type;
     libspdm_secured_message_callbacks_t spdm_secured_message_callbacks;
     void *secured_message_context;
@@ -216,7 +216,7 @@ void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size)
             libspdm_pci_doe_get_max_random_number_count;
         break;
     default:
-        ASSERT(FALSE);
+        ASSERT(false);
         printf("<UnknownTransportLayer> ");
         printf("\n");
         return;
@@ -229,7 +229,7 @@ void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size)
         return;
     }
 
-    is_requester = (boolean)(!is_requester);
+    is_requester = (bool)(!is_requester);
 
     record_header1 = buffer;
     sequence_num = 0;
@@ -283,12 +283,12 @@ void dump_secured_spdm_message(IN void *buffer, IN uintn buffer_size)
         }
         printf(") ");
 
-        m_decrypted = TRUE;
+        m_decrypted = true;
         dump_dispatch_message(m_secured_spdm_dispatch,
                       ARRAY_SIZE(m_secured_spdm_dispatch),
                       get_data_link_type(),
                       m_spdm_dec_message_buffer, message_size);
-        m_decrypted = FALSE;
+        m_decrypted = false;
     } else {
         printf("(?)->(?) ");
         printf("SecuredSPDM(0x%08x", record_header1->session_id);
