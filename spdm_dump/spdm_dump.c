@@ -6,10 +6,10 @@
 
 #include "spdm_dump.h"
 
-boolean m_param_quite_mode;
-boolean m_param_all_mode;
-boolean m_param_dump_vendor_app;
-boolean m_param_dump_hex;
+bool m_param_quite_mode;
+bool m_param_all_mode;
+bool m_param_dump_vendor_app;
+bool m_param_dump_hex;
 char *m_param_out_rsp_cert_chain_file_name;
 char *m_param_out_rsq_cert_chain_file_name;
 
@@ -23,7 +23,7 @@ extern uint16_t m_spdm_dhe_named_group;
 extern uint16_t m_spdm_aead_cipher_suite;
 extern uint16_t m_spdm_req_base_asym_alg;
 extern uint16_t m_spdm_key_schedule;
-extern uint16_t m_spdm_other_params_support;
+extern uint8_t m_spdm_other_params_support;
 
 extern value_string_entry_t m_spdm_requester_capabilities_string_table[];
 extern uintn m_spdm_requester_capabilities_string_table_count;
@@ -47,8 +47,8 @@ extern value_string_entry_t m_spdm_other_param_value_string_table[];
 extern uintn m_spdm_other_param_value_string_table_count;
 
 dispatch_table_entry_t *
-get_dispatch_entry_by_id(IN dispatch_table_entry_t *dispatch_table,
-             IN uintn dispatch_table_count, IN uint32_t id)
+get_dispatch_entry_by_id(dispatch_table_entry_t *dispatch_table,
+             uintn dispatch_table_count, uint32_t id)
 {
     uintn index;
 
@@ -60,9 +60,9 @@ get_dispatch_entry_by_id(IN dispatch_table_entry_t *dispatch_table,
     return NULL;
 }
 
-void dump_dispatch_message(IN dispatch_table_entry_t *dispatch_table,
-               IN uintn dispatch_table_count, IN uint32_t id,
-               IN void *buffer, IN uintn buffer_size)
+void dump_dispatch_message(dispatch_table_entry_t *dispatch_table,
+               uintn dispatch_table_count, uint32_t id,
+               const void *buffer, uintn buffer_size)
 {
     dispatch_table_entry_t *entry;
 
@@ -79,17 +79,17 @@ void dump_dispatch_message(IN dispatch_table_entry_t *dispatch_table,
     }
 }
 
-void dump_entry_flags(IN value_string_entry_t *entry_table,
-              IN uintn entry_table_count, IN uint32_t flags)
+void dump_entry_flags(const value_string_entry_t *entry_table,
+              uintn entry_table_count, uint32_t flags)
 {
     uintn index;
-    boolean first;
+    bool first;
 
-    first = TRUE;
+    first = true;
     for (index = 0; index < entry_table_count; index++) {
         if ((entry_table[index].value & flags) != 0) {
             if (first) {
-                first = FALSE;
+                first = false;
             } else {
                 printf(",");
             }
@@ -98,8 +98,8 @@ void dump_entry_flags(IN value_string_entry_t *entry_table,
     }
 }
 
-void dump_entry_flags_all(IN value_string_entry_t *entry_table,
-              IN uintn entry_table_count, IN uint32_t flags)
+void dump_entry_flags_all(const value_string_entry_t *entry_table,
+              uintn entry_table_count, uint32_t flags)
 {
     uintn index;
 
@@ -112,8 +112,8 @@ void dump_entry_flags_all(IN value_string_entry_t *entry_table,
     }
 }
 
-void dump_entry_value(IN value_string_entry_t *entry_table,
-              IN uintn entry_table_count, IN uint32_t value)
+void dump_entry_value(const value_string_entry_t *entry_table,
+              uintn entry_table_count, uint32_t value)
 {
     uintn index;
 
@@ -126,33 +126,33 @@ void dump_entry_value(IN value_string_entry_t *entry_table,
     printf("<Unknown>");
 }
 
-boolean get_value_from_name(IN value_string_entry_t *table,
-                IN uintn entry_count, IN char *name,
-                OUT uint32_t *value)
+bool get_value_from_name(const value_string_entry_t *table,
+                uintn entry_count, const char *name,
+                uint32_t *value)
 {
     uintn index;
 
     for (index = 0; index < entry_count; index++) {
         if (strcmp(name, table[index].name) == 0) {
             *value = table[index].value;
-            return TRUE;
+            return true;
         }
     }
-    return FALSE;
+    return false;
 }
 
-boolean get_flags_from_name(IN value_string_entry_t *table,
-                IN uintn entry_count, IN char *name,
-                OUT uint32_t *flags)
+bool get_flags_from_name(const value_string_entry_t *table,
+                uintn entry_count, const char *name,
+                uint32_t *flags)
 {
     uint32_t value;
     char *flag_name;
     char *local_name;
-    boolean ret;
+    bool ret;
 
     local_name = (void *)malloc(strlen(name) + 1);
     if (local_name == NULL) {
-        return FALSE;
+        return false;
     }
     strcpy(local_name, name);
 
@@ -165,16 +165,16 @@ boolean get_flags_from_name(IN value_string_entry_t *table,
         if (!get_value_from_name(table, entry_count, flag_name,
                      &value)) {
             printf("unsupported flag - %s\n", flag_name);
-            ret = FALSE;
+            ret = false;
             goto done;
         }
         *flags |= value;
         flag_name = strtok(NULL, ",");
     }
     if (*flags == 0) {
-        ret = FALSE;
+        ret = false;
     } else {
-        ret = TRUE;
+        ret = true;
     }
 done:
     free(local_name);
@@ -235,7 +235,7 @@ void process_args(int argc, char *argv[])
 {
     char *pcap_file_name;
     uint32_t data32;
-    boolean res;
+    bool res;
 
     pcap_file_name = NULL;
 
@@ -268,28 +268,28 @@ void process_args(int argc, char *argv[])
         }
 
         if (strcmp(argv[0], "-q") == 0) {
-            m_param_quite_mode = TRUE;
+            m_param_quite_mode = true;
             argc -= 1;
             argv += 1;
             continue;
         }
 
         if (strcmp(argv[0], "-a") == 0) {
-            m_param_all_mode = TRUE;
+            m_param_all_mode = true;
             argc -= 1;
             argv += 1;
             continue;
         }
 
         if (strcmp(argv[0], "-d") == 0) {
-            m_param_dump_vendor_app = TRUE;
+            m_param_dump_vendor_app = true;
             argc -= 1;
             argv += 1;
             continue;
         }
 
         if (strcmp(argv[0], "-x") == 0) {
-            m_param_dump_hex = TRUE;
+            m_param_dump_hex = true;
             argc -= 1;
             argv += 1;
             continue;

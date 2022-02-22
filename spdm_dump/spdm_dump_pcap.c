@@ -15,7 +15,7 @@ dispatch_table_entry_t m_pcap_dispatch[] = {
     { LINKTYPE_PCI_DOE, "PCI_DOE", dump_pci_doe_packet },
 };
 
-char *data_link_type_to_string(IN uint32_t data_link_type)
+char *data_link_type_to_string(uint32_t data_link_type)
 {
     switch (data_link_type) {
     case LINKTYPE_MCTP:
@@ -37,7 +37,7 @@ uint32_t get_data_link_type(void)
     return m_pcap_global_header.network;
 }
 
-void dump_pcap_global_header(IN pcap_global_header_t *pcap_global_header)
+void dump_pcap_global_header(const pcap_global_header_t *pcap_global_header)
 {
     printf("PcapFile: Magic - '%x', version%d.%d, DataLink - %d (%s), MaxPacketSize - %d\n",
            pcap_global_header->magic_number,
@@ -47,21 +47,21 @@ void dump_pcap_global_header(IN pcap_global_header_t *pcap_global_header)
            pcap_global_header->snap_len);
 }
 
-boolean open_pcap_packet_file(IN char *pcap_file_name)
+bool open_pcap_packet_file(const char *pcap_file_name)
 {
     if (pcap_file_name == NULL) {
-        return FALSE;
+        return false;
     }
 
     if ((m_pcap_file = fopen(pcap_file_name, "rb")) == NULL) {
         printf("!!!Unable to open pcap file %s!!!\n", pcap_file_name);
-        return FALSE;
+        return false;
     }
 
     if (fread(&m_pcap_global_header, 1, sizeof(pcap_global_header_t),
           m_pcap_file) != sizeof(pcap_global_header_t)) {
         printf("!!!Unable to read the pcap global header!!!\n");
-        return FALSE;
+        return false;
     }
 
     if ((m_pcap_global_header.magic_number != PCAP_GLOBAL_HEADER_MAGIC) &&
@@ -73,23 +73,23 @@ boolean open_pcap_packet_file(IN char *pcap_file_name)
          PCAP_GLOBAL_HEADER_MAGIC_NANO_SWAPPED)) {
         printf("!!!pcap file magic invalid '%x'!!!\n",
                m_pcap_global_header.magic_number);
-        return FALSE;
+        return false;
     }
 
     dump_pcap_global_header(&m_pcap_global_header);
 
     if (m_pcap_global_header.snap_len == 0) {
-        return FALSE;
+        return false;
     }
 
     m_pcap_packet_data_buffer =
         (void *)malloc(m_pcap_global_header.snap_len);
     if (m_pcap_packet_data_buffer == NULL) {
         printf("!!!memory out of resources!!!\n");
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 void close_pcap_packet_file(void)
@@ -104,13 +104,13 @@ void close_pcap_packet_file(void)
     }
 }
 
-void dump_pcap_packet_header(IN uintn index,
-                 IN pcap_packet_header_t *pcap_packet_header)
+void dump_pcap_packet_header(uintn index,
+                 const pcap_packet_header_t *pcap_packet_header)
 {
     printf("%d (%d) ", (uint32_t)index, pcap_packet_header->ts_sec);
 }
 
-void dump_pcap_packet(IN void *buffer, IN uintn buffer_size)
+void dump_pcap_packet(const void *buffer, uintn buffer_size)
 {
     dump_dispatch_message(m_pcap_dispatch, ARRAY_SIZE(m_pcap_dispatch),
                   m_pcap_global_header.network, buffer,
@@ -124,7 +124,7 @@ void dump_pcap(void)
 
     index = 1;
 
-    while (TRUE) {
+    while (true) {
         if (fread(&pcap_packet_header, 1, sizeof(pcap_packet_header_t),
               m_pcap_file) != sizeof(pcap_packet_header_t)) {
             return;
