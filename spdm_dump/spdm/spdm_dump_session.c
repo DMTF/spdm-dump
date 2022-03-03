@@ -36,18 +36,18 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
     session_info =
         libspdm_get_session_info_via_session_id(spdm_context, session_id);
     if (session_info == NULL) {
-        ASSERT(false);
+        LIBSPDM_ASSERT(false);
         return RETURN_UNSUPPORTED;
     }
     secured_message_context =
         libspdm_get_secured_message_context_via_session_id(spdm_context,
                                 session_id);
     if (secured_message_context == NULL) {
-        ASSERT(false);
+        LIBSPDM_ASSERT(false);
         return RETURN_UNSUPPORTED;
     }
 
-    zero_mem(&parameter, sizeof(parameter));
+    libspdm_zero_mem(&parameter, sizeof(parameter));
     parameter.location = LIBSPDM_DATA_LOCATION_SESSION;
     *(uint32_t *)parameter.additional_data = session_id;
     data_size = sizeof(use_psk);
@@ -77,7 +77,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
                        m_requester_cert_chain_buffer_size);
                 m_local_used_cert_chain_buffer_size =
                     m_requester_cert_chain_buffer_size;
-                zero_mem(&parameter, sizeof(parameter));
+                libspdm_zero_mem(&parameter, sizeof(parameter));
                 parameter.location =
                     LIBSPDM_DATA_LOCATION_CONNECTION;
                 libspdm_set_data(
@@ -96,7 +96,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
                    m_responder_cert_chain_buffer_size);
             m_peer_cert_chain_buffer_size =
                 m_responder_cert_chain_buffer_size;
-            zero_mem(&parameter, sizeof(parameter));
+            libspdm_zero_mem(&parameter, sizeof(parameter));
             parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
             libspdm_set_data(spdm_context,
                       LIBSPDM_DATA_PEER_USED_CERT_CHAIN_BUFFER,
@@ -112,7 +112,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
                    m_responder_cert_chain_buffer_size);
             m_local_used_cert_chain_buffer_size =
                 m_responder_cert_chain_buffer_size;
-            zero_mem(&parameter, sizeof(parameter));
+            libspdm_zero_mem(&parameter, sizeof(parameter));
             parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
             libspdm_set_data(spdm_context,
                       LIBSPDM_DATA_LOCAL_USED_CERT_CHAIN_BUFFER,
@@ -129,7 +129,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
                        m_requester_cert_chain_buffer_size);
                 m_peer_cert_chain_buffer_size =
                     m_requester_cert_chain_buffer_size;
-                zero_mem(&parameter, sizeof(parameter));
+                libspdm_zero_mem(&parameter, sizeof(parameter));
                 parameter.location =
                     LIBSPDM_DATA_LOCATION_CONNECTION;
                 libspdm_set_data(
@@ -168,11 +168,11 @@ return_status spdm_dump_session_data_check(void *spdm_context,
     session_info =
         libspdm_get_session_info_via_session_id(spdm_context, session_id);
     if (session_info == NULL) {
-        ASSERT(false);
+        LIBSPDM_ASSERT(false);
         return RETURN_UNSUPPORTED;
     }
 
-    zero_mem(&parameter, sizeof(parameter));
+    libspdm_zero_mem(&parameter, sizeof(parameter));
     parameter.location = LIBSPDM_DATA_LOCATION_SESSION;
     *(uint32_t *)parameter.additional_data = session_id;
     data_size = sizeof(use_psk);
