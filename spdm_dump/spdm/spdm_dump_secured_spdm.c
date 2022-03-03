@@ -216,7 +216,7 @@ void dump_secured_spdm_message(const void *buffer, uintn buffer_size)
             libspdm_pci_doe_get_max_random_number_count;
         break;
     default:
-        ASSERT(false);
+        LIBSPDM_ASSERT(false);
         printf("<UnknownTransportLayer> ");
         printf("\n");
         return;
