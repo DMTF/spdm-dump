@@ -26,31 +26,31 @@ extern uint16_t m_spdm_key_schedule;
 extern uint8_t m_spdm_other_params_support;
 
 extern value_string_entry_t m_spdm_requester_capabilities_string_table[];
-extern uintn m_spdm_requester_capabilities_string_table_count;
+extern size_t m_spdm_requester_capabilities_string_table_count;
 extern value_string_entry_t m_spdm_responder_capabilities_string_table[];
-extern uintn m_spdm_responder_capabilities_string_table_count;
+extern size_t m_spdm_responder_capabilities_string_table_count;
 extern value_string_entry_t m_spdm_hash_value_string_table[];
-extern uintn m_spdm_hash_value_string_table_count;
+extern size_t m_spdm_hash_value_string_table_count;
 extern value_string_entry_t m_spdm_measurement_hash_value_string_table[];
-extern uintn m_spdm_measurement_hash_value_string_table_count;
+extern size_t m_spdm_measurement_hash_value_string_table_count;
 extern value_string_entry_t m_spdm_asym_value_string_table[];
-extern uintn m_spdm_asym_value_string_table_count;
+extern size_t m_spdm_asym_value_string_table_count;
 extern value_string_entry_t m_spdm_dhe_value_string_table[];
-extern uintn m_spdm_dhe_value_string_table_count;
+extern size_t m_spdm_dhe_value_string_table_count;
 extern value_string_entry_t m_spdm_aead_value_string_table[];
-extern uintn m_spdm_aead_value_string_table_count;
+extern size_t m_spdm_aead_value_string_table_count;
 extern value_string_entry_t m_spdm_key_schedule_value_string_table[];
-extern uintn m_spdm_key_schedule_value_string_table_count;
+extern size_t m_spdm_key_schedule_value_string_table_count;
 extern value_string_entry_t m_spdm_measurement_spec_value_string_table[];
-extern uintn m_spdm_measurement_spec_value_string_table_count;
+extern size_t m_spdm_measurement_spec_value_string_table_count;
 extern value_string_entry_t m_spdm_other_param_value_string_table[];
-extern uintn m_spdm_other_param_value_string_table_count;
+extern size_t m_spdm_other_param_value_string_table_count;
 
 dispatch_table_entry_t *
 get_dispatch_entry_by_id(dispatch_table_entry_t *dispatch_table,
-             uintn dispatch_table_count, uint32_t id)
+             size_t dispatch_table_count, uint32_t id)
 {
-    uintn index;
+    size_t index;
 
     for (index = 0; index < dispatch_table_count; index++) {
         if (dispatch_table[index].id == id) {
@@ -61,8 +61,8 @@ get_dispatch_entry_by_id(dispatch_table_entry_t *dispatch_table,
 }
 
 void dump_dispatch_message(dispatch_table_entry_t *dispatch_table,
-               uintn dispatch_table_count, uint32_t id,
-               const void *buffer, uintn buffer_size)
+               size_t dispatch_table_count, uint32_t id,
+               const void *buffer, size_t buffer_size)
 {
     dispatch_table_entry_t *entry;
 
@@ -80,9 +80,9 @@ void dump_dispatch_message(dispatch_table_entry_t *dispatch_table,
 }
 
 void dump_entry_flags(const value_string_entry_t *entry_table,
-              uintn entry_table_count, uint32_t flags)
+              size_t entry_table_count, uint32_t flags)
 {
-    uintn index;
+    size_t index;
     bool first;
 
     first = true;
@@ -99,9 +99,9 @@ void dump_entry_flags(const value_string_entry_t *entry_table,
 }
 
 void dump_entry_flags_all(const value_string_entry_t *entry_table,
-              uintn entry_table_count, uint32_t flags)
+              size_t entry_table_count, uint32_t flags)
 {
-    uintn index;
+    size_t index;
 
     for (index = 0; index < entry_table_count; index++) {
         if (index != 0) {
@@ -113,9 +113,9 @@ void dump_entry_flags_all(const value_string_entry_t *entry_table,
 }
 
 void dump_entry_value(const value_string_entry_t *entry_table,
-              uintn entry_table_count, uint32_t value)
+              size_t entry_table_count, uint32_t value)
 {
-    uintn index;
+    size_t index;
 
     for (index = 0; index < entry_table_count; index++) {
         if (entry_table[index].value == value) {
@@ -127,10 +127,10 @@ void dump_entry_value(const value_string_entry_t *entry_table,
 }
 
 bool get_value_from_name(const value_string_entry_t *table,
-                uintn entry_count, const char *name,
+                size_t entry_count, const char *name,
                 uint32_t *value)
 {
-    uintn index;
+    size_t index;
 
     for (index = 0; index < entry_count; index++) {
         if (strcmp(name, table[index].name) == 0) {
@@ -142,7 +142,7 @@ bool get_value_from_name(const value_string_entry_t *table,
 }
 
 bool get_flags_from_name(const value_string_entry_t *table,
-                uintn entry_count, const char *name,
+                size_t entry_count, const char *name,
                 uint32_t *flags)
 {
     uint32_t value;

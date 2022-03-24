@@ -10,7 +10,7 @@ void *m_spdm_dec_message_buffer;
 void *m_spdm_context;
 
 void *m_spdm_last_message_buffer;
-uintn m_spdm_last_message_buffer_size;
+size_t m_spdm_last_message_buffer_size;
 uint8_t m_cached_get_measurement_request_attribute;
 uint8_t m_cached_get_measurement_operation;
 uint8_t m_cached_measurement_summary_hash_type;
@@ -21,13 +21,13 @@ bool m_encapsulated;
 bool m_decrypted;
 
 void *m_spdm_cert_chain_buffer;
-uintn m_spdm_cert_chain_buffer_size;
-uintn m_cached_spdm_cert_chain_buffer_offset;
+size_t m_spdm_cert_chain_buffer_size;
+size_t m_cached_spdm_cert_chain_buffer_offset;
 
 void *m_local_used_cert_chain_buffer;
-uintn m_local_used_cert_chain_buffer_size;
+size_t m_local_used_cert_chain_buffer_size;
 void *m_peer_cert_chain_buffer;
-uintn m_peer_cert_chain_buffer_size;
+size_t m_peer_cert_chain_buffer_size;
 
 uint32_t m_spdm_requester_capabilities_flags;
 uint32_t m_spdm_responder_capabilities_flags;
@@ -69,7 +69,7 @@ value_string_entry_t m_spdm_requester_capabilities_string_table[] = {
     { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_PUB_KEY_ID_CAP, "PUB_KEY_ID" },
     { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CHUNK_CAP, "CHUNK" },
 };
-uintn m_spdm_requester_capabilities_string_table_count =
+size_t m_spdm_requester_capabilities_string_table_count =
     ARRAY_SIZE(m_spdm_requester_capabilities_string_table);
 
 value_string_entry_t m_spdm_responder_capabilities_string_table[] = {
@@ -95,7 +95,7 @@ value_string_entry_t m_spdm_responder_capabilities_string_table[] = {
     { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHUNK_CAP, "CHUNK" },
     { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_ALIAS_CERT_CAP, "ALIAS_CERT" },
 };
-uintn m_spdm_responder_capabilities_string_table_count =
+size_t m_spdm_responder_capabilities_string_table_count =
     ARRAY_SIZE(m_spdm_responder_capabilities_string_table);
 
 value_string_entry_t m_spdm_hash_value_string_table[] = {
@@ -107,7 +107,7 @@ value_string_entry_t m_spdm_hash_value_string_table[] = {
     { SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA3_512, "SHA3_512" },
     { SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SM3_256, "SM3_256" },
 };
-uintn m_spdm_hash_value_string_table_count =
+size_t m_spdm_hash_value_string_table_count =
     ARRAY_SIZE(m_spdm_hash_value_string_table);
 
 value_string_entry_t m_spdm_measurement_hash_value_string_table[] = {
@@ -121,7 +121,7 @@ value_string_entry_t m_spdm_measurement_hash_value_string_table[] = {
     { SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SHA3_512, "SHA3_512" },
     { SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SM3_256, "SM3_256" },
 };
-uintn m_spdm_measurement_hash_value_string_table_count =
+size_t m_spdm_measurement_hash_value_string_table_count =
     ARRAY_SIZE(m_spdm_measurement_hash_value_string_table);
 
 value_string_entry_t m_spdm_asym_value_string_table[] = {
@@ -141,7 +141,7 @@ value_string_entry_t m_spdm_asym_value_string_table[] = {
     { SPDM_ALGORITHMS_BASE_ASYM_ALGO_EDDSA_ED25519, "EDDSA_25519" },
     { SPDM_ALGORITHMS_BASE_ASYM_ALGO_EDDSA_ED448, "EDDSA_448" },
 };
-uintn m_spdm_asym_value_string_table_count =
+size_t m_spdm_asym_value_string_table_count =
     ARRAY_SIZE(m_spdm_asym_value_string_table);
 
 value_string_entry_t m_spdm_dhe_value_string_table[] = {
@@ -153,7 +153,7 @@ value_string_entry_t m_spdm_dhe_value_string_table[] = {
     { SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_521_R1, "SECP_521_R1" },
     { SPDM_ALGORITHMS_DHE_NAMED_GROUP_SM2_P256, "SM2_P256" },
 };
-uintn m_spdm_dhe_value_string_table_count =
+size_t m_spdm_dhe_value_string_table_count =
     ARRAY_SIZE(m_spdm_dhe_value_string_table);
 
 value_string_entry_t m_spdm_aead_value_string_table[] = {
@@ -163,25 +163,25 @@ value_string_entry_t m_spdm_aead_value_string_table[] = {
       "CHACHA20_POLY1305" },
     { SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AEAD_SM4_GCM, "SM4_128_GCM" },
 };
-uintn m_spdm_aead_value_string_table_count =
+size_t m_spdm_aead_value_string_table_count =
     ARRAY_SIZE(m_spdm_aead_value_string_table);
 
 value_string_entry_t m_spdm_key_schedule_value_string_table[] = {
     { SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH, "HMAC_HASH" },
 };
-uintn m_spdm_key_schedule_value_string_table_count =
+size_t m_spdm_key_schedule_value_string_table_count =
     ARRAY_SIZE(m_spdm_key_schedule_value_string_table);
 
 value_string_entry_t m_spdm_measurement_spec_value_string_table[] = {
     { SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF, "DMTF" },
 };
-uintn m_spdm_measurement_spec_value_string_table_count =
+size_t m_spdm_measurement_spec_value_string_table_count =
     ARRAY_SIZE(m_spdm_measurement_spec_value_string_table);
 
 value_string_entry_t m_spdm_other_param_value_string_table[] = {
     { SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1, "OPAQUE_FMT_1" },
 };
-uintn m_spdm_other_param_value_string_table_count =
+size_t m_spdm_other_param_value_string_table_count =
     ARRAY_SIZE(m_spdm_other_param_value_string_table);
 
 value_string_entry_t m_spdm_measurement_type_value_string_table[] = {
@@ -309,9 +309,9 @@ uint32_t spdm_dump_get_measurement_summary_hash_size(
     return 0;
 }
 
-void dump_spdm_get_version(const void *buffer, uintn buffer_size)
+void dump_spdm_get_version(const void *buffer, size_t buffer_size)
 {
-    uintn message_size;
+    size_t message_size;
 
     printf("SPDM_GET_VERSION ");
 
@@ -333,12 +333,12 @@ void dump_spdm_get_version(const void *buffer, uintn buffer_size)
     libspdm_append_message_a(m_spdm_context, buffer, message_size);
 }
 
-void dump_spdm_version(const void *buffer, uintn buffer_size)
+void dump_spdm_version(const void *buffer, size_t buffer_size)
 {
-    uintn message_size;
+    size_t message_size;
     const spdm_version_response_t *spdm_response;
     spdm_version_number_t *spdm_version_number;
-    uintn index;
+    size_t index;
 
     printf("SPDM_VERSION ");
 
@@ -358,7 +358,7 @@ void dump_spdm_version(const void *buffer, uintn buffer_size)
 
     if (!m_param_quite_mode) {
         spdm_version_number =
-            (void *)((uintn)buffer + sizeof(spdm_version_response_t));
+            (void *)((size_t)buffer + sizeof(spdm_version_response_t));
         printf("(");
         for (index = 0;
              index < spdm_response->version_number_entry_count;
@@ -379,9 +379,9 @@ void dump_spdm_version(const void *buffer, uintn buffer_size)
     libspdm_append_message_a(m_spdm_context, buffer, message_size);
 }
 
-void dump_spdm_get_capabilities(const void *buffer, uintn buffer_size)
+void dump_spdm_get_capabilities(const void *buffer, size_t buffer_size)
 {
-    uintn message_size;
+    size_t message_size;
     const spdm_get_capabilities_request_t *spdm_request;
     libspdm_data_parameter_t parameter;
 
@@ -451,9 +451,9 @@ void dump_spdm_get_capabilities(const void *buffer, uintn buffer_size)
     libspdm_append_message_a(m_spdm_context, buffer, message_size);
 }
 
-void dump_spdm_capabilities(const void *buffer, uintn buffer_size)
+void dump_spdm_capabilities(const void *buffer, size_t buffer_size)
 {
-    uintn message_size;
+    size_t message_size;
     const spdm_capabilities_response_t *spdm_response;
     libspdm_data_parameter_t parameter;
 
@@ -507,11 +507,11 @@ void dump_spdm_capabilities(const void *buffer, uintn buffer_size)
     libspdm_append_message_a(m_spdm_context, buffer, message_size);
 }
 
-void dump_spdm_negotiate_algorithms(const void *buffer, uintn buffer_size)
+void dump_spdm_negotiate_algorithms(const void *buffer, size_t buffer_size)
 {
-    uintn message_size;
+    size_t message_size;
     const spdm_negotiate_algorithms_request_t *spdm_request;
-    uintn index;
+    size_t index;
     spdm_negotiate_algorithms_common_struct_table_t *struct_table;
     uint8_t ext_alg_count;
 
@@ -562,7 +562,7 @@ void dump_spdm_negotiate_algorithms(const void *buffer, uintn buffer_size)
         if (spdm_request->header.spdm_version >=
             SPDM_MESSAGE_VERSION_11) {
             struct_table =
-                (void *)((uintn)buffer +
+                (void *)((size_t)buffer +
                      sizeof(spdm_negotiate_algorithms_request_t) +
                      spdm_request->ext_asym_count *
                          sizeof(spdm_extended_algorithm_t) +
@@ -610,7 +610,7 @@ void dump_spdm_negotiate_algorithms(const void *buffer, uintn buffer_size)
                 }
                 ext_alg_count = struct_table->alg_count & 0xF;
                 struct_table =
-                    (void *)((uintn)struct_table +
+                    (void *)((size_t)struct_table +
                          sizeof(spdm_negotiate_algorithms_common_struct_table_t) +
                          sizeof(uint32_t) *
                              ext_alg_count);
@@ -630,11 +630,11 @@ void dump_spdm_negotiate_algorithms(const void *buffer, uintn buffer_size)
     libspdm_append_message_a(m_spdm_context, buffer, message_size);
 }
 
-void dump_spdm_algorithms(const void *buffer, uintn buffer_size)
+void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
 {
-    uintn message_size;
+    size_t message_size;
     const spdm_algorithms_response_t *spdm_response;
-    uintn index;
+    size_t index;
     spdm_negotiate_algorithms_common_struct_table_t *struct_table;
     libspdm_data_parameter_t parameter;
     uint8_t ext_alg_count;
@@ -692,7 +692,7 @@ void dump_spdm_algorithms(const void *buffer, uintn buffer_size)
         if (spdm_response->header.spdm_version >=
             SPDM_MESSAGE_VERSION_11) {
             struct_table =
-                (void *)((uintn)buffer +
+                (void *)((size_t)buffer +
                      sizeof(spdm_algorithms_response_t) +
                      spdm_response->ext_asym_sel_count *
                          sizeof(spdm_extended_algorithm_t) +
@@ -740,7 +740,7 @@ void dump_spdm_algorithms(const void *buffer, uintn buffer_size)
                 }
                 ext_alg_count = struct_table->alg_count & 0xF;
                 struct_table =
-                    (void *)((uintn)struct_table +
+                    (void *)((size_t)struct_table +
                          sizeof(spdm_negotiate_algorithms_common_struct_table_t) +
                          sizeof(uint32_t) *
                              ext_alg_count);
@@ -764,7 +764,7 @@ void dump_spdm_algorithms(const void *buffer, uintn buffer_size)
 
     if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_11) {
         struct_table =
-            (void *)((uintn)buffer +
+            (void *)((size_t)buffer +
                  sizeof(spdm_algorithms_response_t) +
                  spdm_response->ext_asym_sel_count *
                      sizeof(spdm_extended_algorithm_t) +
@@ -791,7 +791,7 @@ void dump_spdm_algorithms(const void *buffer, uintn buffer_size)
             }
             ext_alg_count = struct_table->alg_count & 0xF;
             struct_table =
-                (void *)((uintn)struct_table +
+                (void *)((size_t)struct_table +
                      sizeof(spdm_negotiate_algorithms_common_struct_table_t) +
                      sizeof(uint32_t) * ext_alg_count);
         }
@@ -826,9 +826,9 @@ void dump_spdm_algorithms(const void *buffer, uintn buffer_size)
     libspdm_append_message_a(m_spdm_context, buffer, message_size);
 }
 
-void dump_spdm_get_digests(const void *buffer, uintn buffer_size)
+void dump_spdm_get_digests(const void *buffer, size_t buffer_size)
 {
-    uintn message_size;
+    size_t message_size;
 
     printf("SPDM_GET_DIGESTS ");
 
@@ -845,13 +845,13 @@ void dump_spdm_get_digests(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_digests(const void *buffer, uintn buffer_size)
+void dump_spdm_digests(const void *buffer, size_t buffer_size)
 {
     const spdm_digest_response_t *spdm_response;
-    uintn message_size;
-    uintn hash_size;
-    uintn slot_count;
-    uintn index;
+    size_t message_size;
+    size_t hash_size;
+    size_t slot_count;
+    size_t index;
     uint8_t *digest;
 
     printf("SPDM_DIGESTS ");
@@ -896,10 +896,10 @@ void dump_spdm_digests(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_get_certificate(const void *buffer, uintn buffer_size)
+void dump_spdm_get_certificate(const void *buffer, size_t buffer_size)
 {
     const spdm_get_certificate_request_t *spdm_request;
-    uintn message_size;
+    size_t message_size;
 
     printf("SPDM_GET_CERTIFICATE ");
 
@@ -922,13 +922,13 @@ void dump_spdm_get_certificate(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_certificate(const void *buffer, uintn buffer_size)
+void dump_spdm_certificate(const void *buffer, size_t buffer_size)
 {
     const spdm_certificate_response_t *spdm_response;
-    uintn message_size;
+    size_t message_size;
     void *cert_chain;
-    uintn cert_chain_size;
-    uintn hash_size;
+    size_t cert_chain_size;
+    size_t hash_size;
     spdm_cert_chain_t *spdm_cert_chain;
     uint8_t *root_hash;
 
@@ -1055,10 +1055,10 @@ void dump_spdm_certificate(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_challenge(const void *buffer, uintn buffer_size)
+void dump_spdm_challenge(const void *buffer, size_t buffer_size)
 {
     const spdm_challenge_request_t *spdm_request;
-    uintn message_size;
+    size_t message_size;
 
     printf("SPDM_CHALLENGE ");
 
@@ -1092,13 +1092,13 @@ void dump_spdm_challenge(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_challenge_auth(const void *buffer, uintn buffer_size)
+void dump_spdm_challenge_auth(const void *buffer, size_t buffer_size)
 {
     const spdm_challenge_auth_response_t *spdm_response;
-    uintn message_size;
-    uintn hash_size;
-    uintn measurement_summary_hash_size;
-    uintn signature_size;
+    size_t message_size;
+    size_t hash_size;
+    size_t measurement_summary_hash_size;
+    size_t signature_size;
     uint16_t opaque_length;
     uint8_t *cert_chain_hash;
     uint8_t *nonce;
@@ -1122,7 +1122,7 @@ void dump_spdm_challenge_auth(const void *buffer, uintn buffer_size)
     }
 
     opaque_length =
-        *(uint16_t *)((uintn)buffer +
+        *(uint16_t *)((size_t)buffer +
                 sizeof(spdm_challenge_auth_response_t) + hash_size +
                 32 + measurement_summary_hash_size);
     message_size += opaque_length + signature_size;
@@ -1181,10 +1181,10 @@ void dump_spdm_challenge_auth(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_get_measurements(const void *buffer, uintn buffer_size)
+void dump_spdm_get_measurements(const void *buffer, size_t buffer_size)
 {
     const spdm_get_measurements_request_t *spdm_request;
-    uintn message_size;
+    size_t message_size;
     bool include_signature;
 
     printf("SPDM_GET_MEASUREMENTS ");
@@ -1256,15 +1256,15 @@ void dump_spdm_measurements_record(uint8_t number_of_blocks,
                    uint32_t measurement_record_length)
 {
     spdm_measurement_block_dmtf_t *dmtf_block;
-    uintn index;
-    uintn end_of_block;
-    uintn end_of_record;
+    size_t index;
+    size_t end_of_block;
+    size_t end_of_record;
 
-    end_of_record = (uintn)measurement_record + measurement_record_length;
+    end_of_record = (size_t)measurement_record + measurement_record_length;
 
     dmtf_block = (void *)measurement_record;
     for (index = 0; index < number_of_blocks; index++) {
-        if ((uintn)dmtf_block + sizeof(spdm_measurement_block_dmtf_t) >
+        if ((size_t)dmtf_block + sizeof(spdm_measurement_block_dmtf_t) >
             end_of_record) {
             break;
         }
@@ -1280,7 +1280,7 @@ void dump_spdm_measurements_record(uint8_t number_of_blocks,
                 sizeof(spdm_measurement_block_dmtf_header_t)) {
             break;
         }
-        end_of_block = (uintn)dmtf_block +
+        end_of_block = (size_t)dmtf_block +
                    dmtf_block->measurement_block_common_header
                        .measurement_size +
                    sizeof(spdm_measurement_block_common_header_t);
@@ -1379,12 +1379,12 @@ void dump_spdm_measurements_record(uint8_t number_of_blocks,
     }
 }
 
-void dump_spdm_measurements(const void *buffer, uintn buffer_size)
+void dump_spdm_measurements(const void *buffer, size_t buffer_size)
 {
     const spdm_measurements_response_t *spdm_response;
-    uintn message_size;
+    size_t message_size;
     uint32_t measurement_record_length;
-    uintn signature_size;
+    size_t signature_size;
     uint16_t opaque_length;
     bool include_signature;
     uint8_t *measurement_record;
@@ -1426,7 +1426,7 @@ void dump_spdm_measurements(const void *buffer, uintn buffer_size)
         }
 
         opaque_length =
-            *(uint16_t *)((uintn)buffer +
+            *(uint16_t *)((size_t)buffer +
                     sizeof(spdm_measurements_response_t) +
                     measurement_record_length + 32);
         message_size += opaque_length + signature_size;
@@ -1528,7 +1528,7 @@ void dump_spdm_measurements(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_respond_if_ready(const void *buffer, uintn buffer_size)
+void dump_spdm_respond_if_ready(const void *buffer, size_t buffer_size)
 {
     const spdm_response_if_ready_request_t *spdm_request;
 
@@ -1549,7 +1549,7 @@ void dump_spdm_respond_if_ready(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_error(const void *buffer, uintn buffer_size)
+void dump_spdm_error(const void *buffer, size_t buffer_size)
 {
     const spdm_error_response_t *spdm_response;
 
@@ -1595,10 +1595,10 @@ void dump_spdm_error(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_vendor_defined_request(const void *buffer, uintn buffer_size)
+void dump_spdm_vendor_defined_request(const void *buffer, size_t buffer_size)
 {
     const spdm_vendor_defined_request_msg_t *spdm_request;
-    uintn header_size;
+    size_t header_size;
 
     printf("SPDM_VENDOR_DEFINED_REQUEST ");
 
@@ -1625,10 +1625,10 @@ void dump_spdm_vendor_defined_request(const void *buffer, uintn buffer_size)
     }
 }
 
-void dump_spdm_vendor_defined_response(const void *buffer, uintn buffer_size)
+void dump_spdm_vendor_defined_response(const void *buffer, size_t buffer_size)
 {
     const spdm_vendor_defined_response_msg_t *spdm_response;
-    uintn header_size;
+    size_t header_size;
 
     printf("SPDM_VENDOR_DEFINED_RESPONSE ");
 
@@ -1655,11 +1655,11 @@ void dump_spdm_vendor_defined_response(const void *buffer, uintn buffer_size)
     }
 }
 
-void dump_spdm_key_exchange(const void *buffer, uintn buffer_size)
+void dump_spdm_key_exchange(const void *buffer, size_t buffer_size)
 {
     const spdm_key_exchange_request_t *spdm_request;
-    uintn message_size;
-    uintn dhe_key_size;
+    size_t message_size;
+    size_t dhe_key_size;
     uint16_t opaque_length;
     uint8_t *exchange_data;
     uint8_t *opaque_data;
@@ -1681,7 +1681,7 @@ void dump_spdm_key_exchange(const void *buffer, uintn buffer_size)
     }
 
     opaque_length =
-        *(uint16_t *)((uintn)buffer +
+        *(uint16_t *)((size_t)buffer +
                 sizeof(spdm_key_exchange_request_t) + dhe_key_size);
     message_size += opaque_length;
     if (buffer_size < message_size) {
@@ -1738,14 +1738,14 @@ void dump_spdm_key_exchange(const void *buffer, uintn buffer_size)
     m_spdm_last_message_buffer_size = message_size;
 }
 
-void dump_spdm_key_exchange_rsp(const void *buffer, uintn buffer_size)
+void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
 {
     const spdm_key_exchange_response_t *spdm_response;
-    uintn message_size;
-    uintn dhe_key_size;
-    uintn measurement_summary_hash_size;
-    uintn signature_size;
-    uintn hmac_size;
+    size_t message_size;
+    size_t dhe_key_size;
+    size_t measurement_summary_hash_size;
+    size_t signature_size;
+    size_t hmac_size;
     uint16_t opaque_length;
     bool include_hmac;
     uint8_t *exchange_data;
@@ -1781,7 +1781,7 @@ void dump_spdm_key_exchange_rsp(const void *buffer, uintn buffer_size)
     }
 
     opaque_length = *(
-        uint16_t *)((uintn)buffer + sizeof(spdm_key_exchange_response_t) +
+        uint16_t *)((size_t)buffer + sizeof(spdm_key_exchange_response_t) +
               dhe_key_size + measurement_summary_hash_size);
     message_size += opaque_length + signature_size;
     include_hmac =
@@ -1916,12 +1916,12 @@ void dump_spdm_key_exchange_rsp(const void *buffer, uintn buffer_size)
         LIBSPDM_SESSION_STATE_HANDSHAKING);
 }
 
-void dump_spdm_finish(const void *buffer, uintn buffer_size)
+void dump_spdm_finish(const void *buffer, size_t buffer_size)
 {
     const spdm_finish_request_t *spdm_request;
-    uintn message_size;
-    uintn signature_size;
-    uintn hmac_size;
+    size_t message_size;
+    size_t signature_size;
+    size_t hmac_size;
     bool include_signature;
     uint8_t *signature;
     uint8_t *verify_data;
@@ -1984,11 +1984,11 @@ void dump_spdm_finish(const void *buffer, uintn buffer_size)
     m_spdm_last_message_buffer_size = message_size;
 }
 
-void dump_spdm_finish_rsp(const void *buffer, uintn buffer_size)
+void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
 {
     const spdm_finish_response_t *spdm_response;
-    uintn message_size;
-    uintn hmac_size;
+    size_t message_size;
+    size_t hmac_size;
     bool include_hmac;
     uint8_t *verify_data;
     uint8_t th2_hash_data[64];
@@ -2069,10 +2069,10 @@ void dump_spdm_finish_rsp(const void *buffer, uintn buffer_size)
         LIBSPDM_SESSION_STATE_ESTABLISHED);
 }
 
-void dump_spdm_psk_exchange(const void *buffer, uintn buffer_size)
+void dump_spdm_psk_exchange(const void *buffer, size_t buffer_size)
 {
     const spdm_psk_exchange_request_t *spdm_request;
-    uintn message_size;
+    size_t message_size;
     uint8_t *psk_hint;
     uint8_t *context;
     uint8_t *opaque_data;
@@ -2139,12 +2139,12 @@ void dump_spdm_psk_exchange(const void *buffer, uintn buffer_size)
     m_spdm_last_message_buffer_size = message_size;
 }
 
-void dump_spdm_psk_exchange_rsp(const void *buffer, uintn buffer_size)
+void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
 {
     const spdm_psk_exchange_response_t *spdm_response;
-    uintn message_size;
-    uintn measurement_summary_hash_size;
-    uintn hmac_size;
+    size_t message_size;
+    size_t measurement_summary_hash_size;
+    size_t hmac_size;
     uint8_t *measurement_summary_hash;
     uint8_t *context;
     uint8_t *opaque_data;
@@ -2321,11 +2321,11 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, uintn buffer_size)
     }
 }
 
-void dump_spdm_psk_finish(const void *buffer, uintn buffer_size)
+void dump_spdm_psk_finish(const void *buffer, size_t buffer_size)
 {
     const spdm_psk_finish_request_t *spdm_request;
-    uintn message_size;
-    uintn hmac_size;
+    size_t message_size;
+    size_t hmac_size;
     uint8_t *verify_data;
 
     printf("SPDM_PSK_FINISH ");
@@ -2361,9 +2361,9 @@ void dump_spdm_psk_finish(const void *buffer, uintn buffer_size)
     libspdm_append_message_f(m_spdm_context, m_current_session_info, true, buffer, message_size);
 }
 
-void dump_spdm_psk_finish_rsp(const void *buffer, uintn buffer_size)
+void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
 {
-    uintn message_size;
+    size_t message_size;
     uint8_t th2_hash_data[64];
     libspdm_data_parameter_t parameter;
     bool use_psk;
@@ -2438,7 +2438,7 @@ void dump_spdm_psk_finish_rsp(const void *buffer, uintn buffer_size)
         LIBSPDM_SESSION_STATE_ESTABLISHED);
 }
 
-void dump_spdm_heartbeat(const void *buffer, uintn buffer_size)
+void dump_spdm_heartbeat(const void *buffer, size_t buffer_size)
 {
     printf("SPDM_HEARTBEAT ");
 
@@ -2454,7 +2454,7 @@ void dump_spdm_heartbeat(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_heartbeat_ack(const void *buffer, uintn buffer_size)
+void dump_spdm_heartbeat_ack(const void *buffer, size_t buffer_size)
 {
     printf("SPDM_HEARTBEAT_ACK ");
 
@@ -2470,7 +2470,7 @@ void dump_spdm_heartbeat_ack(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_key_update(const void *buffer, uintn buffer_size)
+void dump_spdm_key_update(const void *buffer, size_t buffer_size)
 {
     const spdm_key_update_request_t *spdm_request;
 
@@ -2527,7 +2527,7 @@ void dump_spdm_key_update(const void *buffer, uintn buffer_size)
     }
 }
 
-void dump_spdm_key_update_ack(const void *buffer, uintn buffer_size)
+void dump_spdm_key_update_ack(const void *buffer, size_t buffer_size)
 {
     const spdm_key_update_response_t *spdm_response;
 
@@ -2552,7 +2552,7 @@ void dump_spdm_key_update_ack(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_get_encapsulated_request(const void *buffer, uintn buffer_size)
+void dump_spdm_get_encapsulated_request(const void *buffer, size_t buffer_size)
 {
     printf("SPDM_GET_ENCAPSULATED_REQUEST ");
 
@@ -2568,10 +2568,10 @@ void dump_spdm_get_encapsulated_request(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_encapsulated_request(const void *buffer, uintn buffer_size)
+void dump_spdm_encapsulated_request(const void *buffer, size_t buffer_size)
 {
     const spdm_encapsulated_request_response_t *spdm_response;
-    uintn header_size;
+    size_t header_size;
 
     printf("SPDM_ENCAPSULATED_REQUEST ");
 
@@ -2593,10 +2593,10 @@ void dump_spdm_encapsulated_request(const void *buffer, uintn buffer_size)
 }
 
 void dump_spdm_deliver_encapsulated_response(const void *buffer,
-                         uintn buffer_size)
+                         size_t buffer_size)
 {
     const spdm_deliver_encapsulated_response_request_t *spdm_request;
-    uintn header_size;
+    size_t header_size;
 
     printf("SPDM_DELIVER_ENCAPSULATED_RESPONSE ");
 
@@ -2617,10 +2617,10 @@ void dump_spdm_deliver_encapsulated_response(const void *buffer,
     m_encapsulated = false;
 }
 
-void dump_spdm_encapsulated_response_ack(const void *buffer, uintn buffer_size)
+void dump_spdm_encapsulated_response_ack(const void *buffer, size_t buffer_size)
 {
     const spdm_encapsulated_response_ack_response_t *spdm_response;
-    uintn header_size;
+    size_t header_size;
 
     printf("SPDM_ENCAPSULATED_RESPONSE_ACK ");
 
@@ -2672,7 +2672,7 @@ void dump_spdm_encapsulated_response_ack(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_end_session(const void *buffer, uintn buffer_size)
+void dump_spdm_end_session(const void *buffer, size_t buffer_size)
 {
     const spdm_end_session_request_t *spdm_request;
 
@@ -2697,7 +2697,7 @@ void dump_spdm_end_session(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_spdm_end_session_ack(const void *buffer, uintn buffer_size)
+void dump_spdm_end_session_ack(const void *buffer, size_t buffer_size)
 {
     printf("SPDM_END_SESSION_ACK ");
 
@@ -2773,7 +2773,7 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
     { SPDM_END_SESSION, "SPDM_END_SESSION", dump_spdm_end_session },
 };
 
-void dump_spdm_message(const void *buffer, uintn buffer_size)
+void dump_spdm_message(const void *buffer, size_t buffer_size)
 {
     const spdm_message_header_t *SpdmHeader;
 

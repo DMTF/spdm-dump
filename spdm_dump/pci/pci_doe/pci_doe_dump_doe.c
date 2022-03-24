@@ -6,7 +6,7 @@
 
 #include "spdm_dump.h"
 
-void dump_pci_doe_discovery_message(const void *buffer, uintn buffer_size)
+void dump_pci_doe_discovery_message(const void *buffer, size_t buffer_size)
 {
     const pci_doe_discovery_request_t *doe_request;
     const pci_doe_discovery_response_t *doe_response;

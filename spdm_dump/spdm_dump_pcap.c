@@ -104,13 +104,13 @@ void close_pcap_packet_file(void)
     }
 }
 
-void dump_pcap_packet_header(uintn index,
+void dump_pcap_packet_header(size_t index,
                  const pcap_packet_header_t *pcap_packet_header)
 {
     printf("%d (%d) ", (uint32_t)index, pcap_packet_header->ts_sec);
 }
 
-void dump_pcap_packet(const void *buffer, uintn buffer_size)
+void dump_pcap_packet(const void *buffer, size_t buffer_size)
 {
     dump_dispatch_message(m_pcap_dispatch, ARRAY_SIZE(m_pcap_dispatch),
                   m_pcap_global_header.network, buffer,
@@ -120,7 +120,7 @@ void dump_pcap_packet(const void *buffer, uintn buffer_size)
 void dump_pcap(void)
 {
     pcap_packet_header_t pcap_packet_header;
-    uintn index;
+    size_t index;
 
     index = 1;
 

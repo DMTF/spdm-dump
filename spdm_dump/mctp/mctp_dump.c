@@ -19,10 +19,10 @@ dispatch_table_entry_t m_mctp_dispatch[] = {
     { MCTP_MESSAGE_TYPE_VENDOR_DEFINED_IANA, "VendorDefinedIana", NULL },
 };
 
-void dump_mctp_message(const void *buffer, uintn buffer_size)
+void dump_mctp_message(const void *buffer, size_t buffer_size)
 {
     mctp_message_header_t *mctp_message_header;
-    uintn header_size;
+    size_t header_size;
 
     header_size = sizeof(mctp_message_header_t);
     if (buffer_size < header_size) {
@@ -56,9 +56,9 @@ void dump_mctp_message(const void *buffer, uintn buffer_size)
     }
 }
 
-void dump_mctp_packet(const void *buffer, uintn buffer_size)
+void dump_mctp_packet(const void *buffer, size_t buffer_size)
 {
-    uintn header_size;
+    size_t header_size;
 
     header_size = sizeof(mctp_header_t);
     if (buffer_size < header_size) {

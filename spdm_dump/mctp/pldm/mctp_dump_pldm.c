@@ -6,11 +6,11 @@
 
 #include "spdm_dump.h"
 
-void dump_pldm_control_get_tid(const void *buffer, uintn buffer_size)
+void dump_pldm_control_get_tid(const void *buffer, size_t buffer_size)
 {
     const pldm_message_header_t *pldm_message_header;
     bool is_req;
-    uintn header_size;
+    size_t header_size;
 
     pldm_message_header = buffer;
     is_req = ((pldm_message_header->instance_id & 0x80) != 0);
@@ -53,7 +53,7 @@ dispatch_table_entry_t m_pldm_control_dispatch[] = {
       NULL },
 };
 
-void dump_pldm_control(const void *buffer, uintn buffer_size)
+void dump_pldm_control(const void *buffer, size_t buffer_size)
 {
     const pldm_message_header_t *pldm_message_header;
 
@@ -79,7 +79,7 @@ dispatch_table_entry_t m_pldm_dispatch[] = {
     { PLDM_MESSAGE_TYPE_OEM, "OEM", NULL },
 };
 
-void dump_pldm_message(const void *buffer, uintn buffer_size)
+void dump_pldm_message(const void *buffer, size_t buffer_size)
 {
     const pldm_message_header_t *pldm_message_header;
     pldm_message_response_header_t *pldm_response_header;

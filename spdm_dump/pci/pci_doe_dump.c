@@ -14,10 +14,10 @@ dispatch_table_entry_t m_pci_doe_dispatch[] = {
       dump_secured_spdm_message },
 };
 
-void dump_pci_doe_packet(const void *buffer, uintn buffer_size)
+void dump_pci_doe_packet(const void *buffer, size_t buffer_size)
 {
     const pci_doe_data_object_header_t *pci_doe_header;
-    uintn header_size;
+    size_t header_size;
 
     header_size = sizeof(pci_doe_data_object_header_t);
     if (buffer_size < header_size) {

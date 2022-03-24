@@ -12,9 +12,9 @@
   @param  data  raw data
   @param  size  raw data size
 **/
-void dump_hex_str(const uint8_t *data, uintn size)
+void dump_hex_str(const uint8_t *data, size_t size)
 {
-    uintn index;
+    size_t index;
 
     for (index = 0; index < size; index++) {
         printf("%02x", data[index]);
@@ -27,9 +27,9 @@ void dump_hex_str(const uint8_t *data, uintn size)
   @param  data  raw data
   @param  size  raw data size
 **/
-void dump_data(const uint8_t *data, uintn size)
+void dump_data(const uint8_t *data, size_t size)
 {
-    uintn index;
+    size_t index;
 
     for (index = 0; index < size; index++) {
         if (index != 0) {
@@ -45,11 +45,11 @@ void dump_data(const uint8_t *data, uintn size)
   @param  data  raw data
   @param  size  raw data size
 **/
-void dump_hex(const uint8_t *data, uintn size)
+void dump_hex(const uint8_t *data, size_t size)
 {
     uint32_t index;
-    uintn count;
-    uintn left;
+    size_t count;
+    size_t left;
 
 #define COLUME_SIZE (16 * 2)
 
@@ -104,10 +104,10 @@ static bool one_byte_string_to_buffer(const char one_byte_string[2],
 }
 
 bool hex_string_to_buffer(const char *hex_string, void **buffer,
-                 uintn *buffer_size)
+                 size_t *buffer_size)
 {
-    uintn str_len;
-    uintn index;
+    size_t str_len;
+    size_t index;
 
     str_len = strlen(hex_string);
     if ((str_len & 0x1) != 0) {
@@ -133,10 +133,10 @@ bool hex_string_to_buffer(const char *hex_string, void **buffer,
 }
 
 bool read_input_file(const char *file_name, void **file_data,
-            uintn *file_size)
+            size_t *file_size)
 {
     FILE *fp_in;
-    uintn temp_result;
+    size_t temp_result;
 
     if ((fp_in = fopen(file_name, "rb")) == NULL) {
         printf("Unable to open file %s\n", file_name);
@@ -169,7 +169,7 @@ bool read_input_file(const char *file_name, void **file_data,
 }
 
 bool write_output_file(const char *file_name, const void *file_data,
-              uintn file_size)
+              size_t file_size)
 {
     FILE *fp_out;
 
