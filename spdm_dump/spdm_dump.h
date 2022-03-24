@@ -26,7 +26,7 @@
 #include "stdlib.h"
 #include "string.h"
 
-typedef void (*dump_message_func)(const void *buffer, uintn buffer_size);
+typedef void (*dump_message_func)(const void *buffer, size_t buffer_size);
 
 typedef struct {
     uint32_t id;
@@ -36,11 +36,11 @@ typedef struct {
 
 dispatch_table_entry_t *
 get_dispatch_entry_by_id(dispatch_table_entry_t *dispatch_table,
-             uintn dispatch_table_count, uint32_t id);
+             size_t dispatch_table_count, uint32_t id);
 
 void dump_dispatch_message(dispatch_table_entry_t *dispatch_table,
-               uintn dispatch_table_count, uint32_t id,
-               const void *buffer, uintn buffer_size);
+               size_t dispatch_table_count, uint32_t id,
+               const void *buffer, size_t buffer_size);
 
 typedef struct {
     uint32_t value;
@@ -48,13 +48,13 @@ typedef struct {
 } value_string_entry_t;
 
 void dump_entry_flags_all(const value_string_entry_t *entry_table,
-              uintn entry_table_count, uint32_t flags);
+              size_t entry_table_count, uint32_t flags);
 
 void dump_entry_flags(const value_string_entry_t *entry_table,
-              uintn entry_table_count, uint32_t flags);
+              size_t entry_table_count, uint32_t flags);
 
 void dump_entry_value(const value_string_entry_t *entry_table,
-              uintn entry_table_count, uint32_t value);
+              size_t entry_table_count, uint32_t value);
 
 bool init_spdm_dump(void);
 
@@ -70,31 +70,31 @@ uint32_t get_data_link_type(void);
 
 uint32_t get_max_packet_length(void);
 
-void dump_hex_str(const uint8_t *data, uintn size);
+void dump_hex_str(const uint8_t *data, size_t size);
 
-void dump_data(const uint8_t *data, uintn size);
+void dump_data(const uint8_t *data, size_t size);
 
-void dump_hex(const uint8_t *data, uintn size);
+void dump_hex(const uint8_t *data, size_t size);
 
-void dump_mctp_packet(const void *buffer, uintn buffer_size);
+void dump_mctp_packet(const void *buffer, size_t buffer_size);
 
-void dump_pci_doe_packet(const void *buffer, uintn buffer_size);
+void dump_pci_doe_packet(const void *buffer, size_t buffer_size);
 
-void dump_mctp_message(const void *buffer, uintn buffer_size);
+void dump_mctp_message(const void *buffer, size_t buffer_size);
 
-void dump_spdm_message(const void *buffer, uintn buffer_size);
+void dump_spdm_message(const void *buffer, size_t buffer_size);
 
-void dump_secured_spdm_message(const void *buffer, uintn buffer_size);
+void dump_secured_spdm_message(const void *buffer, size_t buffer_size);
 
 void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data, uint16_t opaque_length);
 
-void dump_pldm_message(const void *buffer, uintn buffer_size);
+void dump_pldm_message(const void *buffer, size_t buffer_size);
 
-void dump_pci_doe_discovery_message(const void *buffer, uintn buffer_size);
+void dump_pci_doe_discovery_message(const void *buffer, size_t buffer_size);
 
-void dump_spdm_vendor_pci(const void *buffer, uintn buffer_size);
+void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size);
 
-void dump_pci_ide_km_message(const void *buffer, uintn buffer_size);
+void dump_pci_ide_km_message(const void *buffer, size_t buffer_size);
 
 return_status spdm_dump_session_data_provision(void *spdm_context,
                            uint32_t session_id,
@@ -106,13 +106,13 @@ return_status spdm_dump_session_data_check(void *spdm_context,
                        bool is_requester);
 
 bool hex_string_to_buffer(const char *hex_string, void **buffer,
-                 uintn *buffer_size);
+                 size_t *buffer_size);
 
 bool read_input_file(const char *file_name, void **file_data,
-            uintn *file_size);
+            size_t *file_size);
 
 bool write_output_file(const char *file_name, const void *file_data,
-              uintn file_size);
+              size_t file_size);
 
 bool open_output_file(const char *file_name);
 
@@ -124,12 +124,12 @@ extern char *m_param_out_rsp_cert_chain_file_name;
 extern char *m_param_out_rsq_cert_chain_file_name;
 
 extern void *m_requester_cert_chain_buffer;
-extern uintn m_requester_cert_chain_buffer_size;
+extern size_t m_requester_cert_chain_buffer_size;
 extern void *m_responder_cert_chain_buffer;
-extern uintn m_responder_cert_chain_buffer_size;
+extern size_t m_responder_cert_chain_buffer_size;
 extern void *m_dhe_secret_buffer;
-extern uintn m_dhe_secret_buffer_size;
+extern size_t m_dhe_secret_buffer_size;
 extern void *m_psk_buffer;
-extern uintn m_psk_buffer_size;
+extern size_t m_psk_buffer_size;
 
 #endif

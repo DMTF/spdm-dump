@@ -6,7 +6,7 @@
 
 #include "spdm_dump.h"
 
-void dump_pci_ide_km_query(const void *buffer, uintn buffer_size)
+void dump_pci_ide_km_query(const void *buffer, size_t buffer_size)
 {
     const pci_ide_km_query_t *query;
 
@@ -26,7 +26,7 @@ void dump_pci_ide_km_query(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_pci_ide_km_query_resp(const void *buffer, uintn buffer_size)
+void dump_pci_ide_km_query_resp(const void *buffer, size_t buffer_size)
 {
     const pci_ide_km_query_resp_t *query_resp;
 
@@ -49,31 +49,31 @@ void dump_pci_ide_km_query_resp(const void *buffer, uintn buffer_size)
     printf("\n");
 }
 
-void dump_pci_ide_km_key_program(const void *buffer, uintn buffer_size)
+void dump_pci_ide_km_key_program(const void *buffer, size_t buffer_size)
 {
     printf("KEY_PROG ");
     printf("\n");
 }
 
-void dump_pci_ide_km_key_program_ack(const void *buffer, uintn buffer_size)
+void dump_pci_ide_km_key_program_ack(const void *buffer, size_t buffer_size)
 {
     printf("KP_ACK ");
     printf("\n");
 }
 
-void dump_pci_ide_km_key_set_go(const void *buffer, uintn buffer_size)
+void dump_pci_ide_km_key_set_go(const void *buffer, size_t buffer_size)
 {
     printf("K_SET_GO ");
     printf("\n");
 }
 
-void dump_pci_ide_km_key_set_stop(const void *buffer, uintn buffer_size)
+void dump_pci_ide_km_key_set_stop(const void *buffer, size_t buffer_size)
 {
     printf("K_SET_STOP ");
     printf("\n");
 }
 
-void dump_pci_ide_km_key_set_gostop_ack(const void *buffer, uintn buffer_size)
+void dump_pci_ide_km_key_set_gostop_ack(const void *buffer, size_t buffer_size)
 {
     printf("K_SET_GOSTOP_ACK ");
     printf("\n");
@@ -95,7 +95,7 @@ dispatch_table_entry_t m_pci_ide_km_dispatch[] = {
       dump_pci_ide_km_key_set_gostop_ack },
 };
 
-void dump_pci_ide_km_message(const void *buffer, uintn buffer_size)
+void dump_pci_ide_km_message(const void *buffer, size_t buffer_size)
 {
     const pci_ide_km_header_t *pci_ide_km_header;
 

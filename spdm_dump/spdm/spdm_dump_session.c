@@ -8,18 +8,18 @@
 
 extern uint32_t m_spdm_base_hash_algo;
 extern void *m_local_used_cert_chain_buffer;
-extern uintn m_local_used_cert_chain_buffer_size;
+extern size_t m_local_used_cert_chain_buffer_size;
 extern void *m_peer_cert_chain_buffer;
-extern uintn m_peer_cert_chain_buffer_size;
+extern size_t m_peer_cert_chain_buffer_size;
 
 void *m_requester_cert_chain_buffer;
-uintn m_requester_cert_chain_buffer_size;
+size_t m_requester_cert_chain_buffer_size;
 void *m_responder_cert_chain_buffer;
-uintn m_responder_cert_chain_buffer_size;
+size_t m_responder_cert_chain_buffer_size;
 void *m_dhe_secret_buffer;
-uintn m_dhe_secret_buffer_size;
+size_t m_dhe_secret_buffer_size;
 void *m_psk_buffer;
-uintn m_psk_buffer_size;
+size_t m_psk_buffer_size;
 
 return_status spdm_dump_session_data_provision(void *spdm_context,
                            uint32_t session_id,
@@ -31,7 +31,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
     libspdm_data_parameter_t parameter;
     bool use_psk;
     uint8_t mut_auth_requested;
-    uintn data_size;
+    size_t data_size;
 
     session_info =
         libspdm_get_session_info_via_session_id(spdm_context, session_id);
@@ -163,7 +163,7 @@ return_status spdm_dump_session_data_check(void *spdm_context,
     libspdm_data_parameter_t parameter;
     bool use_psk;
     uint8_t mut_auth_requested;
-    uintn data_size;
+    size_t data_size;
 
     session_info =
         libspdm_get_session_info_via_session_id(spdm_context, session_id);
