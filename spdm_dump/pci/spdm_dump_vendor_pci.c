@@ -1,8 +1,8 @@
 /**
-    Copyright Notice:
-    Copyright 2021 DMTF. All rights reserved.
-    License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
-**/
+ *  Copyright Notice:
+ *  Copyright 2021 DMTF. All rights reserved.
+ *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
+ **/
 
 #include "spdm_dump.h"
 
@@ -49,7 +49,7 @@ void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size)
     }
     if (vendor_defined_pci_header->payload_length >
         buffer_size - (OFFSET_OF(pci_doe_spdm_vendor_defined_header_t,
-                     pci_protocol))) {
+                                 pci_protocol))) {
         printf("\n");
         return;
     }
@@ -60,7 +60,7 @@ void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size)
         vendor_defined_pci_header->pci_protocol.protocol_id,
         (uint8_t *)buffer + sizeof(pci_doe_spdm_vendor_defined_header_t),
         vendor_defined_pci_header->payload_length -
-            sizeof(pci_protocol_header_t));
+        sizeof(pci_protocol_header_t));
 
     if (m_param_dump_hex) {
         printf("  PCI Vendor message:\n");

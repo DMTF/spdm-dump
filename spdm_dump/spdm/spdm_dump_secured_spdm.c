@@ -1,8 +1,8 @@
 /**
-    Copyright Notice:
-    Copyright 2021 DMTF. All rights reserved.
-    License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
-**/
+ *  Copyright Notice:
+ *  Copyright 2021 DMTF. All rights reserved.
+ *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
+ **/
 
 #include "spdm_dump.h"
 
@@ -47,8 +47,8 @@ void dump_spdm_opaque_supported_version(const void *buffer, size_t buffer_size)
     supported_version = buffer;
     if (buffer_size <
         sizeof(secured_message_opaque_element_supported_version_t) +
-            supported_version->version_count *
-                sizeof(spdm_version_number_t)) {
+        supported_version->version_count *
+        sizeof(spdm_version_number_t)) {
         return;
     }
 
@@ -79,12 +79,12 @@ dispatch_table_entry_t m_spdm_opaque_dispatch[] = {
 void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data, uint16_t opaque_length)
 {
     secured_message_general_opaque_data_table_header_t
-        *secured_message_opaque_data_table;
+    *secured_message_opaque_data_table;
     spdm_general_opaque_data_table_header_t
-        *spdm_opaque_data_table_header;
+    *spdm_opaque_data_table_header;
     uint8_t total_elements;
     secured_message_opaque_element_table_header_t
-        *secured_message_element_table;
+    *secured_message_element_table;
     secured_message_opaque_element_header_t *secured_message_element;
     size_t end_of_element_table;
     size_t end_of_opaque_data;
@@ -95,7 +95,7 @@ void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data, uin
 
     if ((spdm_version >= SPDM_MESSAGE_VERSION_12) &&
         ((m_spdm_other_params_support & SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_MASK) ==
-           SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1)) {
+         SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1)) {
         if (opaque_length <
             sizeof(spdm_general_opaque_data_table_header_t)) {
             return;
@@ -104,7 +104,7 @@ void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data, uin
         spdm_opaque_data_table_header = (void *)opaque_data;
 
         printf("\n      SpdmOpaqueDataHeader(TotalElem=0x%02x)",
-            spdm_opaque_data_table_header->total_elements);
+               spdm_opaque_data_table_header->total_elements);
 
         secured_message_element_table =
             (void *)(spdm_opaque_data_table_header + 1);
@@ -122,7 +122,8 @@ void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data, uin
         }
 
         ch = (void *)&secured_message_opaque_data_table->spec_id;
-        printf("\n      SecuredMessageOpaqueDataHeader(spec_id=0x%08x(%c%c%c%c), Ver=0x%02x, TotalElem=0x%02x)",
+        printf(
+            "\n      SecuredMessageOpaqueDataHeader(spec_id=0x%08x(%c%c%c%c), Ver=0x%02x, TotalElem=0x%02x)",
             secured_message_opaque_data_table->spec_id, ch[3], ch[2], ch[1],
             ch[0], secured_message_opaque_data_table->opaque_version,
             secured_message_opaque_data_table->total_elements);
@@ -135,7 +136,7 @@ void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data, uin
          index < total_elements;
          index++) {
         if ((size_t)secured_message_element_table +
-                sizeof(secured_message_opaque_element_table_header_t) >
+            sizeof(secured_message_opaque_element_table_header_t) >
             end_of_opaque_data) {
             break;
         }
@@ -225,7 +226,7 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
 
     if (buffer_size <
         sizeof(spdm_secured_message_a_data_header1_t) + sequence_num_size +
-            sizeof(spdm_secured_message_a_data_header2_t)) {
+        sizeof(spdm_secured_message_a_data_header2_t)) {
         printf("\n");
         return;
     }
@@ -256,9 +257,9 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
                 &spdm_dec_message_buffer,
                 &spdm_secured_message_callbacks);
             if (RETURN_ERROR(status)) {
-                
+
                 /* Try other direction, because a responder might initiate a message in Session.*/
-                
+
                 status = libspdm_decode_secured_message(
                     secured_message_context,
                     record_header1->session_id,
@@ -287,9 +288,9 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
 
         m_decrypted = true;
         dump_dispatch_message(m_secured_spdm_dispatch,
-                      ARRAY_SIZE(m_secured_spdm_dispatch),
-                      get_data_link_type(),
-                      spdm_dec_message_buffer, message_size);
+                              ARRAY_SIZE(m_secured_spdm_dispatch),
+                              get_data_link_type(),
+                              spdm_dec_message_buffer, message_size);
         m_decrypted = false;
     } else {
         printf("(?)->(?) ");

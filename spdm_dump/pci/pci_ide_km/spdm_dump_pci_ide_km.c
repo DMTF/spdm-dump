@@ -1,8 +1,8 @@
 /**
-    Copyright Notice:
-    Copyright 2021 DMTF. All rights reserved.
-    License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
-**/
+ *  Copyright Notice:
+ *  Copyright 2021 DMTF. All rights reserved.
+ *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
+ **/
 
 #include "spdm_dump.h"
 
@@ -108,7 +108,7 @@ void dump_pci_ide_km_message(const void *buffer, size_t buffer_size)
     printf("IDE_KM(0x%02x) ", pci_ide_km_header->object_id);
 
     dump_dispatch_message(m_pci_ide_km_dispatch,
-                  ARRAY_SIZE(m_pci_ide_km_dispatch),
-                  pci_ide_km_header->object_id, (uint8_t *)buffer,
-                  buffer_size);
+                          ARRAY_SIZE(m_pci_ide_km_dispatch),
+                          pci_ide_km_header->object_id, (uint8_t *)buffer,
+                          buffer_size);
 }

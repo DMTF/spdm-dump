@@ -1,8 +1,8 @@
 /**
-    Copyright Notice:
-    Copyright 2021 DMTF. All rights reserved.
-    License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
-**/
+ *  Copyright Notice:
+ *  Copyright 2021 DMTF. All rights reserved.
+ *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
+ **/
 
 #include "spdm_dump.h"
 
@@ -59,7 +59,7 @@ bool open_pcap_packet_file(const char *pcap_file_name)
     }
 
     if (fread(&m_pcap_global_header, 1, sizeof(pcap_global_header_t),
-          m_pcap_file) != sizeof(pcap_global_header_t)) {
+              m_pcap_file) != sizeof(pcap_global_header_t)) {
         printf("!!!Unable to read the pcap global header!!!\n");
         return false;
     }
@@ -105,7 +105,7 @@ void close_pcap_packet_file(void)
 }
 
 void dump_pcap_packet_header(size_t index,
-                 const pcap_packet_header_t *pcap_packet_header)
+                             const pcap_packet_header_t *pcap_packet_header)
 {
     printf("%d (%d) ", (uint32_t)index, pcap_packet_header->ts_sec);
 }
@@ -113,8 +113,8 @@ void dump_pcap_packet_header(size_t index,
 void dump_pcap_packet(const void *buffer, size_t buffer_size)
 {
     dump_dispatch_message(m_pcap_dispatch, ARRAY_SIZE(m_pcap_dispatch),
-                  m_pcap_global_header.network, buffer,
-                  buffer_size);
+                          m_pcap_global_header.network, buffer,
+                          buffer_size);
 }
 
 void dump_pcap(void)
@@ -126,7 +126,7 @@ void dump_pcap(void)
 
     while (true) {
         if (fread(&pcap_packet_header, 1, sizeof(pcap_packet_header_t),
-              m_pcap_file) != sizeof(pcap_packet_header_t)) {
+                  m_pcap_file) != sizeof(pcap_packet_header_t)) {
             return;
         }
         dump_pcap_packet_header(index++, &pcap_packet_header);
@@ -134,11 +134,11 @@ void dump_pcap(void)
             return;
         }
         if (fread(m_pcap_packet_data_buffer, 1,
-              pcap_packet_header.incl_len,
-              m_pcap_file) != pcap_packet_header.incl_len) {
+                  pcap_packet_header.incl_len,
+                  m_pcap_file) != pcap_packet_header.incl_len) {
             return;
         }
         dump_pcap_packet(m_pcap_packet_data_buffer,
-                 pcap_packet_header.incl_len);
+                         pcap_packet_header.incl_len);
     }
 }
