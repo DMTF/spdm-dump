@@ -194,6 +194,7 @@ void dump_secured_spdm_message(const void *buffer, uintn buffer_size)
     uint32_t data_link_type;
     libspdm_secured_message_callbacks_t spdm_secured_message_callbacks;
     void *secured_message_context;
+    void *spdm_dec_message_buffer;
 
     data_link_type = get_data_link_type();
     switch (data_link_type) {
@@ -241,17 +242,18 @@ void dump_secured_spdm_message(const void *buffer, uintn buffer_size)
         m_spdm_context, record_header1->session_id);
     m_current_session_id = record_header1->session_id;
     status = RETURN_UNSUPPORTED;
+    message_size = get_max_packet_length();
+    spdm_dec_message_buffer = m_spdm_dec_message_buffer;
     if (m_current_session_info != NULL) {
         secured_message_context =
             libspdm_get_secured_message_context_via_session_id(
                 m_spdm_context, record_header1->session_id);
         if (secured_message_context != NULL) {
-            message_size = get_max_packet_length();
             status = libspdm_decode_secured_message(
                 secured_message_context,
                 record_header1->session_id, is_requester,
                 buffer_size, buffer, &message_size,
-                m_spdm_dec_message_buffer,
+                &spdm_dec_message_buffer,
                 &spdm_secured_message_callbacks);
             if (RETURN_ERROR(status)) {
                 
@@ -262,7 +264,7 @@ void dump_secured_spdm_message(const void *buffer, uintn buffer_size)
                     record_header1->session_id,
                     !is_requester, buffer_size, buffer,
                     &message_size,
-                    m_spdm_dec_message_buffer,
+                    &spdm_dec_message_buffer,
                     &spdm_secured_message_callbacks);
                 if (!RETURN_ERROR(status)) {
                     is_requester = !is_requester;
@@ -287,7 +289,7 @@ void dump_secured_spdm_message(const void *buffer, uintn buffer_size)
         dump_dispatch_message(m_secured_spdm_dispatch,
                       ARRAY_SIZE(m_secured_spdm_dispatch),
                       get_data_link_type(),
-                      m_spdm_dec_message_buffer, message_size);
+                      spdm_dec_message_buffer, message_size);
         m_decrypted = false;
     } else {
         printf("(?)->(?) ");
