@@ -1,8 +1,8 @@
 /**
-    Copyright Notice:
-    Copyright 2021 DMTF. All rights reserved.
-    License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
-**/
+ *  Copyright Notice:
+ *  Copyright 2021 DMTF. All rights reserved.
+ *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
+ **/
 
 #include "spdm_dump.h"
 
@@ -22,9 +22,9 @@ void *m_psk_buffer;
 size_t m_psk_buffer_size;
 
 return_status spdm_dump_session_data_provision(void *spdm_context,
-                           uint32_t session_id,
-                           bool need_mut_auth,
-                           bool is_requester)
+                                               uint32_t session_id,
+                                               bool need_mut_auth,
+                                               bool is_requester)
 {
     void *session_info;
     void *secured_message_context;
@@ -41,7 +41,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
     }
     secured_message_context =
         libspdm_get_secured_message_context_via_session_id(spdm_context,
-                                session_id);
+                                                           session_id);
     if (secured_message_context == NULL) {
         LIBSPDM_ASSERT(false);
         return RETURN_UNSUPPORTED;
@@ -52,10 +52,10 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
     *(uint32_t *)parameter.additional_data = session_id;
     data_size = sizeof(use_psk);
     libspdm_get_data(spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
-              &use_psk, &data_size);
+                     &use_psk, &data_size);
     data_size = sizeof(mut_auth_requested);
     libspdm_get_data(spdm_context, LIBSPDM_DATA_SESSION_MUT_AUTH_REQUESTED,
-              &parameter, &mut_auth_requested, &data_size);
+                     &parameter, &mut_auth_requested, &data_size);
 
     if (!use_psk) {
         if (m_dhe_secret_buffer == NULL ||
@@ -99,9 +99,9 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
             libspdm_zero_mem(&parameter, sizeof(parameter));
             parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
             libspdm_set_data(spdm_context,
-                      LIBSPDM_DATA_PEER_USED_CERT_CHAIN_BUFFER,
-                      &parameter, m_peer_cert_chain_buffer,
-                      m_peer_cert_chain_buffer_size);
+                             LIBSPDM_DATA_PEER_USED_CERT_CHAIN_BUFFER,
+                             &parameter, m_peer_cert_chain_buffer,
+                             m_peer_cert_chain_buffer_size);
         } else {
             if (m_responder_cert_chain_buffer == NULL ||
                 m_responder_cert_chain_buffer_size == 0) {
@@ -115,10 +115,10 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
             libspdm_zero_mem(&parameter, sizeof(parameter));
             parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
             libspdm_set_data(spdm_context,
-                      LIBSPDM_DATA_LOCAL_USED_CERT_CHAIN_BUFFER,
-                      &parameter,
-                      m_local_used_cert_chain_buffer,
-                      m_local_used_cert_chain_buffer_size);
+                             LIBSPDM_DATA_LOCAL_USED_CERT_CHAIN_BUFFER,
+                             &parameter,
+                             m_local_used_cert_chain_buffer,
+                             m_local_used_cert_chain_buffer_size);
             if (need_mut_auth && mut_auth_requested) {
                 if (m_requester_cert_chain_buffer == NULL ||
                     m_requester_cert_chain_buffer_size == 0) {
@@ -148,16 +148,16 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
             return RETURN_UNSUPPORTED;
         }
         libspdm_secured_message_import_dhe_secret(secured_message_context,
-                               m_psk_buffer,
-                               m_psk_buffer_size);
+                                                  m_psk_buffer,
+                                                  m_psk_buffer_size);
     }
 
     return RETURN_SUCCESS;
 }
 
 return_status spdm_dump_session_data_check(void *spdm_context,
-                       uint32_t session_id,
-                       bool is_requester)
+                                           uint32_t session_id,
+                                           bool is_requester)
 {
     void *session_info;
     libspdm_data_parameter_t parameter;
@@ -177,10 +177,10 @@ return_status spdm_dump_session_data_check(void *spdm_context,
     *(uint32_t *)parameter.additional_data = session_id;
     data_size = sizeof(use_psk);
     libspdm_get_data(spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
-              &use_psk, &data_size);
+                     &use_psk, &data_size);
     data_size = sizeof(mut_auth_requested);
     libspdm_get_data(spdm_context, LIBSPDM_DATA_SESSION_MUT_AUTH_REQUESTED,
-              &parameter, &mut_auth_requested, &data_size);
+                     &parameter, &mut_auth_requested, &data_size);
 
     if (!use_psk) {
         if (m_dhe_secret_buffer == NULL ||

@@ -1,8 +1,8 @@
 /**
-    Copyright Notice:
-    Copyright 2021 DMTF. All rights reserved.
-    License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
-**/
+ *  Copyright Notice:
+ *  Copyright 2021 DMTF. All rights reserved.
+ *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
+ **/
 
 #include "spdm_dump.h"
 
@@ -48,7 +48,7 @@ extern size_t m_spdm_other_param_value_string_table_count;
 
 dispatch_table_entry_t *
 get_dispatch_entry_by_id(dispatch_table_entry_t *dispatch_table,
-             size_t dispatch_table_count, uint32_t id)
+                         size_t dispatch_table_count, uint32_t id)
 {
     size_t index;
 
@@ -61,13 +61,13 @@ get_dispatch_entry_by_id(dispatch_table_entry_t *dispatch_table,
 }
 
 void dump_dispatch_message(dispatch_table_entry_t *dispatch_table,
-               size_t dispatch_table_count, uint32_t id,
-               const void *buffer, size_t buffer_size)
+                           size_t dispatch_table_count, uint32_t id,
+                           const void *buffer, size_t buffer_size)
 {
     dispatch_table_entry_t *entry;
 
     entry = get_dispatch_entry_by_id(dispatch_table, dispatch_table_count,
-                     id);
+                                     id);
     if (entry != NULL) {
         if (entry->dump_func != NULL) {
             entry->dump_func(buffer, buffer_size);
@@ -80,7 +80,7 @@ void dump_dispatch_message(dispatch_table_entry_t *dispatch_table,
 }
 
 void dump_entry_flags(const value_string_entry_t *entry_table,
-              size_t entry_table_count, uint32_t flags)
+                      size_t entry_table_count, uint32_t flags)
 {
     size_t index;
     bool first;
@@ -99,7 +99,7 @@ void dump_entry_flags(const value_string_entry_t *entry_table,
 }
 
 void dump_entry_flags_all(const value_string_entry_t *entry_table,
-              size_t entry_table_count, uint32_t flags)
+                          size_t entry_table_count, uint32_t flags)
 {
     size_t index;
 
@@ -113,7 +113,7 @@ void dump_entry_flags_all(const value_string_entry_t *entry_table,
 }
 
 void dump_entry_value(const value_string_entry_t *entry_table,
-              size_t entry_table_count, uint32_t value)
+                      size_t entry_table_count, uint32_t value)
 {
     size_t index;
 
@@ -127,8 +127,8 @@ void dump_entry_value(const value_string_entry_t *entry_table,
 }
 
 bool get_value_from_name(const value_string_entry_t *table,
-                size_t entry_count, const char *name,
-                uint32_t *value)
+                         size_t entry_count, const char *name,
+                         uint32_t *value)
 {
     size_t index;
 
@@ -142,8 +142,8 @@ bool get_value_from_name(const value_string_entry_t *table,
 }
 
 bool get_flags_from_name(const value_string_entry_t *table,
-                size_t entry_count, const char *name,
-                uint32_t *flags)
+                         size_t entry_count, const char *name,
+                         uint32_t *flags)
 {
     uint32_t value;
     char *flag_name;
@@ -156,14 +156,14 @@ bool get_flags_from_name(const value_string_entry_t *table,
     }
     strcpy(local_name, name);
 
-    
+
     /* name = Flag1,Flag2,...,FlagN*/
-    
+
     *flags = 0;
     flag_name = strtok(local_name, ",");
     while (flag_name != NULL) {
         if (!get_value_from_name(table, entry_count, flag_name,
-                     &value)) {
+                                 &value)) {
             printf("unsupported flag - %s\n", flag_name);
             ret = false;
             goto done;
@@ -190,14 +190,19 @@ void print_usage(void)
     printf("   [-x] (dump message in hex)\n");
     printf("   [--psk <pre-shared key>]\n");
     printf("   [--dhe_secret <session DHE secret>]\n");
-    printf("   [--req_cap       CERT|CHAL|                                ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|                 ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID]\n");
-    printf("   [--rsp_cap CACHE|CERT|CHAL|MEAS_NO_SIG|MEAS_SIG|MEAS_FRESH|ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|PSK_WITH_CONTEXT|ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID]\n");
+    printf(
+        "   [--req_cap       CERT|CHAL|                                ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|                 ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID]\n");
+    printf(
+        "   [--rsp_cap CACHE|CERT|CHAL|MEAS_NO_SIG|MEAS_SIG|MEAS_FRESH|ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|PSK_WITH_CONTEXT|ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID]\n");
     printf("   [--hash SHA_256|SHA_384|SHA_512|SHA3_256|SHA3_384|SHA3_512|SM3_256]\n");
     printf("   [--meas_spec DMTF]\n");
     printf("   [--meas_hash RAW_BIT|SHA_256|SHA_384|SHA_512|SHA3_256|SHA3_384|SHA3_512|SM3_256]\n");
-    printf("   [--asym RSASSA_2048|RSASSA_3072|RSASSA_4096|RSAPSS_2048|RSAPSS_3072|RSAPSS_4096|ECDSA_P256|ECDSA_P384|ECDSA_P521|SM2_P256|EDDSA_25519|EDDSA_448]\n");
-    printf("   [--req_asym RSASSA_2048|RSASSA_3072|RSASSA_4096|RSAPSS_2048|RSAPSS_3072|RSAPSS_4096|ECDSA_P256|ECDSA_P384|ECDSA_P521|SM2_P256|EDDSA_25519|EDDSA_448]\n");
-    printf("   [--dhe FFDHE_2048|FFDHE_3072|FFDHE_4096|SECP_256_R1|SECP_384_R1|SECP_521_R1|SM2_P256]\n");
+    printf(
+        "   [--asym RSASSA_2048|RSASSA_3072|RSASSA_4096|RSAPSS_2048|RSAPSS_3072|RSAPSS_4096|ECDSA_P256|ECDSA_P384|ECDSA_P521|SM2_P256|EDDSA_25519|EDDSA_448]\n");
+    printf(
+        "   [--req_asym RSASSA_2048|RSASSA_3072|RSASSA_4096|RSAPSS_2048|RSAPSS_3072|RSAPSS_4096|ECDSA_P256|ECDSA_P384|ECDSA_P521|SM2_P256|EDDSA_25519|EDDSA_448]\n");
+    printf(
+        "   [--dhe FFDHE_2048|FFDHE_3072|FFDHE_4096|SECP_256_R1|SECP_384_R1|SECP_521_R1|SM2_P256]\n");
     printf("   [--aead AES_128_GCM|AES_256_GCM|CHACHA20_POLY1305|SM4_128_GCM]\n");
     printf("   [--key_schedule HMAC_HASH]\n");
     printf("   [--other_param OPAQUE_FMT_1]\n");
@@ -214,20 +219,25 @@ void print_usage(void)
     printf("              '0123CDEF' means 4 bytes 0x01, 0x23, 0xCD, 0xEF,\n");
     printf("              where 0x01 is the first byte and 0xEF is the last byte in memory\n");
     printf("\n");
-    printf("   [--req_cap] and [--rsp_cap] means requester capability flags and responder capability flags.\n");
+    printf(
+        "   [--req_cap] and [--rsp_cap] means requester capability flags and responder capability flags.\n");
     printf("      format: Capabilities can be multiple flags. Please use ',' for them.\n");
-    printf("   [--hash], [--meas_spec], [--meas_hash], [--asym], [--req_asym], [--dhe], [--aead], [--key_schedule], [--other_param] means negotiated algorithms.\n");
+    printf(
+        "   [--hash], [--meas_spec], [--meas_hash], [--asym], [--req_asym], [--dhe], [--aead], [--key_schedule], [--other_param] means negotiated algorithms.\n");
     printf("      format: Algorithms must include only one flag.\n");
-    printf("      Capabilities and algorithms are required if GET_CAPABILITIES or NEGOTIATE_ALGORITHMS is not sent.\n");
+    printf(
+        "      Capabilities and algorithms are required if GET_CAPABILITIES or NEGOTIATE_ALGORITHMS is not sent.\n");
     printf("              For example, the negotiated state session or quick PSK session.\n");
     printf("\n");
     printf("   [--req_cert_chain] is required to if encapsulated GET_CERTIFICATE is not sent\n");
     printf("   [--rsp_cert_chain] is required to if GET_CERTIFICATE is not sent\n");
     printf("   [--out_req_cert_chain] can be used if encapsulated GET_CERTIFICATE is sent\n");
     printf("   [--out_rsp_cert_chain] can be used if GET_CERTIFICATE is sent\n");
-    printf("      format: A file containing certificates defined in SPDM spec 'certificate chain format'.\n");
+    printf(
+        "      format: A file containing certificates defined in SPDM spec 'certificate chain format'.\n");
     printf("              It is one or more ASN.1 DER-encoded X.509 v3 certificates.\n");
-    printf("              It may include multiple certificates, starting from root cert to leaf cert.\n");
+    printf(
+        "              It may include multiple certificates, starting from root cert to leaf cert.\n");
     printf("              It does include the length, reserved, or root_hash fields.\n");
 }
 
@@ -298,8 +308,8 @@ void process_args(int argc, char *argv[])
         if (strcmp(argv[0], "--psk") == 0) {
             if (argc >= 2) {
                 if (!hex_string_to_buffer(argv[1],
-                              &m_psk_buffer,
-                              &m_psk_buffer_size)) {
+                                          &m_psk_buffer,
+                                          &m_psk_buffer_size)) {
                     printf("invalid --psk\n");
                     print_usage();
                     exit(0);
@@ -603,7 +613,8 @@ void process_args(int argc, char *argv[])
                 }
                 if (m_requester_cert_chain_buffer_size >
                     LIBSPDM_MAX_CERT_CHAIN_SIZE) {
-                    printf("req_cert_chain is too larger. Please increase LIBSPDM_MAX_CERT_CHAIN_SIZE and rebuild.\n");
+                    printf(
+                        "req_cert_chain is too larger. Please increase LIBSPDM_MAX_CERT_CHAIN_SIZE and rebuild.\n");
                     exit(0);
                 }
                 argc -= 2;
@@ -628,7 +639,8 @@ void process_args(int argc, char *argv[])
                 }
                 if (m_requester_cert_chain_buffer_size >
                     LIBSPDM_MAX_CERT_CHAIN_SIZE) {
-                    printf("rsp_cert_chain is too larger. Please increase LIBSPDM_MAX_CERT_CHAIN_SIZE and rebuild.\n");
+                    printf(
+                        "rsp_cert_chain is too larger. Please increase LIBSPDM_MAX_CERT_CHAIN_SIZE and rebuild.\n");
                     exit(0);
                 }
                 argc -= 2;

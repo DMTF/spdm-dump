@@ -1,17 +1,17 @@
 /**
-    Copyright Notice:
-    Copyright 2021 DMTF. All rights reserved.
-    License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
-**/
+ *  Copyright Notice:
+ *  Copyright 2021 DMTF. All rights reserved.
+ *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
+ **/
 
 #include "spdm_dump.h"
 
 /**
-  This function dump raw data.
-
-  @param  data  raw data
-  @param  size  raw data size
-**/
+ * This function dump raw data.
+ *
+ * @param  data  raw data
+ * @param  size  raw data size
+ **/
 void dump_hex_str(const uint8_t *data, size_t size)
 {
     size_t index;
@@ -22,11 +22,11 @@ void dump_hex_str(const uint8_t *data, size_t size)
 }
 
 /**
-  This function dump raw data.
-
-  @param  data  raw data
-  @param  size  raw data size
-**/
+ * This function dump raw data.
+ *
+ * @param  data  raw data
+ * @param  size  raw data size
+ **/
 void dump_data(const uint8_t *data, size_t size)
 {
     size_t index;
@@ -40,11 +40,11 @@ void dump_data(const uint8_t *data, size_t size)
 }
 
 /**
-  This function dump raw data with colume format.
-
-  @param  data  raw data
-  @param  size  raw data size
-**/
+ * This function dump raw data with colume format.
+ *
+ * @param  data  raw data
+ * @param  size  raw data size
+ **/
 void dump_hex(const uint8_t *data, size_t size)
 {
     uint32_t index;
@@ -87,7 +87,7 @@ static bool char_to_byte(const char ch, uint8_t *data)
 }
 
 static bool one_byte_string_to_buffer(const char one_byte_string[2],
-                     uint8_t *buffer)
+                                      uint8_t *buffer)
 {
     uint8_t data_h;
     uint8_t data_l;
@@ -104,7 +104,7 @@ static bool one_byte_string_to_buffer(const char one_byte_string[2],
 }
 
 bool hex_string_to_buffer(const char *hex_string, void **buffer,
-                 size_t *buffer_size)
+                          size_t *buffer_size)
 {
     size_t str_len;
     size_t index;
@@ -124,7 +124,7 @@ bool hex_string_to_buffer(const char *hex_string, void **buffer,
 
     for (index = 0; index < str_len / 2; index++) {
         if (!one_byte_string_to_buffer(hex_string + index * 2,
-                           (uint8_t *)*buffer + index)) {
+                                       (uint8_t *)*buffer + index)) {
             return false;
         }
     }
@@ -133,7 +133,7 @@ bool hex_string_to_buffer(const char *hex_string, void **buffer,
 }
 
 bool read_input_file(const char *file_name, void **file_data,
-            size_t *file_size)
+                     size_t *file_size)
 {
     FILE *fp_in;
     size_t temp_result;
@@ -169,7 +169,7 @@ bool read_input_file(const char *file_name, void **file_data,
 }
 
 bool write_output_file(const char *file_name, const void *file_data,
-              size_t file_size)
+                       size_t file_size)
 {
     FILE *fp_out;
 

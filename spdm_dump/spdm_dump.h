@@ -1,8 +1,8 @@
 /**
-    Copyright Notice:
-    Copyright 2021 DMTF. All rights reserved.
-    License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
-**/
+ *  Copyright Notice:
+ *  Copyright 2021 DMTF. All rights reserved.
+ *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
+ **/
 
 #ifndef __SPDM_DUMP_H__
 #define __SPDM_DUMP_H__
@@ -36,11 +36,11 @@ typedef struct {
 
 dispatch_table_entry_t *
 get_dispatch_entry_by_id(dispatch_table_entry_t *dispatch_table,
-             size_t dispatch_table_count, uint32_t id);
+                         size_t dispatch_table_count, uint32_t id);
 
 void dump_dispatch_message(dispatch_table_entry_t *dispatch_table,
-               size_t dispatch_table_count, uint32_t id,
-               const void *buffer, size_t buffer_size);
+                           size_t dispatch_table_count, uint32_t id,
+                           const void *buffer, size_t buffer_size);
 
 typedef struct {
     uint32_t value;
@@ -48,13 +48,13 @@ typedef struct {
 } value_string_entry_t;
 
 void dump_entry_flags_all(const value_string_entry_t *entry_table,
-              size_t entry_table_count, uint32_t flags);
+                          size_t entry_table_count, uint32_t flags);
 
 void dump_entry_flags(const value_string_entry_t *entry_table,
-              size_t entry_table_count, uint32_t flags);
+                      size_t entry_table_count, uint32_t flags);
 
 void dump_entry_value(const value_string_entry_t *entry_table,
-              size_t entry_table_count, uint32_t value);
+                      size_t entry_table_count, uint32_t value);
 
 bool init_spdm_dump(void);
 
@@ -86,7 +86,8 @@ void dump_spdm_message(const void *buffer, size_t buffer_size);
 
 void dump_secured_spdm_message(const void *buffer, size_t buffer_size);
 
-void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data, uint16_t opaque_length);
+void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data,
+                           uint16_t opaque_length);
 
 void dump_pldm_message(const void *buffer, size_t buffer_size);
 
@@ -97,22 +98,22 @@ void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size);
 void dump_pci_ide_km_message(const void *buffer, size_t buffer_size);
 
 return_status spdm_dump_session_data_provision(void *spdm_context,
-                           uint32_t session_id,
-                           bool need_mut_auth,
-                           bool is_requester);
+                                               uint32_t session_id,
+                                               bool need_mut_auth,
+                                               bool is_requester);
 
 return_status spdm_dump_session_data_check(void *spdm_context,
-                       uint32_t session_id,
-                       bool is_requester);
+                                           uint32_t session_id,
+                                           bool is_requester);
 
 bool hex_string_to_buffer(const char *hex_string, void **buffer,
-                 size_t *buffer_size);
+                          size_t *buffer_size);
 
 bool read_input_file(const char *file_name, void **file_data,
-            size_t *file_size);
+                     size_t *file_size);
 
 bool write_output_file(const char *file_name, const void *file_data,
-              size_t file_size);
+                       size_t file_size);
 
 bool open_output_file(const char *file_name);
 

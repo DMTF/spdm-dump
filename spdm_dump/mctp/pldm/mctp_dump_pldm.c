@@ -1,8 +1,8 @@
 /**
-    Copyright Notice:
-    Copyright 2021 DMTF. All rights reserved.
-    License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
-**/
+ *  Copyright Notice:
+ *  Copyright 2021 DMTF. All rights reserved.
+ *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
+ **/
 
 #include "spdm_dump.h"
 
@@ -62,9 +62,9 @@ void dump_pldm_control(const void *buffer, size_t buffer_size)
     pldm_message_header = buffer;
 
     dump_dispatch_message(m_pldm_control_dispatch,
-                  ARRAY_SIZE(m_pldm_control_dispatch),
-                  pldm_message_header->pldm_command_code,
-                  (uint8_t *)buffer, buffer_size);
+                          ARRAY_SIZE(m_pldm_control_dispatch),
+                          pldm_message_header->pldm_command_code,
+                          (uint8_t *)buffer, buffer_size);
 }
 
 dispatch_table_entry_t m_pldm_dispatch[] = {
@@ -96,7 +96,7 @@ void dump_pldm_message(const void *buffer, size_t buffer_size)
     if (!is_req) {
         if (buffer_size <
             sizeof(pldm_message_header_t) +
-                sizeof(pldm_message_response_header_t)) {
+            sizeof(pldm_message_response_header_t)) {
             printf("\n");
             return;
         }
@@ -121,10 +121,10 @@ void dump_pldm_message(const void *buffer, size_t buffer_size)
                pldm_message_header->instance_id & 0x1F,
                ((pldm_message_header->instance_id & 0x40) != 0) ? 1 : 0,
                ((pldm_message_header->instance_id & 0x80) != 0) ? 1 :
-                                      0);
+               0);
     }
 
     dump_dispatch_message(m_pldm_dispatch, ARRAY_SIZE(m_pldm_dispatch),
-                  pldm_message_header->pldm_type & 0x3F,
-                  (uint8_t *)buffer, buffer_size);
+                          pldm_message_header->pldm_type & 0x3F,
+                          (uint8_t *)buffer, buffer_size);
 }
