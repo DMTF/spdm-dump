@@ -1885,7 +1885,7 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
 
     if (spdm_dump_session_data_provision(m_spdm_context,
                                          m_current_session_id, false,
-                                         true) != RETURN_SUCCESS) {
+                                         true) != LIBSPDM_STATUS_SUCCESS) {
         return;
     }
 
@@ -2047,7 +2047,7 @@ void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
 
     if (spdm_dump_session_data_provision(m_spdm_context,
                                          m_current_session_id, true,
-                                         true) != RETURN_SUCCESS) {
+                                         true) != LIBSPDM_STATUS_SUCCESS) {
         return;
     }
 
@@ -2060,7 +2060,7 @@ void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
                    m_current_session_id));
 
     if (spdm_dump_session_data_check(m_spdm_context, m_current_session_id,
-                                     true) != RETURN_SUCCESS) {
+                                     true) != LIBSPDM_STATUS_SUCCESS) {
         return;
     }
     libspdm_calculate_th2_hash(m_spdm_context, m_current_session_info, true,
@@ -2233,7 +2233,7 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
 
     if (spdm_dump_session_data_provision(m_spdm_context,
                                          m_current_session_id, false,
-                                         true) != RETURN_SUCCESS) {
+                                         true) != LIBSPDM_STATUS_SUCCESS) {
         return;
     }
 
@@ -2395,7 +2395,7 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
 
     if (spdm_dump_session_data_provision(m_spdm_context,
                                          m_current_session_id, true,
-                                         true) != RETURN_SUCCESS) {
+                                         true) != LIBSPDM_STATUS_SUCCESS) {
         return;
     }
 
@@ -2405,7 +2405,7 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
                    m_current_session_id));
 
     if (spdm_dump_session_data_check(m_spdm_context, m_current_session_id,
-                                     true) != RETURN_SUCCESS) {
+                                     true) != LIBSPDM_STATUS_SUCCESS) {
         return;
     }
     libspdm_calculate_th2_hash(m_spdm_context, m_current_session_info, true,

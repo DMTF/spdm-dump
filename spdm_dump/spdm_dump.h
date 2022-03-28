@@ -97,12 +97,12 @@ void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size);
 
 void dump_pci_ide_km_message(const void *buffer, size_t buffer_size);
 
-return_status spdm_dump_session_data_provision(void *spdm_context,
+libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                                uint32_t session_id,
                                                bool need_mut_auth,
                                                bool is_requester);
 
-return_status spdm_dump_session_data_check(void *spdm_context,
+libspdm_return_t spdm_dump_session_data_check(void *spdm_context,
                                            uint32_t session_id,
                                            bool is_requester);
 

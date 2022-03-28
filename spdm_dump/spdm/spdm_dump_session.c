@@ -21,7 +21,7 @@ size_t m_dhe_secret_buffer_size;
 void *m_psk_buffer;
 size_t m_psk_buffer_size;
 
-return_status spdm_dump_session_data_provision(void *spdm_context,
+libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                                uint32_t session_id,
                                                bool need_mut_auth,
                                                bool is_requester)
@@ -37,14 +37,14 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
         libspdm_get_session_info_via_session_id(spdm_context, session_id);
     if (session_info == NULL) {
         LIBSPDM_ASSERT(false);
-        return RETURN_UNSUPPORTED;
+        return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
     }
     secured_message_context =
         libspdm_get_secured_message_context_via_session_id(spdm_context,
                                                            session_id);
     if (secured_message_context == NULL) {
         LIBSPDM_ASSERT(false);
-        return RETURN_UNSUPPORTED;
+        return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
     }
 
     libspdm_zero_mem(&parameter, sizeof(parameter));
@@ -60,7 +60,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
     if (!use_psk) {
         if (m_dhe_secret_buffer == NULL ||
             m_dhe_secret_buffer_size == 0) {
-            return RETURN_UNSUPPORTED;
+            return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
         libspdm_secured_message_import_dhe_secret(
             secured_message_context, m_dhe_secret_buffer,
@@ -70,7 +70,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
             if (need_mut_auth && mut_auth_requested) {
                 if (m_requester_cert_chain_buffer == NULL ||
                     m_requester_cert_chain_buffer_size == 0) {
-                    return RETURN_UNSUPPORTED;
+                    return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
                 }
                 memcpy((uint8_t *)m_local_used_cert_chain_buffer,
                        m_requester_cert_chain_buffer,
@@ -89,7 +89,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
             }
             if (m_responder_cert_chain_buffer == NULL ||
                 m_responder_cert_chain_buffer_size == 0) {
-                return RETURN_UNSUPPORTED;
+                return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
             }
             memcpy((uint8_t *)m_peer_cert_chain_buffer,
                    m_responder_cert_chain_buffer,
@@ -105,7 +105,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
         } else {
             if (m_responder_cert_chain_buffer == NULL ||
                 m_responder_cert_chain_buffer_size == 0) {
-                return RETURN_UNSUPPORTED;
+                return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
             }
             memcpy((uint8_t *)m_local_used_cert_chain_buffer,
                    m_responder_cert_chain_buffer,
@@ -122,7 +122,7 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
             if (need_mut_auth && mut_auth_requested) {
                 if (m_requester_cert_chain_buffer == NULL ||
                     m_requester_cert_chain_buffer_size == 0) {
-                    return RETURN_UNSUPPORTED;
+                    return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
                 }
                 memcpy((uint8_t *)m_peer_cert_chain_buffer,
                        m_requester_cert_chain_buffer,
@@ -141,21 +141,21 @@ return_status spdm_dump_session_data_provision(void *spdm_context,
         }
     } else {
         if (m_psk_buffer == NULL || m_psk_buffer_size == 0) {
-            return RETURN_UNSUPPORTED;
+            return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
         if (m_psk_buffer_size > LIBSPDM_MAX_DHE_KEY_SIZE) {
             printf("BUGBUG: PSK size is too large. It will be supported later.\n");
-            return RETURN_UNSUPPORTED;
+            return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
         libspdm_secured_message_import_dhe_secret(secured_message_context,
                                                   m_psk_buffer,
                                                   m_psk_buffer_size);
     }
 
-    return RETURN_SUCCESS;
+    return LIBSPDM_STATUS_SUCCESS;
 }
 
-return_status spdm_dump_session_data_check(void *spdm_context,
+libspdm_return_t spdm_dump_session_data_check(void *spdm_context,
                                            uint32_t session_id,
                                            bool is_requester)
 {
@@ -169,7 +169,7 @@ return_status spdm_dump_session_data_check(void *spdm_context,
         libspdm_get_session_info_via_session_id(spdm_context, session_id);
     if (session_info == NULL) {
         LIBSPDM_ASSERT(false);
-        return RETURN_UNSUPPORTED;
+        return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
     }
 
     libspdm_zero_mem(&parameter, sizeof(parameter));
@@ -185,36 +185,36 @@ return_status spdm_dump_session_data_check(void *spdm_context,
     if (!use_psk) {
         if (m_dhe_secret_buffer == NULL ||
             m_dhe_secret_buffer_size == 0) {
-            return RETURN_UNSUPPORTED;
+            return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
         if (is_requester) {
             if (mut_auth_requested) {
                 if (m_requester_cert_chain_buffer == NULL ||
                     m_requester_cert_chain_buffer_size == 0) {
-                    return RETURN_UNSUPPORTED;
+                    return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
                 }
             }
             if (m_responder_cert_chain_buffer == NULL ||
                 m_responder_cert_chain_buffer_size == 0) {
-                return RETURN_UNSUPPORTED;
+                return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
             }
         } else {
             if (m_responder_cert_chain_buffer == NULL ||
                 m_responder_cert_chain_buffer_size == 0) {
-                return RETURN_UNSUPPORTED;
+                return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
             }
             if (mut_auth_requested) {
                 if (m_requester_cert_chain_buffer == NULL ||
                     m_requester_cert_chain_buffer_size == 0) {
-                    return RETURN_UNSUPPORTED;
+                    return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
                 }
             }
         }
     } else {
         if (m_psk_buffer == NULL || m_psk_buffer_size == 0) {
-            return RETURN_UNSUPPORTED;
+            return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
     }
 
-    return RETURN_SUCCESS;
+    return LIBSPDM_STATUS_SUCCESS;
 }
