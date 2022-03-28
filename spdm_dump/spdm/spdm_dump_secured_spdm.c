@@ -189,7 +189,7 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
     const spdm_secured_message_a_data_header1_t *record_header1;
     uint16_t sequence_num;
     size_t sequence_num_size;
-    return_status status;
+    libspdm_return_t status;
     size_t message_size;
     static bool is_requester = false;
     uint32_t data_link_type;
@@ -242,7 +242,7 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
     m_current_session_info = libspdm_get_session_info_via_session_id(
         m_spdm_context, record_header1->session_id);
     m_current_session_id = record_header1->session_id;
-    status = RETURN_UNSUPPORTED;
+    status = LIBSPDM_STATUS_UNSUPPORTED_CAP;
     message_size = get_max_packet_length();
     spdm_dec_message_buffer = m_spdm_dec_message_buffer;
     if (m_current_session_info != NULL) {
@@ -256,7 +256,7 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
                 buffer_size, buffer, &message_size,
                 &spdm_dec_message_buffer,
                 &spdm_secured_message_callbacks);
-            if (RETURN_ERROR(status)) {
+            if (LIBSPDM_STATUS_IS_ERROR(status)) {
 
                 /* Try other direction, because a responder might initiate a message in Session.*/
 
@@ -267,14 +267,14 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
                     &message_size,
                     &spdm_dec_message_buffer,
                     &spdm_secured_message_callbacks);
-                if (!RETURN_ERROR(status)) {
+                if (!LIBSPDM_STATUS_IS_ERROR(status)) {
                     is_requester = !is_requester;
                 }
             }
         }
     }
 
-    if (!RETURN_ERROR(status)) {
+    if (!LIBSPDM_STATUS_IS_ERROR(status)) {
         if (is_requester) {
             printf("REQ->RSP ");
         } else {
