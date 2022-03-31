@@ -62,7 +62,7 @@ void dump_pldm_control(const void *buffer, size_t buffer_size)
     pldm_message_header = buffer;
 
     dump_dispatch_message(m_pldm_control_dispatch,
-                          ARRAY_SIZE(m_pldm_control_dispatch),
+                          LIBSPDM_ARRAY_SIZE(m_pldm_control_dispatch),
                           pldm_message_header->pldm_command_code,
                           (uint8_t *)buffer, buffer_size);
 }
@@ -124,7 +124,7 @@ void dump_pldm_message(const void *buffer, size_t buffer_size)
                0);
     }
 
-    dump_dispatch_message(m_pldm_dispatch, ARRAY_SIZE(m_pldm_dispatch),
+    dump_dispatch_message(m_pldm_dispatch, LIBSPDM_ARRAY_SIZE(m_pldm_dispatch),
                           pldm_message_header->pldm_type & 0x3F,
                           (uint8_t *)buffer, buffer_size);
 }

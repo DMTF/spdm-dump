@@ -170,7 +170,7 @@ void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data, uin
 
         dump_dispatch_message(
             m_spdm_opaque_dispatch,
-            ARRAY_SIZE(m_spdm_opaque_dispatch),
+            LIBSPDM_ARRAY_SIZE(m_spdm_opaque_dispatch),
             secured_message_element->sm_data_id,
             (uint8_t *)secured_message_element,
             secured_message_element_table->opaque_element_data_len);
@@ -288,7 +288,7 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
 
         m_decrypted = true;
         dump_dispatch_message(m_secured_spdm_dispatch,
-                              ARRAY_SIZE(m_secured_spdm_dispatch),
+                              LIBSPDM_ARRAY_SIZE(m_secured_spdm_dispatch),
                               get_data_link_type(),
                               spdm_dec_message_buffer, message_size);
         m_decrypted = false;
