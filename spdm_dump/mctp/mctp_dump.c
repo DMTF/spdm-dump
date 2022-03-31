@@ -38,7 +38,7 @@ void dump_mctp_message(const void *buffer, size_t buffer_size)
         (mctp_message_header->message_type ==
          MCTP_MESSAGE_TYPE_SECURED_MCTP)) {
         dump_dispatch_message(m_mctp_dispatch,
-                              ARRAY_SIZE(m_mctp_dispatch),
+                              LIBSPDM_ARRAY_SIZE(m_mctp_dispatch),
                               mctp_message_header->message_type,
                               (uint8_t *)buffer + header_size,
                               buffer_size - header_size);

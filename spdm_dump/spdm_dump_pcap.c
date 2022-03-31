@@ -112,7 +112,7 @@ void dump_pcap_packet_header(size_t index,
 
 void dump_pcap_packet(const void *buffer, size_t buffer_size)
 {
-    dump_dispatch_message(m_pcap_dispatch, ARRAY_SIZE(m_pcap_dispatch),
+    dump_dispatch_message(m_pcap_dispatch, LIBSPDM_ARRAY_SIZE(m_pcap_dispatch),
                           m_pcap_global_header.network, buffer,
                           buffer_size);
 }

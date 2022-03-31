@@ -40,7 +40,7 @@ void dump_pci_doe_packet(const void *buffer, size_t buffer_size)
         (pci_doe_header->data_object_type ==
          PCI_DOE_DATA_OBJECT_TYPE_SECURED_SPDM)) {
         dump_dispatch_message(m_pci_doe_dispatch,
-                              ARRAY_SIZE(m_pci_doe_dispatch),
+                              LIBSPDM_ARRAY_SIZE(m_pci_doe_dispatch),
                               pci_doe_header->data_object_type,
                               (uint8_t *)buffer + header_size,
                               buffer_size - header_size);
