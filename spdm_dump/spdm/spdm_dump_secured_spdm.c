@@ -253,7 +253,7 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
             status = libspdm_decode_secured_message(
                 secured_message_context,
                 record_header1->session_id, is_requester,
-                buffer_size, buffer, &message_size,
+                buffer_size, (void *)buffer, &message_size,
                 &spdm_dec_message_buffer,
                 &spdm_secured_message_callbacks);
             if (LIBSPDM_STATUS_IS_ERROR(status)) {
@@ -263,7 +263,7 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
                 status = libspdm_decode_secured_message(
                     secured_message_context,
                     record_header1->session_id,
-                    !is_requester, buffer_size, buffer,
+                    !is_requester, buffer_size, (void *)buffer,
                     &message_size,
                     &spdm_dec_message_buffer,
                     &spdm_secured_message_callbacks);
