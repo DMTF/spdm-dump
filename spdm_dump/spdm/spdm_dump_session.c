@@ -20,6 +20,7 @@ void *m_dhe_secret_buffer;
 size_t m_dhe_secret_buffer_size;
 void *m_psk_buffer;
 size_t m_psk_buffer_size;
+uint8_t m_use_slot_id = 0;
 
 libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                                uint32_t session_id,
@@ -97,6 +98,7 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
             m_peer_cert_chain_buffer_size =
                 m_responder_cert_chain_buffer_size;
             libspdm_zero_mem(&parameter, sizeof(parameter));
+            parameter.additional_data[0] = m_use_slot_id;
             parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
             libspdm_set_data(spdm_context,
                              LIBSPDM_DATA_PEER_USED_CERT_CHAIN_BUFFER,
@@ -132,6 +134,7 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                 libspdm_zero_mem(&parameter, sizeof(parameter));
                 parameter.location =
                     LIBSPDM_DATA_LOCATION_CONNECTION;
+                parameter.additional_data[0] = m_use_slot_id;
                 libspdm_set_data(
                     spdm_context,
                     LIBSPDM_DATA_PEER_USED_CERT_CHAIN_BUFFER,
