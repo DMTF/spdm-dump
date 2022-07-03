@@ -40,9 +40,9 @@ void dump_pci_ide_km_query_resp(const void *buffer, size_t buffer_size)
     query_resp = buffer;
 
     if (!m_param_quite_mode) {
-        printf("(port=0x%02x, S%02xB%02xDF%02x, MaxPort=0x%02x) ",
-               query_resp->port_index, query_resp->segment,
-               query_resp->bus_num, query_resp->dev_func_num,
+        printf("(port=0x%02x, DevFunc=0x%02x, Bus=0x%02x, Seg=0x%02x, MaxPort=0x%02x) ",
+               query_resp->port_index, query_resp->dev_func_num,
+               query_resp->bus_num, query_resp->segment,
                query_resp->max_port_index);
     }
 
@@ -51,31 +51,126 @@ void dump_pci_ide_km_query_resp(const void *buffer, size_t buffer_size)
 
 void dump_pci_ide_km_key_program(const void *buffer, size_t buffer_size)
 {
+    const pci_ide_km_key_prog_t *key_prog;
+
     printf("KEY_PROG ");
+
+    if (buffer_size < sizeof(pci_ide_km_key_prog_t)) {
+        printf("\n");
+        return;
+    }
+
+    key_prog = buffer;
+
+    if (!m_param_quite_mode) {
+        printf("(StreamId=0x%02x, KeySubStream=0x%02x (KeySet=%x, RxTx=%x, SubStream=%x), PortIndex=0x%02x) ",
+               key_prog->stream_id, key_prog->key_sub_stream,
+               key_prog->key_sub_stream & PCI_IDE_KM_KEY_SET_MASK,
+               (key_prog->key_sub_stream & PCI_IDE_KM_KEY_DIRECTION_MASK) >> 1,
+               (key_prog->key_sub_stream & PCI_IDE_KM_KEY_SUB_STREAM_MASK) >> 4,
+               key_prog->port_index);
+    }
+
     printf("\n");
 }
 
 void dump_pci_ide_km_key_program_ack(const void *buffer, size_t buffer_size)
 {
+    const pci_ide_km_kp_ack_t *kp_ack;
+
     printf("KP_ACK ");
+
+    if (buffer_size < sizeof(pci_ide_km_kp_ack_t)) {
+        printf("\n");
+        return;
+    }
+
+    kp_ack = buffer;
+
+    if (!m_param_quite_mode) {
+        printf("(StreamId=0x%02x, Status=0x%02x, KeySubStream=0x%02x (KeySet=%x, RxTx=%x, SubStream=%x), PortIndex=0x%02x) ",
+               kp_ack->stream_id, kp_ack->status, kp_ack->key_sub_stream,
+               kp_ack->key_sub_stream & PCI_IDE_KM_KEY_SET_MASK,
+               (kp_ack->key_sub_stream & PCI_IDE_KM_KEY_DIRECTION_MASK) >> 1,
+               (kp_ack->key_sub_stream & PCI_IDE_KM_KEY_SUB_STREAM_MASK) >> 4,
+               kp_ack->port_index);
+    }
+
     printf("\n");
 }
 
 void dump_pci_ide_km_key_set_go(const void *buffer, size_t buffer_size)
 {
+    const pci_ide_km_k_set_go_t *k_set_go;
+
     printf("K_SET_GO ");
+
+    if (buffer_size < sizeof(pci_ide_km_k_set_go_t)) {
+        printf("\n");
+        return;
+    }
+
+    k_set_go = buffer;
+
+    if (!m_param_quite_mode) {
+        printf("(StreamId=0x%02x, KeySubStream=0x%02x (KeySet=%x, RxTx=%x, SubStream=%x), PortIndex=0x%02x) ",
+               k_set_go->stream_id, k_set_go->key_sub_stream,
+               k_set_go->key_sub_stream & PCI_IDE_KM_KEY_SET_MASK,
+               (k_set_go->key_sub_stream & PCI_IDE_KM_KEY_DIRECTION_MASK) >> 1,
+               (k_set_go->key_sub_stream & PCI_IDE_KM_KEY_SUB_STREAM_MASK) >> 4,
+               k_set_go->port_index);
+    }
+
     printf("\n");
 }
 
 void dump_pci_ide_km_key_set_stop(const void *buffer, size_t buffer_size)
 {
+    const pci_ide_km_k_set_stop_t *k_set_stop;
+
     printf("K_SET_STOP ");
+
+    if (buffer_size < sizeof(pci_ide_km_k_set_stop_t)) {
+        printf("\n");
+        return;
+    }
+
+    k_set_stop = buffer;
+
+    if (!m_param_quite_mode) {
+        printf("(StreamId=0x%02x, KeySubStream=0x%02x (KeySet=%x, RxTx=%x, SubStream=%x), PortIndex=0x%02x) ",
+               k_set_stop->stream_id, k_set_stop->key_sub_stream,
+               k_set_stop->key_sub_stream & PCI_IDE_KM_KEY_SET_MASK,
+               (k_set_stop->key_sub_stream & PCI_IDE_KM_KEY_DIRECTION_MASK) >> 1,
+               (k_set_stop->key_sub_stream & PCI_IDE_KM_KEY_SUB_STREAM_MASK) >> 4,
+               k_set_stop->port_index);
+    }
+
     printf("\n");
 }
 
 void dump_pci_ide_km_key_set_gostop_ack(const void *buffer, size_t buffer_size)
 {
+    const pci_ide_km_k_gostop_ack_t *k_gostop_ack;
+
     printf("K_SET_GOSTOP_ACK ");
+
+    if (buffer_size < sizeof(pci_ide_km_k_gostop_ack_t)) {
+        printf("\n");
+        return;
+    }
+
+    k_gostop_ack = buffer;
+
+    if (!m_param_quite_mode) {
+        printf("(StreamId=0x%02x, KeySubStream=0x%02x (KeySet=%x, RxTx=%x, SubStream=%x), PortIndex=0x%02x) ",
+               k_gostop_ack->stream_id, k_gostop_ack->key_sub_stream,
+               k_gostop_ack->key_sub_stream & PCI_IDE_KM_KEY_SET_MASK,
+               (k_gostop_ack->key_sub_stream & PCI_IDE_KM_KEY_DIRECTION_MASK) >> 1,
+               (k_gostop_ack->key_sub_stream & PCI_IDE_KM_KEY_SUB_STREAM_MASK) >> 4,
+               k_gostop_ack->port_index);
+    }
+
     printf("\n");
 }
 
