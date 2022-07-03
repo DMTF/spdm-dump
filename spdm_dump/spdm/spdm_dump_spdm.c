@@ -285,6 +285,16 @@ value_string_entry_t m_spdm_end_session_attribute_string_table[] = {
       "PreserveStateClear" },
 };
 
+value_string_entry_t m_spdm_chunk_send_attribute_string_table[] = {
+    { SPDM_CHUNK_SEND_REQUEST_ATTRIBUTE_LAST_CHUNK,
+      "LastChunk" },
+};
+
+value_string_entry_t m_spdm_chunk_send_ack_attribute_string_table[] = {
+    { SPDM_CHUNK_SEND_ACK_RESPONSE_ATTRIBUTE_EARLY_ERROR_DETECTED,
+      "EarlyErrorDetected" },
+};
+
 uint32_t spdm_dump_get_measurement_summary_hash_size(
     uint8_t measurement_summary_hash_type)
 {
@@ -2855,6 +2865,147 @@ void dump_spdm_set_certificate_rsp(const void *buffer, size_t buffer_size)
     printf("\n");
 }
 
+void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
+{
+    const spdm_chunk_send_request_t *spdm_request;
+    uint32_t *large_message_size;
+
+    printf("SPDM_CHUNK_SEND ");
+
+    if (buffer_size < sizeof(spdm_chunk_send_request_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_request = buffer;
+
+    if (buffer_size - sizeof(spdm_chunk_send_request_t) < spdm_request->chunk_size) {
+        printf("\n");
+        return;
+    }
+    if (spdm_request->chunk_seq_no == 0) {
+        if (buffer_size - sizeof(spdm_chunk_send_request_t) - spdm_request->chunk_size <
+            sizeof(uint32_t)) {
+            printf("\n");
+            return;
+        }
+    }
+
+    if (!m_param_quite_mode) {
+        printf("(Attr=0x%02x(", spdm_request->header.param1);
+        dump_entry_flags(
+            m_spdm_chunk_send_attribute_string_table,
+            LIBSPDM_ARRAY_SIZE(m_spdm_chunk_send_attribute_string_table),
+            spdm_request->header.param1);
+        printf("), Handle=0x%02x, ChunkSeqNo=0x%04x, ChunkSize=0x%08x",
+               spdm_request->header.param2,
+               spdm_request->chunk_seq_no,
+               spdm_request->chunk_size);
+        if (spdm_request->chunk_seq_no == 0) {
+            large_message_size = (void *)(spdm_request + 1);
+            printf(", LargeMsgSize=0x%08x", *large_message_size);
+        }
+        printf(") ");
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_chunk_send_ack(const void *buffer, size_t buffer_size)
+{
+    const spdm_chunk_send_ack_response_t *spdm_response;
+
+    printf("SPDM_CHUNK_SEND_ACK ");
+
+    if (buffer_size < sizeof(spdm_chunk_send_ack_response_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_response = buffer;
+
+    if (!m_param_quite_mode) {
+        printf("(Attr=0x%02x(", spdm_response->header.param1);
+        dump_entry_flags(
+            m_spdm_chunk_send_ack_attribute_string_table,
+            LIBSPDM_ARRAY_SIZE(m_spdm_chunk_send_ack_attribute_string_table),
+            spdm_response->header.param1);
+        printf("), Handle=0x%02x, ChunkSeqNo=0x%04x) ",
+               spdm_response->header.param2,
+               spdm_response->chunk_seq_no);
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_chunk_get(const void *buffer, size_t buffer_size)
+{
+    const spdm_chunk_get_request_t *spdm_request;
+
+    printf("SPDM_CHUNK_GET ");
+
+    if (buffer_size < sizeof(spdm_chunk_get_request_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_request = buffer;
+
+    if (!m_param_quite_mode) {
+        printf("(Handle=0x%02x, ChunkSeqNo=0x%04x) ",
+               spdm_request->header.param2,
+               spdm_request->chunk_seq_no);
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_chunk_response(const void *buffer, size_t buffer_size)
+{
+    const spdm_chunk_response_response_t *spdm_response;
+    uint32_t *large_message_size;
+
+    printf("SPDM_CHUNK_RESPONSE ");
+
+    if (buffer_size < sizeof(spdm_chunk_response_response_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_response = buffer;
+
+    if (buffer_size - sizeof(spdm_chunk_response_response_t) < spdm_response->chunk_size) {
+        printf("\n");
+        return;
+    }
+    if (spdm_response->chunk_seq_no == 0) {
+        if (buffer_size - sizeof(spdm_chunk_response_response_t) - spdm_response->chunk_size <
+            sizeof(uint32_t)) {
+            printf("\n");
+            return;
+        }
+    }
+
+    if (!m_param_quite_mode) {
+        printf("(Attr=0x%02x(", spdm_response->header.param1);
+        dump_entry_flags(
+            m_spdm_chunk_send_attribute_string_table,
+            LIBSPDM_ARRAY_SIZE(m_spdm_chunk_send_attribute_string_table),
+            spdm_response->header.param1);
+        printf("), Handle=0x%02x, ChunkSeqNo=0x%04x, ChunkSize=0x%08x",
+               spdm_response->header.param2,
+               spdm_response->chunk_seq_no,
+               spdm_response->chunk_size);
+        if (spdm_response->chunk_seq_no == 0) {
+            large_message_size = (void *)(spdm_response + 1);
+            printf(", LargeMsgSize=0x%08x", *large_message_size);
+        }
+        printf(") ");
+    }
+
+    printf("\n");
+}
+
 dispatch_table_entry_t m_spdm_dispatch[] = {
     { SPDM_DIGESTS, "SPDM_DIGESTS", dump_spdm_digests },
     { SPDM_CERTIFICATE, "SPDM_CERTIFICATE", dump_spdm_certificate },
@@ -2887,6 +3038,10 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       dump_spdm_csr },
     { SPDM_SET_CERTIFICATE_RSP, "SPDM_SET_CERTIFICATE_RSP",
       dump_spdm_set_certificate_rsp },
+    { SPDM_CHUNK_SEND_ACK, "SPDM_CHUNK_SEND_ACK",
+      dump_spdm_chunk_send_ack },
+    { SPDM_CHUNK_RESPONSE, "SPDM_CHUNK_RESPONSE",
+      dump_spdm_chunk_response },
 
     { SPDM_GET_DIGESTS, "SPDM_GET_DIGESTS", dump_spdm_get_digests },
     { SPDM_GET_CERTIFICATE, "SPDM_GET_CERTIFICATE",
@@ -2919,6 +3074,10 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       dump_spdm_get_csr },
     { SPDM_SET_CERTIFICATE, "SPDM_SET_CERTIFICATE",
       dump_spdm_set_certificate },
+    { SPDM_CHUNK_SEND, "SPDM_CHUNK_SEND",
+      dump_spdm_chunk_send },
+    { SPDM_CHUNK_GET, "SPDM_CHUNK_GET",
+      dump_spdm_chunk_get },
 };
 
 void dump_spdm_message(const void *buffer, size_t buffer_size)
