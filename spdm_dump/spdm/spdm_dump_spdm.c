@@ -2732,6 +2732,129 @@ void dump_spdm_end_session_ack(const void *buffer, size_t buffer_size)
     printf("\n");
 }
 
+void dump_spdm_get_csr(const void *buffer, size_t buffer_size)
+{
+    const spdm_get_csr_request_t *spdm_request;
+    uint8_t *ptr;
+
+    printf("SPDM_GET_CSR ");
+
+    if (buffer_size < sizeof(spdm_get_csr_request_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_request = buffer;
+
+    if (buffer_size < sizeof(spdm_get_csr_request_t) +
+                      spdm_request->opaque_data_length +
+                      spdm_request->requester_info_length) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+        if (m_param_all_mode) {
+            printf("\n    RequesterInfo(");
+            ptr = (void *)(spdm_request + 1);
+            dump_data(ptr, spdm_request->requester_info_length);
+            printf(")");
+
+            printf("\n    OpaqueData(");
+            ptr = (void *)(ptr + spdm_request->requester_info_length);
+            dump_data(ptr, spdm_request->opaque_data_length);
+            printf(")");
+        }
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_csr(const void *buffer, size_t buffer_size)
+{
+    const spdm_csr_response_t *spdm_response;
+    uint8_t *ptr;
+
+    printf("SPDM_CSR ");
+
+    if (buffer_size < sizeof(spdm_csr_response_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_response = buffer;
+
+    if (buffer_size < sizeof(spdm_csr_response_t) +
+                      spdm_response->csr_length) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+        if (m_param_all_mode) {
+            printf("\n    CSR(");
+            ptr = (void *)(spdm_response + 1);
+            dump_data(ptr, spdm_response->csr_length);
+            printf(")");
+        }
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_set_certificate(const void *buffer, size_t buffer_size)
+{
+    const spdm_set_certificate_request_t *spdm_request;
+    const spdm_cert_chain_t *cert_chain;
+
+    printf("SPDM_SET_CERTIFICATE ");
+
+    if (buffer_size < sizeof(spdm_set_certificate_request_t) + sizeof(spdm_cert_chain_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_request = buffer;
+    cert_chain = (void *)(spdm_request + 1);
+    if (buffer_size < sizeof(spdm_set_certificate_request_t) + cert_chain->length) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("(SlotID=0x%02x) ", spdm_request->header.param1 & 0xF);
+        if (m_param_all_mode) {
+                printf("\n    CertChain(\n");
+                dump_hex((void *)cert_chain, cert_chain->length);
+                printf("    )");
+        }
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_set_certificate_rsp(const void *buffer, size_t buffer_size)
+{
+    const spdm_set_certificate_response_t *spdm_response;
+
+    printf("SPDM_SET_CERTIFICATE_RSP ");
+
+    if (buffer_size < sizeof(spdm_set_certificate_response_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_response = buffer;
+
+    if (!m_param_quite_mode) {
+        printf("(SlotID=0x%02x) ", spdm_response->header.param1 & 0xF);
+    }
+
+    printf("\n");
+}
+
 dispatch_table_entry_t m_spdm_dispatch[] = {
     { SPDM_DIGESTS, "SPDM_DIGESTS", dump_spdm_digests },
     { SPDM_CERTIFICATE, "SPDM_CERTIFICATE", dump_spdm_certificate },
@@ -2760,6 +2883,10 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       dump_spdm_encapsulated_response_ack },
     { SPDM_END_SESSION_ACK, "SPDM_END_SESSION_ACK",
       dump_spdm_end_session_ack },
+    { SPDM_CSR, "SPDM_CSR",
+      dump_spdm_csr },
+    { SPDM_SET_CERTIFICATE_RSP, "SPDM_SET_CERTIFICATE_RSP",
+      dump_spdm_set_certificate_rsp },
 
     { SPDM_GET_DIGESTS, "SPDM_GET_DIGESTS", dump_spdm_get_digests },
     { SPDM_GET_CERTIFICATE, "SPDM_GET_CERTIFICATE",
@@ -2788,6 +2915,10 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       "SPDM_DELIVER_ENCAPSULATED_RESPONSE",
       dump_spdm_deliver_encapsulated_response },
     { SPDM_END_SESSION, "SPDM_END_SESSION", dump_spdm_end_session },
+    { SPDM_GET_CSR, "SPDM_GET_CSR",
+      dump_spdm_get_csr },
+    { SPDM_SET_CERTIFICATE, "SPDM_SET_CERTIFICATE",
+      dump_spdm_set_certificate },
 };
 
 void dump_spdm_message(const void *buffer, size_t buffer_size)
