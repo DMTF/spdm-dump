@@ -18,8 +18,12 @@
 #include "industry_standard/link_type_ex.h"
 
 #include "library/spdm_common_lib.h"
+#include "library/spdm_crypt_lib.h"
 #include "library/spdm_transport_mctp_lib.h"
 #include "library/spdm_transport_pcidoe_lib.h"
+
+#include "hal/library/memlib.h"
+#include "hal/library/debuglib.h"
 
 #include "os_include.h"
 #include "stdio.h"
