@@ -401,7 +401,7 @@ void dump_spdm_get_capabilities(const void *buffer, size_t buffer_size)
 
     printf("SPDM_GET_CAPABILITIES ");
 
-    message_size = LIBSPDM_OFFSET_OF(spdm_get_capabilities_request_t, reserved);
+    message_size = offsetof(spdm_get_capabilities_request_t, reserved);
     if (buffer_size < message_size) {
         printf("\n");
         return;
@@ -410,7 +410,7 @@ void dump_spdm_get_capabilities(const void *buffer, size_t buffer_size)
     spdm_request = buffer;
 
     if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_11) {
-        message_size = LIBSPDM_OFFSET_OF(spdm_get_capabilities_request_t, data_transfer_size);
+        message_size = offsetof(spdm_get_capabilities_request_t, data_transfer_size);
         if (buffer_size < message_size) {
             printf("\n");
             return;
@@ -480,7 +480,7 @@ void dump_spdm_capabilities(const void *buffer, size_t buffer_size)
 
     printf("SPDM_CAPABILITIES ");
 
-    message_size = LIBSPDM_OFFSET_OF(spdm_capabilities_response_t, data_transfer_size);
+    message_size = offsetof(spdm_capabilities_response_t, data_transfer_size);
     if (buffer_size < message_size) {
         printf("\n");
         return;
@@ -1211,7 +1211,7 @@ void dump_spdm_get_measurements(const void *buffer, size_t buffer_size)
 
     printf("SPDM_GET_MEASUREMENTS ");
 
-    message_size = LIBSPDM_OFFSET_OF(spdm_get_measurements_request_t, nonce);
+    message_size = offsetof(spdm_get_measurements_request_t, nonce);
     if (buffer_size < message_size) {
         printf("\n");
         return;
@@ -1227,7 +1227,7 @@ void dump_spdm_get_measurements(const void *buffer, size_t buffer_size)
             SPDM_MESSAGE_VERSION_11) {
             message_size = sizeof(spdm_get_measurements_request_t);
         } else {
-            message_size = LIBSPDM_OFFSET_OF(
+            message_size = offsetof(
                 spdm_get_measurements_request_t, slot_id_param);
         }
     }
@@ -1633,7 +1633,7 @@ void dump_spdm_vendor_defined_request(const void *buffer, size_t buffer_size)
         printf("\n");
         return;
     }
-    header_size = LIBSPDM_OFFSET_OF(spdm_vendor_defined_request_msg_t, standard_id);
+    header_size = offsetof(spdm_vendor_defined_request_msg_t, standard_id);
 
     spdm_request = buffer;
 
@@ -1663,7 +1663,7 @@ void dump_spdm_vendor_defined_response(const void *buffer, size_t buffer_size)
         printf("\n");
         return;
     }
-    header_size = LIBSPDM_OFFSET_OF(spdm_vendor_defined_request_msg_t, standard_id);
+    header_size = offsetof(spdm_vendor_defined_request_msg_t, standard_id);
 
     spdm_response = buffer;
 

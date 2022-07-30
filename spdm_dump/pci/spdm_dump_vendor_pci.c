@@ -48,8 +48,7 @@ void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size)
         return;
     }
     if (vendor_defined_pci_header->payload_length >
-        buffer_size - (LIBSPDM_OFFSET_OF(pci_doe_spdm_vendor_defined_header_t,
-                                 pci_protocol))) {
+        buffer_size - (offsetof(pci_doe_spdm_vendor_defined_header_t, pci_protocol))) {
         printf("\n");
         return;
     }
