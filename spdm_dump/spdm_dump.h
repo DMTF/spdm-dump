@@ -26,6 +26,7 @@
 #include "hal/library/debuglib.h"
 
 #include "os_include.h"
+#include <stddef.h>
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
