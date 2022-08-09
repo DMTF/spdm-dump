@@ -2385,6 +2385,9 @@ void dump_spdm_psk_finish(const void *buffer, size_t buffer_size)
     printf("\n");
 
     LIBSPDM_ASSERT(m_current_session_info != NULL);
+    if (m_current_session_info == NULL) {
+        return;
+    }
     libspdm_append_message_f(m_spdm_context, m_current_session_info, true, buffer, message_size);
 }
 
