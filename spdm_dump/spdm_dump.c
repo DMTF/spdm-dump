@@ -603,6 +603,9 @@ void process_args(int argc, char *argv[])
 
         if (strcmp(argv[0], "--req_cert_chain") == 0) {
             if (argc >= 2) {
+                if (m_requester_cert_chain_buffer != NULL) {
+                    free(m_requester_cert_chain_buffer);
+                }
                 res = read_input_file(
                     argv[1], &m_requester_cert_chain_buffer,
                     &m_requester_cert_chain_buffer_size);
@@ -629,6 +632,9 @@ void process_args(int argc, char *argv[])
 
         if (strcmp(argv[0], "--rsp_cert_chain") == 0) {
             if (argc >= 2) {
+                if (m_responder_cert_chain_buffer != NULL) {
+                    free(m_responder_cert_chain_buffer);
+                }
                 res = read_input_file(
                     argv[1], &m_responder_cert_chain_buffer,
                     &m_responder_cert_chain_buffer_size);
