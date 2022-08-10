@@ -12,10 +12,6 @@ extern size_t m_local_used_cert_chain_buffer_size;
 extern void *m_peer_cert_chain_buffer;
 extern size_t m_peer_cert_chain_buffer_size;
 
-void *m_requester_cert_chain_buffer;
-size_t m_requester_cert_chain_buffer_size;
-void *m_responder_cert_chain_buffer;
-size_t m_responder_cert_chain_buffer_size;
 void *m_dhe_secret_buffer;
 size_t m_dhe_secret_buffer_size;
 void *m_psk_buffer;
