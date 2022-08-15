@@ -724,9 +724,15 @@ int main(int argc, char *argv[])
         close_pcap_packet_file();
         return 0;
     }
+    if (!init_tdisp_dump()) {
+        deinit_spdm_dump();
+        close_pcap_packet_file();
+        return 0;
+    }
 
     dump_pcap();
 
+    deinit_tdisp_dump();
     deinit_spdm_dump();
 
     close_pcap_packet_file();
