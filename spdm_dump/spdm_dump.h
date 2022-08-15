@@ -14,6 +14,7 @@
 #include "industry_standard/pldm.h"
 #include "industry_standard/pcidoe.h"
 #include "industry_standard/pci_idekm.h"
+#include "industry_standard/pci_tdisp.h"
 #include "industry_standard/pcap.h"
 #include "industry_standard/link_type_ex.h"
 
@@ -101,6 +102,12 @@ void dump_pci_doe_discovery_message(const void *buffer, size_t buffer_size);
 void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size);
 
 void dump_pci_ide_km_message(const void *buffer, size_t buffer_size);
+
+void dump_pci_tdisp_message(const void *buffer, size_t buffer_size);
+
+bool init_tdisp_dump(void);
+
+void deinit_tdisp_dump(void);
 
 libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                                uint32_t session_id,
