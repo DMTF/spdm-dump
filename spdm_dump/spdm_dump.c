@@ -12,6 +12,10 @@ bool m_param_dump_vendor_app;
 bool m_param_dump_hex;
 char *m_param_out_rsp_cert_chain_file_name;
 char *m_param_out_rsq_cert_chain_file_name;
+size_t m_requester_cert_chain_buffer_size;
+void *m_requester_cert_chain_buffer = NULL;
+size_t m_responder_cert_chain_buffer_size;
+void *m_responder_cert_chain_buffer = NULL;
 
 extern uint32_t m_spdm_requester_capabilities_flags;
 extern uint32_t m_spdm_responder_capabilities_flags;
@@ -643,7 +647,7 @@ void process_args(int argc, char *argv[])
                     print_usage();
                     exit(0);
                 }
-                if (m_requester_cert_chain_buffer_size >
+                if (m_responder_cert_chain_buffer_size >
                     LIBSPDM_MAX_CERT_CHAIN_SIZE) {
                     printf(
                         "rsp_cert_chain is too larger. Please increase LIBSPDM_MAX_CERT_CHAIN_SIZE and rebuild.\n");
