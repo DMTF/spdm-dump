@@ -3201,11 +3201,11 @@ error:
         free(m_spdm_cert_chain_buffer);
         m_spdm_cert_chain_buffer = NULL;
     }
-    if (m_local_used_cert_chain_buffer == NULL) {
+    if (m_local_used_cert_chain_buffer != NULL) {
         free(m_local_used_cert_chain_buffer);
         m_local_used_cert_chain_buffer = NULL;
     }
-    if (m_peer_cert_chain_buffer == NULL) {
+    if (m_peer_cert_chain_buffer != NULL) {
         free(m_peer_cert_chain_buffer);
         m_peer_cert_chain_buffer = NULL;
     }
