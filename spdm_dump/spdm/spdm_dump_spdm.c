@@ -19,6 +19,8 @@ void *m_current_session_info;
 uint32_t m_current_session_id;
 bool m_encapsulated;
 bool m_decrypted;
+/*chunk_send command last chunk flag*/
+bool m_chunk_send_lask_chunk_flag;
 
 void *m_spdm_cert_chain_buffer;
 size_t m_spdm_cert_chain_buffer_size;
@@ -289,6 +291,7 @@ value_string_entry_t m_spdm_chunk_send_attribute_string_table[] = {
     { SPDM_CHUNK_SEND_REQUEST_ATTRIBUTE_LAST_CHUNK,
       "LastChunk" },
 };
+
 
 value_string_entry_t m_spdm_chunk_send_ack_attribute_string_table[] = {
     { SPDM_CHUNK_SEND_ACK_RESPONSE_ATTRIBUTE_EARLY_ERROR_DETECTED,
@@ -2931,7 +2934,15 @@ void dump_spdm_set_certificate_rsp(const void *buffer, size_t buffer_size)
 void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
 {
     const spdm_chunk_send_request_t *spdm_request;
-    uint32_t *large_message_size;
+    uint32_t *large_message_size_ptr;
+    /*current chunk data*/
+    uint8_t *ptr;
+    /*pointer to store chunk large message*/
+    static uint8_t *chunk_send_large_message_buf = NULL;
+    /*loop to store chunk data to large meesage*/
+    static uint32_t chunk_send_large_message_current_size;
+    /*store the total message_size*/
+    static uint32_t chunk_send_large_message_buf_size;
 
     printf("SPDM_CHUNK_SEND ");
 
@@ -2964,19 +2975,83 @@ void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
                spdm_request->header.param2,
                spdm_request->chunk_seq_no,
                spdm_request->chunk_size);
-        if (spdm_request->chunk_seq_no == 0) {
-            large_message_size = (void *)(spdm_request + 1);
-            printf(", LargeMsgSize=0x%08x", *large_message_size);
+    }
+
+    if (spdm_request->chunk_seq_no == 0) {
+        /*first chunk*/
+        large_message_size_ptr = (void *)(spdm_request + 1);
+        if (!m_param_quite_mode) {
+            printf(", LargeMsgSize=0x%08x", *large_message_size_ptr);
         }
+        if (chunk_send_large_message_buf != NULL) {
+            free(chunk_send_large_message_buf);
+            chunk_send_large_message_buf = NULL;
+        }
+        chunk_send_large_message_buf = malloc(*large_message_size_ptr);
+        if (chunk_send_large_message_buf == NULL) {
+            printf("!!!memory out of resources!!!\n");
+            return;
+        }
+        chunk_send_large_message_buf_size = *large_message_size_ptr;
+        chunk_send_large_message_current_size = 0;
+        /*point to SPDMchunk data*/
+        ptr = (uint8_t *)(spdm_request + 1) + sizeof(uint32_t);
+    } else {
+        /*point to SPDMchunk data*/
+        ptr = (void *)(spdm_request + 1);
+    }
+
+    if (!m_param_quite_mode) {
         printf(") ");
     }
 
-    printf("\n");
+    if (chunk_send_large_message_current_size + spdm_request->chunk_size <=
+        chunk_send_large_message_buf_size) {
+        /*store chunk data to large message*/
+        memcpy(chunk_send_large_message_buf + chunk_send_large_message_current_size,
+               ptr, spdm_request->chunk_size);
+    } else {
+        free(chunk_send_large_message_buf);
+        chunk_send_large_message_buf = NULL;
+        printf("\n");
+        return;
+    }
+
+    /*move to store next chunk*/
+    chunk_send_large_message_current_size += spdm_request->chunk_size;
+
+    m_chunk_send_lask_chunk_flag = false;
+    /*last chunk: dump total large message and free chunk_send_large_message_buf*/
+    if (spdm_request->header.param1 == SPDM_CHUNK_SEND_REQUEST_ATTRIBUTE_LAST_CHUNK) {
+
+        /*change the last chunk flag*/
+        m_chunk_send_lask_chunk_flag = true;
+
+        /*final total chunk size shall equal the LargeMessageSize*/
+        if (chunk_send_large_message_current_size != chunk_send_large_message_buf_size) {
+            free(chunk_send_large_message_buf);
+            chunk_send_large_message_buf = NULL;
+            printf("\n");
+            return;
+        }
+
+        dump_spdm_message(chunk_send_large_message_buf, chunk_send_large_message_buf_size);
+
+        chunk_send_large_message_current_size = 0;
+        chunk_send_large_message_buf_size = 0;
+        free(chunk_send_large_message_buf);
+        chunk_send_large_message_buf = NULL;
+    } else {
+        printf("\n");
+    }
 }
 
 void dump_spdm_chunk_send_ack(const void *buffer, size_t buffer_size)
 {
     const spdm_chunk_send_ack_response_t *spdm_response;
+    size_t header_size;
+
+    header_size = sizeof(spdm_chunk_send_ack_response_t);
 
     printf("SPDM_CHUNK_SEND_ACK ");
 
@@ -2998,7 +3073,15 @@ void dump_spdm_chunk_send_ack(const void *buffer, size_t buffer_size)
                spdm_response->chunk_seq_no);
     }
 
-    printf("\n");
+    if (m_chunk_send_lask_chunk_flag) {
+        dump_spdm_message((uint8_t *)buffer + header_size,
+                          buffer_size - header_size);
+
+        m_chunk_send_lask_chunk_flag = false;
+    } else {
+        printf("\n");
+    }
+
 }
 
 void dump_spdm_chunk_get(const void *buffer, size_t buffer_size)
@@ -3026,7 +3109,15 @@ void dump_spdm_chunk_get(const void *buffer, size_t buffer_size)
 void dump_spdm_chunk_response(const void *buffer, size_t buffer_size)
 {
     const spdm_chunk_response_response_t *spdm_response;
-    uint32_t *large_message_size;
+    uint32_t *large_message_size_ptr;
+    /*current chunk data*/
+    uint8_t *ptr;
+    /*pointer to store chunk large message*/
+    static uint8_t *chunk_response_large_message_buf = NULL;
+    /*loop to store chunk data to large meesage*/
+    static uint32_t chunk_response_large_message_current_size;
+    /*store the total message_size*/
+    static uint32_t chunk_response_large_message_buf_size = 0;
 
     printf("SPDM_CHUNK_RESPONSE ");
 
@@ -3059,14 +3150,71 @@ void dump_spdm_chunk_response(const void *buffer, size_t buffer_size)
                spdm_response->header.param2,
                spdm_response->chunk_seq_no,
                spdm_response->chunk_size);
-        if (spdm_response->chunk_seq_no == 0) {
-            large_message_size = (void *)(spdm_response + 1);
-            printf(", LargeMsgSize=0x%08x", *large_message_size);
+    }
+
+    if (spdm_response->chunk_seq_no == 0) {
+        /*first chunk*/
+        large_message_size_ptr = (void *)(spdm_response + 1);
+        if (!m_param_quite_mode) {
+            printf(", LargeMsgSize=0x%08x", *large_message_size_ptr);
         }
+        if (chunk_response_large_message_buf != NULL) {
+            free(chunk_response_large_message_buf);
+            chunk_response_large_message_buf = NULL;
+        }
+        chunk_response_large_message_buf = malloc(*large_message_size_ptr);
+        if (chunk_response_large_message_buf == NULL) {
+            printf("!!!memory out of resources!!!\n");
+            return;
+        }
+        chunk_response_large_message_buf_size = *large_message_size_ptr;
+        chunk_response_large_message_current_size = 0;
+        /*point to SPDMchunk data*/
+        ptr = (uint8_t *)(spdm_response + 1) + sizeof(uint32_t);
+    } else {
+        /*point to SPDMchunk data*/
+        ptr = (void *)(spdm_response + 1);
+    }
+
+    if (!m_param_quite_mode) {
         printf(") ");
     }
 
-    printf("\n");
+    if (chunk_response_large_message_current_size + spdm_response->chunk_size <=
+        chunk_response_large_message_buf_size) {
+        /*store chunk data to large message*/
+        memcpy(chunk_response_large_message_buf + chunk_response_large_message_current_size,
+            ptr, spdm_response->chunk_size);
+    } else {
+        free(chunk_response_large_message_buf);
+        chunk_response_large_message_buf = NULL;
+        printf("\n");
+        return;
+    }
+
+    /*move to store next chunk*/
+    chunk_response_large_message_current_size += spdm_response->chunk_size;
+
+    /*last chunk: dump total large message and free chunk_send_large_message_buf*/
+    if (spdm_response->header.param1 == SPDM_CHUNK_SEND_REQUEST_ATTRIBUTE_LAST_CHUNK) {
+
+        /*final total chunk size shall equal the LargeMessageSize*/
+        if (chunk_response_large_message_current_size != chunk_response_large_message_buf_size) {
+            free(chunk_response_large_message_buf);
+            chunk_response_large_message_buf = NULL;
+            printf("\n");
+            return;
+        }
+
+        dump_spdm_message(chunk_response_large_message_buf, chunk_response_large_message_buf_size);
+
+        chunk_response_large_message_buf_size = 0;
+        chunk_response_large_message_current_size = 0;
+        free(chunk_response_large_message_buf);
+        chunk_response_large_message_buf = NULL;
+    } else {
+        printf("\n");
+    }
 }
 
 dispatch_table_entry_t m_spdm_dispatch[] = {
