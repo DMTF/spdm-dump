@@ -11,6 +11,10 @@ dispatch_table_entry_t m_spdm_pci_protocol_dispatch[] = {
     { PCI_PROTOCOL_ID_TDISP, "TDISP", dump_pci_tdisp_message },
 };
 
+dispatch_table_entry_t m_spdm_pci_cxl_protocol_dispatch[] = {
+    { CXL_PROTOCOL_ID_IDE_KM, "CXL_IDE_KM", dump_cxl_ide_km_message },
+};
+
 void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size)
 {
     const pci_doe_spdm_vendor_defined_header_t *vendor_defined_pci_header;
@@ -33,7 +37,8 @@ void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size)
         printf("\n");
         return;
     }
-    if (vendor_defined_pci_header->vendor_id != SPDM_VENDOR_ID_PCISIG) {
+    if ((vendor_defined_pci_header->vendor_id != SPDM_VENDOR_ID_PCISIG) &&
+        (vendor_defined_pci_header->vendor_id != SPDM_VENDOR_ID_CXL)) {
         printf("\n");
         return;
     }
@@ -54,14 +59,23 @@ void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size)
         return;
     }
 
-    dump_dispatch_message(
-        m_spdm_pci_protocol_dispatch,
-        LIBSPDM_ARRAY_SIZE(m_spdm_pci_protocol_dispatch),
-        vendor_defined_pci_header->pci_protocol.protocol_id,
-        (uint8_t *)buffer + sizeof(pci_doe_spdm_vendor_defined_header_t),
-        vendor_defined_pci_header->payload_length -
-        sizeof(pci_protocol_header_t));
-
+    if (vendor_defined_pci_header->vendor_id == SPDM_VENDOR_ID_PCISIG) {
+        dump_dispatch_message(
+            m_spdm_pci_protocol_dispatch,
+            LIBSPDM_ARRAY_SIZE(m_spdm_pci_protocol_dispatch),
+            vendor_defined_pci_header->pci_protocol.protocol_id,
+            (uint8_t *)buffer + sizeof(pci_doe_spdm_vendor_defined_header_t),
+            vendor_defined_pci_header->payload_length -
+            sizeof(pci_protocol_header_t));
+    } else if (vendor_defined_pci_header->vendor_id == SPDM_VENDOR_ID_CXL) {
+        dump_dispatch_message(
+            m_spdm_pci_cxl_protocol_dispatch,
+            LIBSPDM_ARRAY_SIZE(m_spdm_pci_cxl_protocol_dispatch),
+            vendor_defined_pci_header->pci_protocol.protocol_id,
+            (uint8_t *)buffer + sizeof(pci_doe_spdm_vendor_defined_header_t),
+            vendor_defined_pci_header->payload_length -
+            sizeof(pci_protocol_header_t));
+    }
     if (m_param_dump_hex) {
         printf("  PCI Vendor message:\n");
         dump_hex(buffer, buffer_size);

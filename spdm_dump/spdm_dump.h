@@ -15,6 +15,7 @@
 #include "industry_standard/pcidoe.h"
 #include "industry_standard/pci_idekm.h"
 #include "industry_standard/pci_tdisp.h"
+#include "industry_standard/cxl_idekm.h"
 #include "industry_standard/pcap.h"
 #include "industry_standard/link_type_ex.h"
 
@@ -104,6 +105,8 @@ void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size);
 void dump_pci_ide_km_message(const void *buffer, size_t buffer_size);
 
 void dump_pci_tdisp_message(const void *buffer, size_t buffer_size);
+
+void dump_cxl_ide_km_message(const void *buffer, size_t buffer_size);
 
 bool init_tdisp_dump(void);
 
