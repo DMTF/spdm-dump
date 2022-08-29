@@ -21,6 +21,7 @@ SET(src_spdm_dump
     pci/pci_doe/pci_doe_dump_doe.c
     pci/pci_ide_km/spdm_dump_pci_ide_km.c
     pci/pci_tdisp/spdm_dump_pci_tdisp.c
+    cxl/cxl_ide_km/spdm_dump_cxl_ide_km.c
 )
 
 SET(spdm_dump_LIBRARY
