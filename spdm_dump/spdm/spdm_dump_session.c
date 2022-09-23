@@ -12,12 +12,17 @@ extern size_t m_local_used_cert_chain_buffer_size;
 extern void *m_peer_cert_chain_buffer;
 extern size_t m_peer_cert_chain_buffer_size;
 
-void *m_dhe_secret_buffer;
-size_t m_dhe_secret_buffer_size;
-void *m_psk_buffer;
-size_t m_psk_buffer_size;
+void *m_dhe_secret_buffer[LIBSPDM_MAX_SESSION_COUNT] = {NULL};
+size_t m_dhe_secret_buffer_size[LIBSPDM_MAX_SESSION_COUNT] = {0};
+void *m_psk_buffer[LIBSPDM_MAX_SESSION_COUNT] = {NULL};
+size_t m_psk_buffer_size[LIBSPDM_MAX_SESSION_COUNT] = {0};
 uint8_t m_responder_cert_chain_slot_id = 0;
 uint8_t m_requester_cert_chain_slot_id = 0;
+
+
+/*current used key index, index++ when finish command dump complete*/
+uint8_t m_dhe_secret_buffer_count = 0;
+uint8_t m_psk_secret_buffer_count = 0;
 
 libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                                uint32_t session_id,
@@ -56,13 +61,13 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                      &parameter, &mut_auth_requested, &data_size);
 
     if (!use_psk) {
-        if (m_dhe_secret_buffer == NULL ||
-            m_dhe_secret_buffer_size == 0) {
+        if (m_dhe_secret_buffer[m_dhe_secret_buffer_count] == NULL ||
+            m_dhe_secret_buffer_size[m_dhe_secret_buffer_count] == 0) {
             return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
         libspdm_secured_message_import_dhe_secret(
-            secured_message_context, m_dhe_secret_buffer,
-            m_dhe_secret_buffer_size);
+            secured_message_context, m_dhe_secret_buffer[m_dhe_secret_buffer_count],
+            m_dhe_secret_buffer_size[m_dhe_secret_buffer_count]);
 
         if (is_requester) {
             if (need_mut_auth && mut_auth_requested) {
@@ -140,16 +145,17 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
             }
         }
     } else {
-        if (m_psk_buffer == NULL || m_psk_buffer_size == 0) {
+        if (m_psk_buffer[m_psk_secret_buffer_count] == NULL ||
+            m_psk_buffer_size[m_psk_secret_buffer_count] == 0) {
             return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
-        if (m_psk_buffer_size > LIBSPDM_MAX_DHE_KEY_SIZE) {
+        if (m_psk_buffer_size[m_psk_secret_buffer_count] > LIBSPDM_MAX_DHE_KEY_SIZE) {
             printf("BUGBUG: PSK size is too large. It will be supported later.\n");
             return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
         libspdm_secured_message_import_dhe_secret(secured_message_context,
-                                                  m_psk_buffer,
-                                                  m_psk_buffer_size);
+                                                  m_psk_buffer[m_psk_secret_buffer_count],
+                                                  m_psk_buffer_size[m_psk_secret_buffer_count]);
     }
 
     return LIBSPDM_STATUS_SUCCESS;
@@ -183,8 +189,8 @@ libspdm_return_t spdm_dump_session_data_check(void *spdm_context,
                      &parameter, &mut_auth_requested, &data_size);
 
     if (!use_psk) {
-        if (m_dhe_secret_buffer == NULL ||
-            m_dhe_secret_buffer_size == 0) {
+        if (m_dhe_secret_buffer[m_dhe_secret_buffer_count] == NULL ||
+            m_dhe_secret_buffer_size[m_dhe_secret_buffer_count] == 0) {
             return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
         if (is_requester) {
@@ -211,7 +217,8 @@ libspdm_return_t spdm_dump_session_data_check(void *spdm_context,
             }
         }
     } else {
-        if (m_psk_buffer == NULL || m_psk_buffer_size == 0) {
+        if (m_psk_buffer[m_psk_secret_buffer_count] == NULL ||
+            m_psk_buffer_size[m_psk_secret_buffer_count] == 0) {
             return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
     }

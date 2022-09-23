@@ -1935,6 +1935,10 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
                      &parameter, &mut_auth_requested,
                      sizeof(mut_auth_requested));
 
+    if (m_dhe_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
+        return;
+    }
+
     if (spdm_dump_session_data_provision(m_spdm_context,
                                          m_current_session_id, false,
                                          true) != LIBSPDM_STATUS_SUCCESS) {
@@ -2097,6 +2101,10 @@ void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
         return;
     }
 
+    if (m_dhe_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
+        return;
+    }
+
     if (spdm_dump_session_data_provision(m_spdm_context,
                                          m_current_session_id, true,
                                          true) != LIBSPDM_STATUS_SUCCESS) {
@@ -2121,6 +2129,8 @@ void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         th2_hash_data);
+    /*use next key when next seesion start*/
+    m_dhe_secret_buffer_count++;
     libspdm_secured_message_set_session_state(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
@@ -2283,6 +2293,9 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
     }
     m_current_session_id = m_cached_session_id;
 
+    if (m_psk_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
+        return;
+    }
     if (spdm_dump_session_data_provision(m_spdm_context,
                                          m_current_session_id, false,
                                          true) != LIBSPDM_STATUS_SUCCESS) {
@@ -2448,6 +2461,9 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
         return;
     }
 
+    if (m_psk_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
+        return;
+    }
     if (spdm_dump_session_data_provision(m_spdm_context,
                                          m_current_session_id, true,
                                          true) != LIBSPDM_STATUS_SUCCESS) {
@@ -2488,6 +2504,9 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
     *(uint32_t *)parameter.additional_data = m_current_session_id;
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
                      &use_psk, sizeof(use_psk));
+
+    /*use next key when next seesion start*/
+    m_psk_secret_buffer_count++;
 
     libspdm_secured_message_set_use_psk(
         libspdm_get_secured_message_context_via_session_info(
@@ -2682,6 +2701,7 @@ void dump_spdm_encapsulated_response_ack(const void *buffer, size_t buffer_size)
 {
     const spdm_encapsulated_response_ack_response_t *spdm_response;
     size_t header_size;
+    uint8_t req_slot_id;
 
     printf("SPDM_ENCAPSULATED_RESPONSE_ACK ");
 
@@ -2724,14 +2744,14 @@ void dump_spdm_encapsulated_response_ack(const void *buffer, size_t buffer_size)
             return;
         }
 
+        req_slot_id = *((uint8_t *)buffer + header_size);
         if (!m_param_quite_mode) {
-            printf("(ReqSlotID=0x%02x) ",
-                   *((uint8_t *)buffer + header_size));
+            printf("(ReqSlotID=0x%02x) ", req_slot_id);
         }
 
         /*change global m_requester_cert_chain_slot_id when encapsulated_response_ack*/
-        if (*((uint8_t *)buffer + header_size) < SPDM_MAX_SLOT_COUNT) {
-            m_requester_cert_chain_slot_id = *((uint8_t *)buffer + header_size);
+        if (req_slot_id < SPDM_MAX_SLOT_COUNT) {
+            m_requester_cert_chain_slot_id = req_slot_id;
         } else {
             printf("ReqSlotID is not right\n");
             return;
