@@ -12,10 +12,10 @@ bool m_param_dump_vendor_app;
 bool m_param_dump_hex;
 char *m_param_out_rsp_cert_chain_file_name;
 char *m_param_out_rsq_cert_chain_file_name;
-size_t m_requester_cert_chain_buffer_size;
-void *m_requester_cert_chain_buffer = NULL;
-size_t m_responder_cert_chain_buffer_size;
-void *m_responder_cert_chain_buffer = NULL;
+size_t m_requester_cert_chain_buffer_size[SPDM_MAX_SLOT_COUNT] = {0};
+void *m_requester_cert_chain_buffer[SPDM_MAX_SLOT_COUNT] = {NULL};
+size_t m_responder_cert_chain_buffer_size[SPDM_MAX_SLOT_COUNT] = {0};
+void *m_responder_cert_chain_buffer[SPDM_MAX_SLOT_COUNT] = {NULL};
 
 extern uint32_t m_spdm_requester_capabilities_flags;
 extern uint32_t m_spdm_responder_capabilities_flags;
@@ -251,6 +251,11 @@ void process_args(int argc, char *argv[])
     uint32_t data32;
     bool res;
 
+    /*rsp_slot_id_index*/
+    uint8_t rsp_slot_id_index;
+    uint8_t req_slot_id_index;
+    rsp_slot_id_index = 0;
+    req_slot_id_index = 0;
     pcap_file_name = NULL;
 
     if (argc == 1) {
@@ -607,18 +612,22 @@ void process_args(int argc, char *argv[])
 
         if (strcmp(argv[0], "--req_cert_chain") == 0) {
             if (argc >= 2) {
-                if (m_requester_cert_chain_buffer != NULL) {
-                    free(m_requester_cert_chain_buffer);
+                if (req_slot_id_index >= SPDM_MAX_SLOT_COUNT) {
+                    printf("requester slot is full to store cert_chain\n");
+                    exit(0);
+                }
+                if (m_requester_cert_chain_buffer[req_slot_id_index] != NULL) {
+                    free(m_requester_cert_chain_buffer[req_slot_id_index]);
                 }
                 res = read_input_file(
-                    argv[1], &m_requester_cert_chain_buffer,
-                    &m_requester_cert_chain_buffer_size);
+                    argv[1], &m_requester_cert_chain_buffer[req_slot_id_index],
+                    &m_requester_cert_chain_buffer_size[req_slot_id_index]);
                 if (!res) {
                     printf("invalid --req_cert_chain\n");
                     print_usage();
                     exit(0);
                 }
-                if (m_requester_cert_chain_buffer_size >
+                if (m_requester_cert_chain_buffer_size[req_slot_id_index] >
                     LIBSPDM_MAX_CERT_CHAIN_SIZE) {
                     printf(
                         "req_cert_chain is too larger. Please increase LIBSPDM_MAX_CERT_CHAIN_SIZE and rebuild.\n");
@@ -626,6 +635,7 @@ void process_args(int argc, char *argv[])
                 }
                 argc -= 2;
                 argv += 2;
+                req_slot_id_index++;
                 continue;
             } else {
                 printf("invalid --req_cert_chain\n");
@@ -636,18 +646,22 @@ void process_args(int argc, char *argv[])
 
         if (strcmp(argv[0], "--rsp_cert_chain") == 0) {
             if (argc >= 2) {
-                if (m_responder_cert_chain_buffer != NULL) {
-                    free(m_responder_cert_chain_buffer);
+                if (rsp_slot_id_index >= SPDM_MAX_SLOT_COUNT) {
+                    printf("responder slot is full to store cert_chain\n");
+                    exit(0);
+                }
+                if (m_responder_cert_chain_buffer[rsp_slot_id_index] != NULL) {
+                    free(m_responder_cert_chain_buffer[rsp_slot_id_index]);
                 }
                 res = read_input_file(
-                    argv[1], &m_responder_cert_chain_buffer,
-                    &m_responder_cert_chain_buffer_size);
+                    argv[1], &m_responder_cert_chain_buffer[rsp_slot_id_index],
+                    &m_responder_cert_chain_buffer_size[rsp_slot_id_index]);
                 if (!res) {
                     printf("invalid --rsp_cert_chain\n");
                     print_usage();
                     exit(0);
                 }
-                if (m_responder_cert_chain_buffer_size >
+                if (m_responder_cert_chain_buffer_size[rsp_slot_id_index] >
                     LIBSPDM_MAX_CERT_CHAIN_SIZE) {
                     printf(
                         "rsp_cert_chain is too larger. Please increase LIBSPDM_MAX_CERT_CHAIN_SIZE and rebuild.\n");
@@ -655,6 +669,7 @@ void process_args(int argc, char *argv[])
                 }
                 argc -= 2;
                 argv += 2;
+                rsp_slot_id_index++;
                 continue;
             } else {
                 printf("invalid --rsp_cert_chain\n");
@@ -716,6 +731,8 @@ void process_args(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
+    uint8_t slot_id_index;
+
     printf("%s version 0.1\n", "spdm_dump");
 
     process_args(argc, argv);
@@ -737,11 +754,14 @@ int main(int argc, char *argv[])
 
     close_pcap_packet_file();
 
-    if (m_requester_cert_chain_buffer != NULL) {
-        free(m_requester_cert_chain_buffer);
-    }
-    if (m_responder_cert_chain_buffer != NULL) {
-        free(m_responder_cert_chain_buffer);
+    for (slot_id_index = 0; slot_id_index < SPDM_MAX_SLOT_COUNT; slot_id_index++) {
+        if (m_requester_cert_chain_buffer[slot_id_index] != NULL) {
+            free(m_requester_cert_chain_buffer[slot_id_index]);
+        }
+
+        if (m_responder_cert_chain_buffer[slot_id_index] != NULL) {
+            free(m_responder_cert_chain_buffer[slot_id_index]);
+        }
     }
     return 0;
 }
