@@ -143,10 +143,14 @@ extern void *m_requester_cert_chain_buffer[SPDM_MAX_SLOT_COUNT];
 extern size_t m_requester_cert_chain_buffer_size[SPDM_MAX_SLOT_COUNT];
 extern void *m_responder_cert_chain_buffer[SPDM_MAX_SLOT_COUNT];
 extern size_t m_responder_cert_chain_buffer_size[SPDM_MAX_SLOT_COUNT];
-extern void *m_dhe_secret_buffer;
-extern size_t m_dhe_secret_buffer_size;
-extern void *m_psk_buffer;
-extern size_t m_psk_buffer_size;
+extern void *m_dhe_secret_buffer[LIBSPDM_MAX_SESSION_COUNT];
+extern size_t m_dhe_secret_buffer_size[LIBSPDM_MAX_SESSION_COUNT];
+extern void *m_psk_buffer[LIBSPDM_MAX_SESSION_COUNT];
+extern size_t m_psk_buffer_size[LIBSPDM_MAX_SESSION_COUNT];
+
+/*current used key index, index++ when finish command dump complete*/
+extern uint8_t m_dhe_secret_buffer_count;
+extern uint8_t m_psk_secret_buffer_count;
 
 extern uint8_t m_responder_cert_chain_slot_id;
 extern uint8_t m_requester_cert_chain_slot_id;

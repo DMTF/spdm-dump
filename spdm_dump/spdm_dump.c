@@ -256,6 +256,13 @@ void process_args(int argc, char *argv[])
     uint8_t req_slot_id_index;
     rsp_slot_id_index = 0;
     req_slot_id_index = 0;
+
+    /*key params input time*/
+    uint8_t psk_key_input_count;
+    uint8_t dhe_key_input_count;
+    psk_key_input_count = 0;
+    dhe_key_input_count = 0;
+
     pcap_file_name = NULL;
 
     if (argc == 1) {
@@ -316,15 +323,22 @@ void process_args(int argc, char *argv[])
 
         if (strcmp(argv[0], "--psk") == 0) {
             if (argc >= 2) {
+                if (psk_key_input_count >= LIBSPDM_MAX_SESSION_COUNT) {
+                    printf("too many psk key input \n");
+                    print_usage();
+                    exit(0);
+                }
                 if (!hex_string_to_buffer(argv[1],
-                                          &m_psk_buffer,
-                                          &m_psk_buffer_size)) {
+                                          &m_psk_buffer[psk_key_input_count],
+                                          &m_psk_buffer_size[psk_key_input_count])) {
                     printf("invalid --psk\n");
                     print_usage();
                     exit(0);
                 }
                 argc -= 2;
                 argv += 2;
+
+                psk_key_input_count++;
                 continue;
             } else {
                 printf("invalid --psk\n");
@@ -335,15 +349,22 @@ void process_args(int argc, char *argv[])
 
         if (strcmp(argv[0], "--dhe_secret") == 0) {
             if (argc >= 2) {
+                if (dhe_key_input_count >= LIBSPDM_MAX_SESSION_COUNT) {
+                    printf("too many dhe key input \n");
+                    print_usage();
+                    exit(0);
+                }
                 if (!hex_string_to_buffer(
-                        argv[1], &m_dhe_secret_buffer,
-                        &m_dhe_secret_buffer_size)) {
+                        argv[1], &m_dhe_secret_buffer[dhe_key_input_count],
+                        &m_dhe_secret_buffer_size[dhe_key_input_count])) {
                     printf("invalid --dhe_secret\n");
                     print_usage();
                     exit(0);
                 }
                 argc -= 2;
                 argv += 2;
+
+                dhe_key_input_count++;
                 continue;
             } else {
                 printf("invalid --dhe_secret\n");

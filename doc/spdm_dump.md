@@ -149,6 +149,9 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
 
    Then the user may use command `spdm_dump -r SpdmRequester.pcap --psk 5465737450736b4461746100 --dhe_secret c7ac17ee29b6a4f84e978223040b7eddff792477a6f7fc0f51faa553fee58175`
 
+   Note: If there are multi session which need multi key, please input the key in order of session. For example, there are four session: session1 used dhe_key1; session2 used psk_key1; session3 used dhe_key2; session4 used psk_key2.
+   Then the user may use command `spdm_dump -r SpdmRequester.pcap --psk psk_key1 --psk psk_key2 --dhe_secret dhe_key1 --dhe_secret dhe_key2`
+
    A full SPDM log is like below:
 
    <pre>
