@@ -139,13 +139,15 @@ extern bool m_param_dump_hex;
 extern char *m_param_out_rsp_cert_chain_file_name;
 extern char *m_param_out_rsq_cert_chain_file_name;
 
-extern void *m_requester_cert_chain_buffer;
-extern size_t m_requester_cert_chain_buffer_size;
-extern void *m_responder_cert_chain_buffer;
-extern size_t m_responder_cert_chain_buffer_size;
+extern void *m_requester_cert_chain_buffer[SPDM_MAX_SLOT_COUNT];
+extern size_t m_requester_cert_chain_buffer_size[SPDM_MAX_SLOT_COUNT];
+extern void *m_responder_cert_chain_buffer[SPDM_MAX_SLOT_COUNT];
+extern size_t m_responder_cert_chain_buffer_size[SPDM_MAX_SLOT_COUNT];
 extern void *m_dhe_secret_buffer;
 extern size_t m_dhe_secret_buffer_size;
 extern void *m_psk_buffer;
 extern size_t m_psk_buffer_size;
 
+extern uint8_t m_responder_cert_chain_slot_id;
+extern uint8_t m_requester_cert_chain_slot_id;
 #endif

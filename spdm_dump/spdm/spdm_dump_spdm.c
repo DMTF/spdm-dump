@@ -1041,14 +1041,19 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
                     printf("Fail to write out_req_cert_chain\n");
                 }
             }
-            if (m_requester_cert_chain_buffer == NULL ||
-                m_requester_cert_chain_buffer_size == 0) {
-                m_requester_cert_chain_buffer =
+
+            if (spdm_response->header.param1 >= SPDM_MAX_SLOT_COUNT) {
+                printf("spdm_response->header.param1 is not right\n");
+                return;
+            }
+            if (m_requester_cert_chain_buffer[spdm_response->header.param1] == NULL ||
+                m_requester_cert_chain_buffer_size[spdm_response->header.param1] == 0) {
+                m_requester_cert_chain_buffer[spdm_response->header.param1] =
                     malloc(cert_chain_size);
-                if (m_requester_cert_chain_buffer != NULL) {
-                    memcpy(m_requester_cert_chain_buffer,
+                if (m_requester_cert_chain_buffer[spdm_response->header.param1] != NULL) {
+                    memcpy(m_requester_cert_chain_buffer[spdm_response->header.param1],
                            cert_chain, cert_chain_size);
-                    m_requester_cert_chain_buffer_size =
+                    m_requester_cert_chain_buffer_size[spdm_response->header.param1] =
                         cert_chain_size;
                 }
             }
@@ -1060,14 +1065,18 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
                     printf("Fail to write out_rsp_cert_chain\n");
                 }
             }
-            if (m_responder_cert_chain_buffer == NULL ||
-                m_responder_cert_chain_buffer_size == 0) {
-                m_responder_cert_chain_buffer =
+            if (spdm_response->header.param1 >= SPDM_MAX_SLOT_COUNT) {
+                printf("spdm_response->header.param1 is not right\n");
+                return;
+            }
+            if (m_responder_cert_chain_buffer[spdm_response->header.param1] == NULL ||
+                m_responder_cert_chain_buffer_size[spdm_response->header.param1] == 0) {
+                m_responder_cert_chain_buffer[spdm_response->header.param1] =
                     malloc(cert_chain_size);
-                if (m_responder_cert_chain_buffer != NULL) {
-                    memcpy(m_responder_cert_chain_buffer,
+                if (m_responder_cert_chain_buffer[spdm_response->header.param1] != NULL) {
+                    memcpy(m_responder_cert_chain_buffer[spdm_response->header.param1],
                            cert_chain, cert_chain_size);
-                    m_responder_cert_chain_buffer_size =
+                    m_responder_cert_chain_buffer_size[spdm_response->header.param1] =
                         cert_chain_size;
                 }
             }
@@ -1760,6 +1769,17 @@ void dump_spdm_key_exchange(const void *buffer, size_t buffer_size)
 
     printf("\n");
 
+    /*change global m_responder_cert_chain_slot_id when key exchange*/
+    if (spdm_request->header.param2 < SPDM_MAX_SLOT_COUNT) {
+        m_responder_cert_chain_slot_id = spdm_request->header.param2;
+    }
+    /*When key exchange param2 is 0xFF, m_responder_cert_chain_slot_id will be pre-provisioned slot_id.*/
+    if ((spdm_request->header.param2 >= SPDM_MAX_SLOT_COUNT) &&
+        (spdm_request->header.param2 != 0xFF)) {
+        printf("spdm_request->header.param2 is not right\n");
+        return;
+    }
+
     m_cached_session_id = spdm_request->req_session_id << 16;
     memcpy(m_spdm_last_message_buffer, buffer, message_size);
     m_spdm_last_message_buffer_size = message_size;
@@ -1879,6 +1899,17 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
     }
 
     printf("\n");
+
+    /*change global m_requester_cert_chain_slot_id when key exchange*/
+    if (spdm_response->req_slot_id_param < SPDM_MAX_SLOT_COUNT) {
+        m_requester_cert_chain_slot_id = spdm_response->req_slot_id_param;
+    }
+    /*When spdm_response->req_slot_id_param is 0xF, m_requester_cert_chain_slot_id will be pre-provisioned slot_id.*/
+    if ((spdm_response->req_slot_id_param >= SPDM_MAX_SLOT_COUNT) &&
+        (spdm_response->req_slot_id_param != 0xF)) {
+        printf("spdm_response->req_slot_id_param is not right\n");
+        return;
+    }
 
     m_cached_session_id =
         m_cached_session_id | spdm_response->rsp_session_id;
@@ -2697,6 +2728,15 @@ void dump_spdm_encapsulated_response_ack(const void *buffer, size_t buffer_size)
             printf("(ReqSlotID=0x%02x) ",
                    *((uint8_t *)buffer + header_size));
         }
+
+        /*change global m_requester_cert_chain_slot_id when encapsulated_response_ack*/
+        if (*((uint8_t *)buffer + header_size) < SPDM_MAX_SLOT_COUNT) {
+            m_requester_cert_chain_slot_id = *((uint8_t *)buffer + header_size);
+        } else {
+            printf("ReqSlotID is not right\n");
+            return;
+        }
+
         break;
     }
     printf("\n");

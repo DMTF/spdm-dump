@@ -201,6 +201,8 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
 
 3. If GET_CERTIFICATE or encapsulated GET_CERTIFICATE is not sent (e.g. when SlotId 0xFF is used or PUB_KEY_ID is used), the user need use `--rsp_cert_chain` or `--req_cert_chain` to indicate the responder certificate chain or the requester certificate chain, to dump the secured session data.
 
+   Note: If the user need input multi `--rsp_cert_chain` or  `--req_cert_chain`, the cert_chain need be inputed in order for slot_id. And max of the cert_chain number is SPDM_MAX_SLOT_COUNT.
+
    For example, `spdm_dump -r SpdmRequester.pcap --psk 5465737450736b4461746100 --dhe_secret c7ac17ee29b6a4f84e978223040b7eddff792477a6f7fc0f51faa553fee58175 --req_cert_chain rsa3072/bundle_requester.certchain.der --rsp_cert_chain ecp384/bundle_responder.certchain.der`
 
    If GET_CERTIFICATE or encapsulated GET_CERTIFICATE is sent, the user may use `--out_rsp_cert_chain` or `--out_req_cert_chain` to get the responder certificate chain or the requester certificate chain.
