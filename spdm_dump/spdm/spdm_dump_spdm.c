@@ -298,6 +298,49 @@ value_string_entry_t m_spdm_chunk_send_ack_attribute_string_table[] = {
       "EarlyErrorDetected" },
 };
 
+value_string_entry_t m_spdm_error_string_table[] = {
+    { SPDM_ERROR_CODE_INVALID_REQUEST,
+      "InvalidRequset" },
+    { SPDM_ERROR_CODE_BUSY,
+      "CodeBusy" },
+    { SPDM_ERROR_CODE_UNEXPECTED_REQUEST,
+      "UnexpectedRequest" },
+    { SPDM_ERROR_CODE_UNSPECIFIED,
+      "Unspecified" },
+    { SPDM_ERROR_CODE_UNSUPPORTED_REQUEST,
+      "UnsupportedRequest" },
+    { SPDM_ERROR_CODE_VERSION_MISMATCH,
+      "VersionMismatch" },
+    { SPDM_ERROR_CODE_RESPONSE_NOT_READY,
+      "ResponseNotReady" },
+    { SPDM_ERROR_CODE_REQUEST_RESYNCH,
+      "RequestResynch" },
+    { SPDM_ERROR_CODE_VENDOR_DEFINED,
+      "VendorDefined" },
+    { SPDM_ERROR_CODE_INVALID_SESSION,
+      "InvalidSession" },
+    { SPDM_ERROR_CODE_DECRYPT_ERROR,
+      "DecryptError" },
+    { SPDM_ERROR_CODE_REQUEST_IN_FLIGHT,
+      "RequestInFlight" },
+    { SPDM_ERROR_CODE_INVALID_RESPONSE_CODE,
+      "InvalidResponseCode" },
+    { SPDM_ERROR_CODE_SESSION_LIMIT_EXCEEDED,
+      "SessionLimitExceeded" },
+    { SPDM_ERROR_CODE_SESSION_REQUIRED,
+      "SessionRequired" },
+    { SPDM_ERROR_CODE_RESET_REQUIRED,
+      "ResetRequired" },
+    { SPDM_ERROR_CODE_RESPONSE_TOO_LARGE,
+      "ResponseTooLarge" },
+    { SPDM_ERROR_CODE_REQUEST_TOO_LARGE,
+      "RequestTooLarge" },
+    { SPDM_ERROR_CODE_LARGE_RESPONSE,
+      "LargeResponse" },
+    { SPDM_ERROR_CODE_MESSAGE_LOST,
+      "MessageLost" },
+};
+
 uint32_t spdm_dump_get_measurement_summary_hash_size(
     uint8_t measurement_summary_hash_type)
 {
@@ -1602,8 +1645,15 @@ void dump_spdm_error(const void *buffer, size_t buffer_size)
     spdm_response = buffer;
 
     if (!m_param_quite_mode) {
-        printf("(ErrCode=0x%02x, ErrData=0x%02x) ",
-               spdm_response->header.param1,
+        printf("(ErrCode=0x%02x(",
+               spdm_response->header.param1);
+
+        dump_entry_value(
+            m_spdm_error_string_table,
+            LIBSPDM_ARRAY_SIZE(m_spdm_error_string_table),
+            spdm_response->header.param1);
+
+        printf("), ErrData=0x%02x) ",
                spdm_response->header.param2);
 
         if (spdm_response->header.param1 ==
