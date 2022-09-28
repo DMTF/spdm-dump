@@ -19,6 +19,7 @@ void *m_current_session_info;
 uint32_t m_current_session_id;
 bool m_encapsulated;
 bool m_decrypted;
+bool m_chunk_large_message;
 /*chunk_send command last chunk flag*/
 bool m_chunk_send_lask_chunk_flag;
 
@@ -3085,7 +3086,9 @@ void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
             return;
         }
 
+        m_chunk_large_message = true;
         dump_spdm_message(chunk_send_large_message_buf, chunk_send_large_message_buf_size);
+        m_chunk_large_message = false;
 
         chunk_send_large_message_current_size = 0;
         chunk_send_large_message_buf_size = 0;
@@ -3124,8 +3127,11 @@ void dump_spdm_chunk_send_ack(const void *buffer, size_t buffer_size)
     }
 
     if (m_chunk_send_lask_chunk_flag) {
+
+        m_chunk_large_message = true;
         dump_spdm_message((uint8_t *)buffer + header_size,
                           buffer_size - header_size);
+        m_chunk_large_message = false;
 
         m_chunk_send_lask_chunk_flag = false;
     } else {
@@ -3256,7 +3262,9 @@ void dump_spdm_chunk_response(const void *buffer, size_t buffer_size)
             return;
         }
 
+        m_chunk_large_message = true;
         dump_spdm_message(chunk_response_large_message_buf, chunk_response_large_message_buf_size);
+        m_chunk_large_message = false;
 
         chunk_response_large_message_buf_size = 0;
         chunk_response_large_message_current_size = 0;
@@ -3352,7 +3360,7 @@ void dump_spdm_message(const void *buffer, size_t buffer_size)
 
     SpdmHeader = buffer;
 
-    if (!m_encapsulated && !m_decrypted) {
+    if (!m_encapsulated && !m_decrypted && !m_chunk_large_message) {
         if ((SpdmHeader->request_response_code & 0x80) != 0) {
             printf("REQ->RSP ");
         } else {
@@ -3367,11 +3375,14 @@ void dump_spdm_message(const void *buffer, size_t buffer_size)
                           (uint8_t *)buffer, buffer_size);
 
     if (m_param_dump_hex) {
-        if (!m_encapsulated) {
-            printf("  SPDM Message:\n");
-        } else {
+        if (m_encapsulated) {
             printf("  Encapsulated SPDM Message:\n");
+        } else if (m_chunk_large_message) {
+            printf("  Chunk Large SPDM Message:\n");
+        } else {
+            printf("  SPDM Message:\n");
         }
+
         dump_hex(buffer, buffer_size);
     }
 }
