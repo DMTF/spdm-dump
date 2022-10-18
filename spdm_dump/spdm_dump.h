@@ -19,7 +19,7 @@
 #include "industry_standard/pcap.h"
 #include "industry_standard/link_type_ex.h"
 
-#include "library/spdm_common_lib.h"
+#include "internal/libspdm_common_lib.h"
 #include "library/spdm_crypt_lib.h"
 #include "library/spdm_transport_mctp_lib.h"
 #include "library/spdm_transport_pcidoe_lib.h"
