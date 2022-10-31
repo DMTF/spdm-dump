@@ -6,6 +6,8 @@
 
 #include "spdm_dump.h"
 
+#define PCAP_PACKET_MAX_SIZE 0x00010000
+
 pcap_global_header_t m_pcap_global_header;
 FILE *m_pcap_file;
 void *m_pcap_packet_data_buffer;
@@ -78,7 +80,7 @@ bool open_pcap_packet_file(const char *pcap_file_name)
 
     dump_pcap_global_header(&m_pcap_global_header);
 
-    if (m_pcap_global_header.snap_len == 0) {
+    if (m_pcap_global_header.snap_len == 0 || m_pcap_global_header.snap_len > PCAP_PACKET_MAX_SIZE) {
         return false;
     }
 
@@ -130,7 +132,7 @@ void dump_pcap(void)
             return;
         }
         dump_pcap_packet_header(index++, &pcap_packet_header);
-        if (pcap_packet_header.incl_len == 0) {
+        if (pcap_packet_header.incl_len == 0 || pcap_packet_header.incl_len > PCAP_PACKET_MAX_SIZE) {
             return;
         }
         if (fread(m_pcap_packet_data_buffer, 1,
