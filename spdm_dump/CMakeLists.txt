@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 2.6)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/spdm_dump
                     ${LIBSPDM_DIR}/include
                     ${LIBSPDM_DIR}/include/hal
-                    ${LIBSPDM_DIR}/include/hal/${ARCH}
                     ${LIBSPDM_DIR}/os_stub/include
 )
 
