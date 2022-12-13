@@ -1834,7 +1834,7 @@ void dump_spdm_key_exchange(const void *buffer, size_t buffer_size)
         return;
     }
 
-    m_cached_session_id = spdm_request->req_session_id << 16;
+    m_cached_session_id = spdm_request->req_session_id;
     memcpy(m_spdm_last_message_buffer, buffer, message_size);
     m_spdm_last_message_buffer_size = message_size;
 }
@@ -1965,8 +1965,8 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
         return;
     }
 
-    m_cached_session_id =
-        m_cached_session_id | spdm_response->rsp_session_id;
+    m_cached_session_id = libspdm_generate_session_id((uint16_t)m_cached_session_id,
+        spdm_response->rsp_session_id);
     /* double check if current is occupied*/
     if (libspdm_get_session_info_via_session_id(m_spdm_context,
                                                 m_cached_session_id) != NULL) {
@@ -2256,7 +2256,7 @@ void dump_spdm_psk_exchange(const void *buffer, size_t buffer_size)
 
     printf("\n");
 
-    m_cached_session_id = spdm_request->req_session_id << 16;
+    m_cached_session_id = spdm_request->req_session_id;
     memcpy(m_spdm_last_message_buffer, buffer, message_size);
     m_spdm_last_message_buffer_size = message_size;
 }
@@ -2331,8 +2331,8 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
 
     printf("\n");
 
-    m_cached_session_id =
-        m_cached_session_id | spdm_response->rsp_session_id;
+    m_cached_session_id = libspdm_generate_session_id((uint16_t)m_cached_session_id,
+        spdm_response->rsp_session_id);
     /* double check if current is occupied*/
     if (libspdm_get_session_info_via_session_id(m_spdm_context,
                                                 m_cached_session_id) != NULL) {
