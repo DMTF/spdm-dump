@@ -999,6 +999,7 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
     size_t hash_size;
     spdm_cert_chain_t *spdm_cert_chain;
     uint8_t *root_hash;
+    size_t cert_chain_offset;
 
     printf("SPDM_CERTIFICATE ");
 
@@ -1084,44 +1085,53 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
             printf("spdm_response->header.param1 is not right\n");
             return;
         }
+
+        if (m_cert_chain_format == CERT_CHAIN_FORMAT_SPDM) {
+            cert_chain_offset = 0;
+        } else {
+            cert_chain_offset = sizeof(spdm_cert_chain_t) + hash_size;
+        }
+
+        /* override rule: alway record the latest data */
         if (m_encapsulated) {
             if (m_param_out_rsq_cert_chain_file_name[spdm_response->header.param1] != NULL) {
                 if (!write_output_file(
                         m_param_out_rsq_cert_chain_file_name[spdm_response->header.param1],
-                        cert_chain, cert_chain_size)) {
+                        (uint8_t *)cert_chain + cert_chain_offset,
+                        cert_chain_size - cert_chain_offset)) {
                     printf("Fail to write out_req_cert_chain\n");
                 }
             }
-
-            if (m_requester_cert_chain_buffer[spdm_response->header.param1] == NULL ||
-                m_requester_cert_chain_buffer_size[spdm_response->header.param1] == 0) {
-                m_requester_cert_chain_buffer[spdm_response->header.param1] =
-                    malloc(cert_chain_size);
-                if (m_requester_cert_chain_buffer[spdm_response->header.param1] != NULL) {
-                    memcpy(m_requester_cert_chain_buffer[spdm_response->header.param1],
-                           cert_chain, cert_chain_size);
-                    m_requester_cert_chain_buffer_size[spdm_response->header.param1] =
-                        cert_chain_size;
-                }
+            if (m_requester_cert_chain_buffer[spdm_response->header.param1] != NULL) {
+                free (m_requester_cert_chain_buffer[spdm_response->header.param1]);
+            }
+            m_requester_cert_chain_buffer[spdm_response->header.param1] =
+                malloc(cert_chain_size);
+            if (m_requester_cert_chain_buffer[spdm_response->header.param1] != NULL) {
+                memcpy(m_requester_cert_chain_buffer[spdm_response->header.param1],
+                       cert_chain, cert_chain_size);
+                m_requester_cert_chain_buffer_size[spdm_response->header.param1] =
+                    cert_chain_size;
             }
         } else {
             if (m_param_out_rsp_cert_chain_file_name[spdm_response->header.param1] != NULL) {
                 if (!write_output_file(
                         m_param_out_rsp_cert_chain_file_name[spdm_response->header.param1],
-                        cert_chain, cert_chain_size)) {
+                        (uint8_t *)cert_chain + cert_chain_offset,
+                        cert_chain_size - cert_chain_offset)) {
                     printf("Fail to write out_rsp_cert_chain\n");
                 }
             }
-            if (m_responder_cert_chain_buffer[spdm_response->header.param1] == NULL ||
-                m_responder_cert_chain_buffer_size[spdm_response->header.param1] == 0) {
-                m_responder_cert_chain_buffer[spdm_response->header.param1] =
-                    malloc(cert_chain_size);
-                if (m_responder_cert_chain_buffer[spdm_response->header.param1] != NULL) {
-                    memcpy(m_responder_cert_chain_buffer[spdm_response->header.param1],
-                           cert_chain, cert_chain_size);
-                    m_responder_cert_chain_buffer_size[spdm_response->header.param1] =
-                        cert_chain_size;
-                }
+            if (m_responder_cert_chain_buffer[spdm_response->header.param1] != NULL) {
+                free (m_responder_cert_chain_buffer[spdm_response->header.param1]);
+            }
+            m_responder_cert_chain_buffer[spdm_response->header.param1] =
+                malloc(cert_chain_size);
+            if (m_responder_cert_chain_buffer[spdm_response->header.param1] != NULL) {
+                memcpy(m_responder_cert_chain_buffer[spdm_response->header.param1],
+                       cert_chain, cert_chain_size);
+                m_responder_cert_chain_buffer_size[spdm_response->header.param1] =
+                    cert_chain_size;
             }
         }
     }

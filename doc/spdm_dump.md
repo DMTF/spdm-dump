@@ -34,6 +34,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
          [--aead AES_128_GCM|AES_256_GCM|CHACHA20_POLY1305|SM4_128_GCM]
          [--key_schedule HMAC_HASH]
          [--other_param OPAQUE_FMT_1]
+         [--cert_chain_format SPDM|RAW]
          [--req_cert_chain_slot_id <0~7|0xFF>]
          [--req_cert_chain <input requester public cert chain file>]
          [--rsp_cert_chain_slot_id <0~7|0xFF>]
@@ -58,6 +59,9 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
             Capabilities and algorithms are required if GET_CAPABILITIES or NEGOTIATE_ALGORITHMS is not sent.
                   For example, the negotiated state session or quick PSK session.
 
+         [--cert_chain_format] is required before any cert chain file parameter. Default is SPDM.
+            SPDM means cert chain file includes the Length, Reserved, or RootHash fields. It is needed if root_cert is absent.
+            RAW means cert chain file does not include the Length, Reserved, or RootHash fields.
          [--req_cert_chain_slot_id] is required just before [--req_cert_chain]
          [--req_cert_chain] is required to if encapsulated GET_CERTIFICATE is not sent
          [--rsp_cert_chain_slot_id] is required just before [--rsp_cert_chain]
@@ -69,7 +73,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
             Format: A file containing certificates defined in SPDM spec 'certificate chain format'.
                   It is one or more ASN.1 DER-encoded X.509 v3 certificates.
                   It may include multiple certificates, starting from root cert to leaf cert.
-                  It does include the Length, Reserved, or RootHash fields.
+                  It is defined by [--cert_chain_format].
    ```
 
 1. If you use `spdm_dump -r <pcap_file>` to dump the SPDM message over MCTP, you may see something like:
@@ -214,7 +218,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
 
    Note: Multiple `--rsp_cert_chain` or  `--req_cert_chain` is allowed. `--rsp_cert_chain_slot_id` or `--req_cert_chain_slot_id` must be present before each `--rsp_cert_chain` or  `--req_cert_chain`.
 
-   For example, `spdm_dump -r SpdmRequester.pcap --psk 5465737450736b4461746100 --dhe_secret c7ac17ee29b6a4f84e978223040b7eddff792477a6f7fc0f51faa553fee58175 --req_cert_chain_slot_id 0xFF --req_cert_chain rsa3072/bundle_requester.certchain.der --rsp_cert_chain_slot_id 0xFF --rsp_cert_chain ecp384/bundle_responder.certchain.der`
+   For example, `spdm_dump -r SpdmRequester.pcap --psk 5465737450736b4461746100 --dhe_secret c7ac17ee29b6a4f84e978223040b7eddff792477a6f7fc0f51faa553fee58175 --cert_chain_format RAW --req_cert_chain_slot_id 0xFF --req_cert_chain rsa3072/bundle_requester.certchain.der --rsp_cert_chain_slot_id 0xFF --rsp_cert_chain ecp384/bundle_responder.certchain.der`
 
    If GET_CERTIFICATE or encapsulated GET_CERTIFICATE is sent, the user may use `--out_rsp_cert_chain` or `--out_req_cert_chain` to get the responder certificate chain or the requester certificate chain.
 
