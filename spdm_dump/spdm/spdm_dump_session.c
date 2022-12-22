@@ -36,6 +36,9 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
     uint8_t mut_auth_requested;
     size_t data_size;
 
+    LIBSPDM_ASSERT (m_requester_cert_chain_slot_id <= SPDM_MAX_SLOT_COUNT);
+    LIBSPDM_ASSERT (m_responder_cert_chain_slot_id <= SPDM_MAX_SLOT_COUNT);
+
     session_info =
         libspdm_get_session_info_via_session_id(spdm_context, session_id);
     if (session_info == NULL) {
@@ -100,7 +103,11 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
             m_peer_cert_chain_buffer_size =
                 m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id];
             libspdm_zero_mem(&parameter, sizeof(parameter));
-            parameter.additional_data[0] = m_responder_cert_chain_slot_id;
+            if (m_responder_cert_chain_slot_id < SPDM_MAX_SLOT_COUNT) {
+                parameter.additional_data[0] = m_responder_cert_chain_slot_id;
+            } else {
+                parameter.additional_data[0] = 0;
+            }
             parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
             libspdm_set_data(spdm_context,
                              LIBSPDM_DATA_PEER_USED_CERT_CHAIN_BUFFER,

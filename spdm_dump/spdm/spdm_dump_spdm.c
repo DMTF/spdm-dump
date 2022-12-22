@@ -1080,19 +1080,19 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
         cert_chain = (uint8_t *)m_spdm_cert_chain_buffer;
         cert_chain_size = m_spdm_cert_chain_buffer_size;
 
+        if (spdm_response->header.param1 >= SPDM_MAX_SLOT_COUNT) {
+            printf("spdm_response->header.param1 is not right\n");
+            return;
+        }
         if (m_encapsulated) {
-            if (m_param_out_rsq_cert_chain_file_name != NULL) {
+            if (m_param_out_rsq_cert_chain_file_name[spdm_response->header.param1] != NULL) {
                 if (!write_output_file(
-                        m_param_out_rsq_cert_chain_file_name,
+                        m_param_out_rsq_cert_chain_file_name[spdm_response->header.param1],
                         cert_chain, cert_chain_size)) {
                     printf("Fail to write out_req_cert_chain\n");
                 }
             }
 
-            if (spdm_response->header.param1 >= SPDM_MAX_SLOT_COUNT) {
-                printf("spdm_response->header.param1 is not right\n");
-                return;
-            }
             if (m_requester_cert_chain_buffer[spdm_response->header.param1] == NULL ||
                 m_requester_cert_chain_buffer_size[spdm_response->header.param1] == 0) {
                 m_requester_cert_chain_buffer[spdm_response->header.param1] =
@@ -1105,16 +1105,12 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
                 }
             }
         } else {
-            if (m_param_out_rsp_cert_chain_file_name != NULL) {
+            if (m_param_out_rsp_cert_chain_file_name[spdm_response->header.param1] != NULL) {
                 if (!write_output_file(
-                        m_param_out_rsp_cert_chain_file_name,
+                        m_param_out_rsp_cert_chain_file_name[spdm_response->header.param1],
                         cert_chain, cert_chain_size)) {
                     printf("Fail to write out_rsp_cert_chain\n");
                 }
-            }
-            if (spdm_response->header.param1 >= SPDM_MAX_SLOT_COUNT) {
-                printf("spdm_response->header.param1 is not right\n");
-                return;
             }
             if (m_responder_cert_chain_buffer[spdm_response->header.param1] == NULL ||
                 m_responder_cert_chain_buffer_size[spdm_response->header.param1] == 0) {
@@ -1826,10 +1822,10 @@ void dump_spdm_key_exchange(const void *buffer, size_t buffer_size)
     /*change global m_responder_cert_chain_slot_id when key exchange*/
     if (spdm_request->header.param2 < SPDM_MAX_SLOT_COUNT) {
         m_responder_cert_chain_slot_id = spdm_request->header.param2;
-    }
-    /*When key exchange param2 is 0xFF, m_responder_cert_chain_slot_id will be pre-provisioned slot_id.*/
-    if ((spdm_request->header.param2 >= SPDM_MAX_SLOT_COUNT) &&
-        (spdm_request->header.param2 != 0xFF)) {
+    } else if (spdm_request->header.param2 == 0xFF) {
+        /*When key exchange param2 is 0xFF, m_responder_cert_chain_slot_id will be pre-provisioned slot_id.*/
+        m_responder_cert_chain_slot_id = SPDM_MAX_SLOT_COUNT;
+    } else {
         printf("spdm_request->header.param2 is not right\n");
         return;
     }
@@ -1957,10 +1953,10 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
     /*change global m_requester_cert_chain_slot_id when key exchange*/
     if (spdm_response->req_slot_id_param < SPDM_MAX_SLOT_COUNT) {
         m_requester_cert_chain_slot_id = spdm_response->req_slot_id_param;
-    }
-    /*When spdm_response->req_slot_id_param is 0xF, m_requester_cert_chain_slot_id will be pre-provisioned slot_id.*/
-    if ((spdm_response->req_slot_id_param >= SPDM_MAX_SLOT_COUNT) &&
-        (spdm_response->req_slot_id_param != 0xF)) {
+    } else if (spdm_response->req_slot_id_param == 0xF) {
+        /*When spdm_response->req_slot_id_param is 0xF, m_requester_cert_chain_slot_id will be pre-provisioned slot_id.*/
+        m_requester_cert_chain_slot_id = SPDM_MAX_SLOT_COUNT;
+    } else {
         printf("spdm_response->req_slot_id_param is not right\n");
         return;
     }
@@ -1996,7 +1992,8 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
     if (spdm_dump_session_data_provision(m_spdm_context,
                                          m_current_session_id, false,
                                          true) != LIBSPDM_STATUS_SUCCESS) {
-        return;
+        LIBSPDM_DEBUG((LIBSPDM_DEBUG_ERROR,
+            "spdm_dump_session_data_provision - failed.\n"));
     }
 
     hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
