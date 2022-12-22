@@ -35,6 +35,12 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
     bool use_psk;
     uint8_t mut_auth_requested;
     size_t data_size;
+    size_t hash_size;
+    spdm_cert_chain_t *cert_chain_header;
+    const uint8_t *root_cert;
+    size_t root_cert_len;
+    bool res;
+    size_t cert_chain_offset;
 
     LIBSPDM_ASSERT (m_requester_cert_chain_slot_id <= SPDM_MAX_SLOT_COUNT);
     LIBSPDM_ASSERT (m_responder_cert_chain_slot_id <= SPDM_MAX_SLOT_COUNT);
@@ -71,6 +77,96 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
         libspdm_secured_message_import_dhe_secret(
             secured_message_context, m_dhe_secret_buffer[m_dhe_secret_buffer_count],
             m_dhe_secret_buffer_size[m_dhe_secret_buffer_count]);
+
+        hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
+
+        if (m_cert_chain_format == CERT_CHAIN_FORMAT_SPDM) {
+            cert_chain_offset = 0;
+        } else {
+            cert_chain_offset = sizeof(spdm_cert_chain_t) + hash_size;
+        }
+
+        /* rule: cert_chain_data (from user) override cert_chain_buffer (from transport message) */
+        if (m_requester_cert_chain_data[m_requester_cert_chain_slot_id] != NULL &&
+            m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] != 0) {
+            if (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] != NULL) {
+                free (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id]);
+            }
+            m_requester_cert_chain_buffer_size[m_requester_cert_chain_slot_id] = 0;
+            m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] =
+                malloc(m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] +
+                       cert_chain_offset);
+            if (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] != NULL) {
+                memcpy(
+                    (uint8_t *)m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] +
+                    cert_chain_offset,
+                    m_requester_cert_chain_data[m_requester_cert_chain_slot_id],
+                    m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id]);
+                m_requester_cert_chain_buffer_size[m_requester_cert_chain_slot_id] =
+                    m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] +
+                    cert_chain_offset;
+                if (cert_chain_offset != 0) {
+                    cert_chain_header = m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id];
+                    cert_chain_header->length =
+                        (uint16_t)(m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] +
+                        cert_chain_offset);
+                    cert_chain_header->reserved = 0;
+                    res = libspdm_x509_get_cert_from_cert_chain(
+                                m_requester_cert_chain_data[m_requester_cert_chain_slot_id],
+                                m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id],
+                                0, &root_cert, &root_cert_len);
+                    if (!res) {
+                        free (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id]);
+                        m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] = NULL;
+                    } else {
+                        libspdm_hash_all (
+                            m_spdm_base_hash_algo,
+                            root_cert, root_cert_len,
+                            (uint8_t *)(cert_chain_header + 1));
+                    }
+                }
+            }
+        }
+        if (m_responder_cert_chain_data[m_responder_cert_chain_slot_id] != NULL &&
+            m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] != 0) {
+            if (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] != NULL) {
+                free (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id]);
+            }
+            m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id] = 0;
+            m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] =
+                malloc(m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] +
+                       cert_chain_offset);
+            if (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] != NULL) {
+                memcpy(
+                    (uint8_t *)m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] +
+                    cert_chain_offset,
+                    m_responder_cert_chain_data[m_responder_cert_chain_slot_id],
+                    m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id]);
+                m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id] =
+                    m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] +
+                    cert_chain_offset;
+                if (cert_chain_offset != 0) {
+                    cert_chain_header = m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id];
+                    cert_chain_header->length =
+                        (uint16_t)(m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] +
+                        cert_chain_offset);
+                    cert_chain_header->reserved = 0;
+                    res = libspdm_x509_get_cert_from_cert_chain(
+                                m_responder_cert_chain_data[m_responder_cert_chain_slot_id],
+                                m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id],
+                                0, &root_cert, &root_cert_len);
+                    if (!res) {
+                        free (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id]);
+                        m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] = NULL;
+                    } else {
+                        libspdm_hash_all (
+                            m_spdm_base_hash_algo,
+                            root_cert, root_cert_len,
+                            (uint8_t *)(cert_chain_header + 1));
+                    }
+                }
+            }
+        }
 
         if (is_requester) {
             if (need_mut_auth && mut_auth_requested) {

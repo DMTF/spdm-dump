@@ -136,9 +136,16 @@ extern bool m_param_quite_mode;
 extern bool m_param_all_mode;
 extern bool m_param_dump_vendor_app;
 extern bool m_param_dump_hex;
+
+#define CERT_CHAIN_FORMAT_SPDM 0
+#define CERT_CHAIN_FORMAT_RAW 1
+extern uint32_t m_cert_chain_format;
 extern char *m_param_out_rsp_cert_chain_file_name[SPDM_MAX_SLOT_COUNT];
 extern char *m_param_out_rsq_cert_chain_file_name[SPDM_MAX_SLOT_COUNT];
-
+extern void *m_requester_cert_chain_data[SPDM_MAX_SLOT_COUNT+1];
+extern size_t m_requester_cert_chain_data_size[SPDM_MAX_SLOT_COUNT+1];
+extern void *m_responder_cert_chain_data[SPDM_MAX_SLOT_COUNT+1];
+extern size_t m_responder_cert_chain_data_size[SPDM_MAX_SLOT_COUNT+1];
 extern void *m_requester_cert_chain_buffer[SPDM_MAX_SLOT_COUNT+1];
 extern size_t m_requester_cert_chain_buffer_size[SPDM_MAX_SLOT_COUNT+1];
 extern void *m_responder_cert_chain_buffer[SPDM_MAX_SLOT_COUNT+1];
