@@ -15,7 +15,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
 
 ## spdm_dump user guide
 
-   <pre>
+   ```
       spdm_dump -r <PcapFileName>
          [-q] (quite mode, dump message type only)
          [-a] (all mode, dump all fields)
@@ -62,11 +62,11 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
                   It is one or more ASN.1 DER-encoded X.509 v3 certificates.
                   It may include multiple certificates, starting from root cert to leaf cert.
                   It does include the Length, Reserved, or RootHash fields.
-   </pre>
+   ```
 
 1. If you use `spdm_dump -r <pcap_file>` to dump the SPDM message over MCTP, you may see something like:
 
-   <pre>
+   ```
       PcapFile: Magic - 'a1b2c3d4', version2.4, DataLink - 291 (MCTP), MaxPacketSize - 65536
       1 (1608625474) MCTP(5) REQ->RSP SPDM(10, 0x84) SPDM_GET_VERSION ()
       2 (1608625474) MCTP(5) RSP->REQ SPDM(10, 0x04) SPDM_VERSION (1.0.0.0, 1.1.0.0)
@@ -107,11 +107,11 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
       37 (1608625474) MCTP(5) REQ->RSP SPDM(11, 0xe0) SPDM_GET_MEASUREMENTS (Attr=0x01(GenSig), MeasOp=0x04, SlotID=0x00)
       38 (1608625474) MCTP(5) RSP->REQ SPDM(11, 0x60) SPDM_MEASUREMENTS (NumOfBlocks=0x1, MeasRecordLen=0x27, SlotID=0x00)
       ......
-   </pre>
+   ```
 
    If the transport layer is PCI_DOE, you may see something like:
 
-   <pre>
+   ```
       PcapFile: Magic - 'a1b2c3d4', version2.4, DataLink - 292 (PCI_DOE), MaxPacketSize - 65536
       1 (1608626133) PCI_DOE(1, 0)
       2 (1608626133) PCI_DOE(1, 0)
@@ -134,7 +134,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
       19 (1608626133) PCI_DOE(1, 1) REQ->RSP SPDM(11, 0x83) SPDM_CHALLENGE (SlotID=0x00, HashType=0x00(NoHash))
       20 (1608626133) PCI_DOE(1, 1) RSP->REQ SPDM(11, 0x03) SPDM_CHALLENGE_AUTH (Attr=0x80(BasicMutAuth, SlotID=0x00), SlotMask=0x01)
       ......
-   </pre>
+   ```
 
 2. In order to dump the SPDM secure session, you need use `--psk` or `--dhe_secret`.
 
@@ -154,7 +154,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
 
    A full SPDM log is like below:
 
-   <pre>
+   ```
       ......
       39 (1608625474) MCTP(5) REQ->RSP SPDM(11, 0xe4) SPDM_KEY_EXCHANGE (HashType=0x01(TcbHash), SlotID=0x00, ReqSessionID=0xffff)
       40 (1608625474) MCTP(5) RSP->REQ SPDM(11, 0x64) SPDM_KEY_EXCHANGE_RSP (Heart=0x00, RspSessionID=0xffff, MutAuth=0x03(Requested,WithEncap), SlotID=0x00)
@@ -200,7 +200,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
       80 (1608625474) MCTP(6) RSP->REQ SecuredSPDM(0xffffffff, Seq=0x0005) MCTP(5) SPDM(11, 0x6c) SPDM_END_SESSION_ACK ()
       81 (1608625474) MCTP(6) REQ->RSP SecuredSPDM(0xfffefffe, Seq=0x0001) MCTP(5) SPDM(11, 0xec) SPDM_END_SESSION (Attr=0x00())
       82 (1608625474) MCTP(6) RSP->REQ SecuredSPDM(0xfffefffe, Seq=0x0002) MCTP(5) SPDM(11, 0x6c) SPDM_END_SESSION_ACK ()
-   </pre>
+   ```
 
 3. If GET_CERTIFICATE or encapsulated GET_CERTIFICATE is not sent (e.g. when SlotId 0xFF is used or PUB_KEY_ID is used), the user need use `--rsp_cert_chain` or `--req_cert_chain` to indicate the responder certificate chain or the requester certificate chain, to dump the secured session data.
 
@@ -220,16 +220,16 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
 
    Then you can see the MCTP message, such as:
 
-   <pre>
+   ```
       ......
       65 (1608625474) MCTP(6) REQ->RSP SecuredSPDM(0xfffefffe, Seq=0x0001) MCTP(1) PLDM(0x80, 0x00, 0x02) (ID=0, D=0, Rq=1) ControlDiscovery GetTID_req ()
       66 (1608625474) MCTP(6) RSP->REQ SecuredSPDM(0xfffefffe, Seq=0x0001) MCTP(1) PLDM(0x00, 0x00, 0x02, 0x00) (ID=0, D=0, Rq=0) ControlDiscovery GetTID_rsp (TID=0x01)
       ......
-   </pre>
+   ```
 
    or PCI_DOE message, such as:
 
-   <pre>
+   ```
       1 (1608626133) PCI_DOE(1, 0) REQ->RSP DOE_DISCOVERY (Index=0)
       2 (1608626133) PCI_DOE(1, 0) RSP->REQ DOE_DISCOVERY (1, 0, NextIndex=1)
       3 (1608626133) PCI_DOE(1, 0) REQ->RSP DOE_DISCOVERY (Index=1)
@@ -237,24 +237,24 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
       5 (1608626133) PCI_DOE(1, 0) REQ->RSP DOE_DISCOVERY (Index=2)
       6 (1608626133) PCI_DOE(1, 0) RSP->REQ DOE_DISCOVERY (1, 2, NextIndex=0)
       ......
-   </pre>
+   ```
    
    or PCI_IDE_KM message, such as:
 
-   <pre>
+   ```
       ......
       65 (1608626133) PCI_DOE(1, 2) REQ->RSP SecuredSPDM(0xffffffff) SPDM(10, 0xfe) SPDM_VENDOR_DEFINED_REQUEST (StandID=0x0003) PCI (VendorID=0x0001) (ProtID=0x00) IDE_KM(0x00) QUERY (Port=0x00)
       66 (1608626133) PCI_DOE(1, 2) RSP->REQ SecuredSPDM(0xffffffff) SPDM(10, 0x7e) SPDM_VENDOR_DEFINED_RESPONSE (StandID=0x0003) PCI (VendorID=0x0001) (ProtID=0x00) IDE_KM(0x01) QUERY_RESP (Port=0x00, S00B00DF00, MaxPort=0x07)
       67 (1608626133) PCI_DOE(1, 2) REQ->RSP SecuredSPDM(0xfffefffe) SPDM(10, 0xfe) SPDM_VENDOR_DEFINED_REQUEST (StandID=0x0003) PCI (VendorID=0x0001) (ProtID=0x00) IDE_KM(0x00) QUERY (Port=0x00)
       68 (1608626133) PCI_DOE(1, 2) RSP->REQ SecuredSPDM(0xfffefffe) SPDM(10, 0x7e) SPDM_VENDOR_DEFINED_RESPONSE (StandID=0x0003) PCI (VendorID=0x0001) (ProtID=0x00) IDE_KM(0x01) QUERY_RESP (Port=0x00, S00B00DF00, MaxPort=0x07)
       ......
-   </pre>
+   ```
 
 6. You can also choose different dump level. By default, spdm_dump dumps most important fields. `-q` means quite mode, which only dumps header. `-a` means all mode, which dumps all fields as well as detailed parsing. `-x` means to dump the message in hex.
 
    Below is quite mode dump:
 
-   <pre>
+   ```
       1 (1608625474) MCTP(5) REQ->RSP SPDM(10, 0x84) SPDM_GET_VERSION
       2 (1608625474) MCTP(5) RSP->REQ SPDM(10, 0x04) SPDM_VERSION
       3 (1608625474) MCTP(5) REQ->RSP SPDM(11, 0xe1) SPDM_GET_CAPABILITIES
@@ -262,11 +262,11 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
       5 (1608625474) MCTP(5) REQ->RSP SPDM(11, 0xe3) SPDM_NEGOTIATE_ALGORITHMS
       6 (1608625474) MCTP(5) RSP->REQ SPDM(11, 0x63) SPDM_ALGORITHMS
       ......
-   </pre>
+   ```
 
    Below is all mode dump:
 
-   <pre>
+   ```
       ......
       3 (1608625474) MCTP(5) REQ->RSP SPDM(11, 0xe1) SPDM_GET_CAPABILITIES (Flags=0x0000f7d6, CTExponent=0x00)
           Flags(CERT=1, CHAL=1, MEAS_NO_SIG=0, MEAS_SIG=1, MEAS_FRESH=0, ENCRYPT=1, MAC=1, MUT_AUTH=1, KEY_EX=1, PSK=1, ENCAP=1, HBEAT=1, KEY_UPD=1, HANDSHAKE_IN_CLEAR=1, PUB_KEY_ID=0)
@@ -356,11 +356,11 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
          VerifyData(d5 8f 55 97 8e 97 c6 f8 1a d5 0d 5f 9f da 6b 83 8e 15 5f 1b c4 0d df 7c 42 cb 79 24 89 b4 59 e0)
       58 (1608625474) MCTP(6) RSP->REQ SecuredSPDM(0xfffefffe, Seq=0x0000) MCTP(5) SPDM(11, 0x67) SPDM_PSK_FINISH_RSP ()
       ......
-   </pre>
+   ```
 
    Below is hex dump:
 
-   <pre>
+   ```
       ......
       1 (1608625474) MCTP(5) REQ->RSP SPDM(10, 0x84) SPDM_GET_VERSION ()
          SPDM Message:
@@ -372,6 +372,6 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
          SecuredSPDM Message:
             0000: fe ff fe ff 30 00 05 00 05 11 6c 00 00 da 91 1a 1f 1e 2c 57 84 e0 59 b3 00 f9 9d 76 00 00 00 00
             0020: 46 00 00 00 00 00 2c 44 0f 0a b2 32 f8 92 0f 08 e8 90 14 30 bf 8e
-   </pre>
+   ```
 
    NOTE: Not all commands and fields are dumped so far. Please file issue or submit patch for them if you want to see something interesting.
