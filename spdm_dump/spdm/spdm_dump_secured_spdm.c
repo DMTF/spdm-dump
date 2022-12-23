@@ -65,8 +65,8 @@ void dump_spdm_opaque_supported_version(const void *buffer, size_t buffer_size)
                (spdm_version_number[index] >> 8) & 0xF,
                (spdm_version_number[index] >> 4) & 0xF,
                spdm_version_number[index] & 0xF);
-        printf(") ");
     }
+    printf(") ");
 }
 
 dispatch_table_entry_t m_spdm_opaque_dispatch[] = {
