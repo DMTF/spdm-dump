@@ -737,10 +737,10 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
             spdm_response->measurement_specification_sel);
         if (spdm_response->header.spdm_version >=
             SPDM_MESSAGE_VERSION_12) {
-            printf("), OtherParam=0x%02x(", spdm_response->other_params_support);
+            printf("), OtherParam=0x%02x(", spdm_response->other_params_selection);
             dump_entry_value(m_spdm_other_param_value_string_table,
                              LIBSPDM_ARRAY_SIZE(m_spdm_other_param_value_string_table),
-                             spdm_response->other_params_support);
+                             spdm_response->other_params_selection);
         }
         printf("), Hash=0x%08x(", spdm_response->base_hash_sel);
         dump_entry_value(m_spdm_hash_value_string_table,
@@ -866,7 +866,7 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
     }
 
     if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
-        m_spdm_other_params_support = spdm_response->other_params_support;
+        m_spdm_other_params_support = spdm_response->other_params_selection;
     }
 
     libspdm_zero_mem(&parameter, sizeof(parameter));
