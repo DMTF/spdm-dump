@@ -1193,7 +1193,11 @@ void dump_spdm_challenge_auth(const void *buffer, size_t buffer_size)
     printf("SPDM_CHALLENGE_AUTH ");
 
     hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
-    signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+    if (m_encapsulated) {
+        signature_size = libspdm_get_req_asym_signature_size(m_spdm_req_base_asym_alg);
+    } else {
+        signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+    }
     measurement_summary_hash_size =
         spdm_dump_get_measurement_summary_hash_size(
             m_cached_measurement_summary_hash_type);
