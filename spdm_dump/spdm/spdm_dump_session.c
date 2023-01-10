@@ -93,36 +93,53 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                 free (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id]);
             }
             m_requester_cert_chain_buffer_size[m_requester_cert_chain_slot_id] = 0;
-            m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] =
-                malloc(m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] +
-                       cert_chain_offset);
-            if (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] != NULL) {
-                memcpy(
-                    (uint8_t *)m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] +
-                    cert_chain_offset,
-                    m_requester_cert_chain_data[m_requester_cert_chain_slot_id],
-                    m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id]);
-                m_requester_cert_chain_buffer_size[m_requester_cert_chain_slot_id] =
-                    m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] +
-                    cert_chain_offset;
-                if (cert_chain_offset != 0) {
-                    cert_chain_header = m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id];
-                    cert_chain_header->length =
-                        (uint16_t)(m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] +
-                        cert_chain_offset);
-                    cert_chain_header->reserved = 0;
-                    res = libspdm_x509_get_cert_from_cert_chain(
+            /* data from user stored in m_requester_cert_chain_buffer[SPDM_MAX_SLOT_COUNT]
+             * is raw public key provisioned for slot_id - 0xFF */
+            if (m_requester_cert_chain_slot_id == SPDM_MAX_SLOT_COUNT) {
+                m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] =
+                    malloc(m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id]);
+                if (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] != NULL) {
+                    memcpy(
+                        (uint8_t *)m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id],
+                        m_requester_cert_chain_data[m_requester_cert_chain_slot_id],
+                        m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id]);
+                    m_requester_cert_chain_buffer_size[m_requester_cert_chain_slot_id] =
+                        m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id];
+                }
+            } else {
+                m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] =
+                    malloc(m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] +
+                           cert_chain_offset);
+                if (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] != NULL) {
+                    memcpy(
+                        (uint8_t *)m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] +
+                        cert_chain_offset,
+                        m_requester_cert_chain_data[m_requester_cert_chain_slot_id],
+                        m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id]);
+                    m_requester_cert_chain_buffer_size[m_requester_cert_chain_slot_id] =
+                        m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] +
+                        cert_chain_offset;
+                    if (cert_chain_offset != 0) {
+                        cert_chain_header =
+                            m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id];
+                        cert_chain_header->length =
+                            (uint16_t)(
+                                m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] +
+                                cert_chain_offset);
+                        cert_chain_header->reserved = 0;
+                        res = libspdm_x509_get_cert_from_cert_chain(
                                 m_requester_cert_chain_data[m_requester_cert_chain_slot_id],
                                 m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id],
                                 0, &root_cert, &root_cert_len);
-                    if (!res) {
-                        free (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id]);
-                        m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] = NULL;
-                    } else {
-                        libspdm_hash_all (
-                            m_spdm_base_hash_algo,
-                            root_cert, root_cert_len,
-                            (uint8_t *)(cert_chain_header + 1));
+                        if (!res) {
+                            free (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id]);
+                            m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] = NULL;
+                        } else {
+                            libspdm_hash_all (
+                                m_spdm_base_hash_algo,
+                                root_cert, root_cert_len,
+                                (uint8_t *)(cert_chain_header + 1));
+                        }
                     }
                 }
             }
@@ -133,36 +150,53 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                 free (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id]);
             }
             m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id] = 0;
-            m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] =
-                malloc(m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] +
-                       cert_chain_offset);
-            if (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] != NULL) {
-                memcpy(
-                    (uint8_t *)m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] +
-                    cert_chain_offset,
-                    m_responder_cert_chain_data[m_responder_cert_chain_slot_id],
-                    m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id]);
-                m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id] =
-                    m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] +
-                    cert_chain_offset;
-                if (cert_chain_offset != 0) {
-                    cert_chain_header = m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id];
-                    cert_chain_header->length =
-                        (uint16_t)(m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] +
-                        cert_chain_offset);
-                    cert_chain_header->reserved = 0;
-                    res = libspdm_x509_get_cert_from_cert_chain(
+            /* data from user stored in m_responder_cert_chain_buffer[SPDM_MAX_SLOT_COUNT]
+             * is raw public key provisioned for slot_id - 0xFF */
+            if (m_responder_cert_chain_slot_id == SPDM_MAX_SLOT_COUNT) {
+                m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] =
+                    malloc(m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id]);
+                if (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] != NULL) {
+                    memcpy(
+                        (uint8_t *)m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id],
+                        m_responder_cert_chain_data[m_responder_cert_chain_slot_id],
+                        m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id]);
+                    m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id] =
+                        m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id];
+                }
+            } else {
+                m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] =
+                    malloc(m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] +
+                           cert_chain_offset);
+                if (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] != NULL) {
+                    memcpy(
+                        (uint8_t *)m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] +
+                        cert_chain_offset,
+                        m_responder_cert_chain_data[m_responder_cert_chain_slot_id],
+                        m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id]);
+                    m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id] =
+                        m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] +
+                        cert_chain_offset;
+                    if (cert_chain_offset != 0) {
+                        cert_chain_header =
+                            m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id];
+                        cert_chain_header->length =
+                            (uint16_t)(
+                                m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] +
+                                cert_chain_offset);
+                        cert_chain_header->reserved = 0;
+                        res = libspdm_x509_get_cert_from_cert_chain(
                                 m_responder_cert_chain_data[m_responder_cert_chain_slot_id],
                                 m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id],
                                 0, &root_cert, &root_cert_len);
-                    if (!res) {
-                        free (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id]);
-                        m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] = NULL;
-                    } else {
-                        libspdm_hash_all (
-                            m_spdm_base_hash_algo,
-                            root_cert, root_cert_len,
-                            (uint8_t *)(cert_chain_header + 1));
+                        if (!res) {
+                            free (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id]);
+                            m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] = NULL;
+                        } else {
+                            libspdm_hash_all (
+                                m_spdm_base_hash_algo,
+                                root_cert, root_cert_len,
+                                (uint8_t *)(cert_chain_header + 1));
+                        }
                     }
                 }
             }
@@ -180,14 +214,25 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                 m_local_used_cert_chain_buffer_size =
                     m_requester_cert_chain_buffer_size[m_requester_cert_chain_slot_id];
                 libspdm_zero_mem(&parameter, sizeof(parameter));
-                parameter.location =
-                    LIBSPDM_DATA_LOCATION_CONNECTION;
-                libspdm_set_data(
-                    spdm_context,
-                    LIBSPDM_DATA_LOCAL_USED_CERT_CHAIN_BUFFER,
-                    &parameter,
-                    m_local_used_cert_chain_buffer,
-                    m_local_used_cert_chain_buffer_size);
+                if (m_requester_cert_chain_slot_id == SPDM_MAX_SLOT_COUNT) {
+                    parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
+                    libspdm_set_data(spdm_context,
+                                     LIBSPDM_DATA_LOCAL_PUBLIC_KEY,
+                                     &parameter,
+                                     m_local_used_cert_chain_buffer,
+                                     m_local_used_cert_chain_buffer_size);
+                    ((libspdm_context_t *)spdm_context)->
+                    connection_info.local_used_cert_chain_slot_id = 0xFF;
+                } else {
+                    parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
+                    libspdm_set_data(spdm_context,
+                                     LIBSPDM_DATA_LOCAL_USED_CERT_CHAIN_BUFFER,
+                                     &parameter,
+                                     m_local_used_cert_chain_buffer,
+                                     m_local_used_cert_chain_buffer_size);
+                    ((libspdm_context_t *)spdm_context)->
+                    connection_info.local_used_cert_chain_slot_id = m_requester_cert_chain_slot_id;
+                }
             }
             if (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] == NULL ||
                 m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id] == 0) {
@@ -199,16 +244,24 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
             m_peer_cert_chain_buffer_size =
                 m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id];
             libspdm_zero_mem(&parameter, sizeof(parameter));
-            if (m_responder_cert_chain_slot_id < SPDM_MAX_SLOT_COUNT) {
-                parameter.additional_data[0] = m_responder_cert_chain_slot_id;
+            if (m_responder_cert_chain_slot_id == SPDM_MAX_SLOT_COUNT) {
+                parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
+                libspdm_set_data(spdm_context,
+                                 LIBSPDM_DATA_PEER_PUBLIC_KEY,
+                                 &parameter,
+                                 m_peer_cert_chain_buffer,
+                                 m_peer_cert_chain_buffer_size);
+                ((libspdm_context_t *)spdm_context)->
+                connection_info.peer_used_cert_chain_slot_id = 0xFF;
             } else {
-                parameter.additional_data[0] = 0;
+                parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
+                parameter.additional_data[0] = m_responder_cert_chain_slot_id;
+                libspdm_set_data(spdm_context,
+                                 LIBSPDM_DATA_PEER_USED_CERT_CHAIN_BUFFER,
+                                 &parameter,
+                                 m_peer_cert_chain_buffer,
+                                 m_peer_cert_chain_buffer_size);
             }
-            parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
-            libspdm_set_data(spdm_context,
-                             LIBSPDM_DATA_PEER_USED_CERT_CHAIN_BUFFER,
-                             &parameter, m_peer_cert_chain_buffer,
-                             m_peer_cert_chain_buffer_size);
         } else {
             if (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] == NULL ||
                 m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id] == 0) {
@@ -220,12 +273,25 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
             m_local_used_cert_chain_buffer_size =
                 m_responder_cert_chain_buffer_size[m_responder_cert_chain_slot_id];
             libspdm_zero_mem(&parameter, sizeof(parameter));
-            parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
-            libspdm_set_data(spdm_context,
-                             LIBSPDM_DATA_LOCAL_USED_CERT_CHAIN_BUFFER,
-                             &parameter,
-                             m_local_used_cert_chain_buffer,
-                             m_local_used_cert_chain_buffer_size);
+            if (m_responder_cert_chain_slot_id == SPDM_MAX_SLOT_COUNT) {
+                parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
+                libspdm_set_data(spdm_context,
+                                 LIBSPDM_DATA_LOCAL_PUBLIC_KEY,
+                                 &parameter,
+                                 m_local_used_cert_chain_buffer,
+                                 m_local_used_cert_chain_buffer_size);
+                ((libspdm_context_t *)spdm_context)->
+                connection_info.local_used_cert_chain_slot_id = 0xFF;
+            } else {
+                parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
+                libspdm_set_data(spdm_context,
+                                 LIBSPDM_DATA_LOCAL_USED_CERT_CHAIN_BUFFER,
+                                 &parameter,
+                                 m_local_used_cert_chain_buffer,
+                                 m_local_used_cert_chain_buffer_size);
+                ((libspdm_context_t *)spdm_context)->
+                connection_info.local_used_cert_chain_slot_id = m_responder_cert_chain_slot_id;
+            }
             if (need_mut_auth && mut_auth_requested) {
                 if (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] == NULL ||
                     m_requester_cert_chain_buffer_size[m_requester_cert_chain_slot_id] == 0) {
@@ -237,14 +303,24 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                 m_peer_cert_chain_buffer_size =
                     m_requester_cert_chain_buffer_size[m_requester_cert_chain_slot_id];
                 libspdm_zero_mem(&parameter, sizeof(parameter));
-                parameter.location =
-                    LIBSPDM_DATA_LOCATION_CONNECTION;
-                parameter.additional_data[0] = m_requester_cert_chain_slot_id;
-                libspdm_set_data(
-                    spdm_context,
-                    LIBSPDM_DATA_PEER_USED_CERT_CHAIN_BUFFER,
-                    &parameter, m_peer_cert_chain_buffer,
-                    m_peer_cert_chain_buffer_size);
+                if (m_requester_cert_chain_slot_id == SPDM_MAX_SLOT_COUNT) {
+                    parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
+                    libspdm_set_data(spdm_context,
+                                     LIBSPDM_DATA_PEER_PUBLIC_KEY,
+                                     &parameter,
+                                     m_peer_cert_chain_buffer,
+                                     m_peer_cert_chain_buffer_size);
+                    ((libspdm_context_t *)spdm_context)->
+                    connection_info.peer_used_cert_chain_slot_id = 0xFF;
+                } else {
+                    parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
+                    parameter.additional_data[0] = m_requester_cert_chain_slot_id;
+                    libspdm_set_data(spdm_context,
+                                     LIBSPDM_DATA_PEER_USED_CERT_CHAIN_BUFFER,
+                                     &parameter,
+                                     m_peer_cert_chain_buffer,
+                                     m_peer_cert_chain_buffer_size);
+                }
             }
         }
     } else {

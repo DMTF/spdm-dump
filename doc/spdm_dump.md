@@ -214,11 +214,13 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
       82 (1608625474) MCTP(6) RSP->REQ SecuredSPDM(0xfffefffe, Seq=0x0002) MCTP(5) SPDM(11, 0x6c) SPDM_END_SESSION_ACK ()
    ```
 
-3. If GET_CERTIFICATE or encapsulated GET_CERTIFICATE is not sent (e.g. SlotId 0xFF is used with PUB_KEY_ID, or the entity caches the previous sent certificate chain), the user need use `--rsp_cert_chain` or `--req_cert_chain` to indicate the responder certificate chain or the requester certificate chain, to dump the secured session data.
+3. If GET_CERTIFICATE or encapsulated GET_CERTIFICATE is not sent (e.g. SlotId 0xFF is used with PUB_KEY_ID, or the entity caches the previous sent certificate chain), the user need use `--rsp_cert_chain` or `--req_cert_chain` to indicate the certificate chain or raw public key of responder or requester, to dump the secured session data.
 
    Note: Multiple `--rsp_cert_chain` or  `--req_cert_chain` is allowed. `--rsp_cert_chain_slot_id` or `--req_cert_chain_slot_id` must be present before each `--rsp_cert_chain` or  `--req_cert_chain`.
 
-   For example, `spdm_dump -r SpdmRequester.pcap --psk 5465737450736b4461746100 --dhe_secret c7ac17ee29b6a4f84e978223040b7eddff792477a6f7fc0f51faa553fee58175 --cert_chain_format RAW --req_cert_chain_slot_id 0xFF --req_cert_chain rsa3072/bundle_requester.certchain.der --rsp_cert_chain_slot_id 0xFF --rsp_cert_chain ecp384/bundle_responder.certchain.der`
+   For the example of SlotId 0xFF is used with PUB_KEY_ID, `spdm_dump -r SpdmRequester.pcap --psk 5465737450736b4461746100 --dhe_secret c7ac17ee29b6a4f84e978223040b7eddff792477a6f7fc0f51faa553fee58175 --cert_chain_format RAW --req_cert_chain_slot_id 0xFF --req_cert_chain rsa3072/end_requester.key.pub.der --rsp_cert_chain_slot_id 0xFF --rsp_cert_chain ecp384/end_responder.key.pub.der`
+
+   For the example of the entity caches the previous sent certificate chain, `spdm_dump -r SpdmRequester.pcap --psk 5465737450736b4461746100 --dhe_secret c7ac17ee29b6a4f84e978223040b7eddff792477a6f7fc0f51faa553fee58175 --cert_chain_format RAW --req_cert_chain_slot_id 0x00 --req_cert_chain rsa3072/bundle_requester.certchain.der --rsp_cert_chain_slot_id 0x00 --rsp_cert_chain ecp384/bundle_responder.certchain.der`
 
    If GET_CERTIFICATE or encapsulated GET_CERTIFICATE is sent, the user may use `--out_rsp_cert_chain` or `--out_req_cert_chain` to get the responder certificate chain or the requester certificate chain.
 
