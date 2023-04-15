@@ -20,6 +20,7 @@
 #include "industry_standard/link_type_ex.h"
 
 #include "internal/libspdm_common_lib.h"
+#include "internal/libspdm_secured_message_lib.h"
 #include "library/spdm_crypt_lib.h"
 #include "library/spdm_transport_mctp_lib.h"
 #include "library/spdm_transport_pcidoe_lib.h"
@@ -111,6 +112,11 @@ void dump_cxl_ide_km_message(const void *buffer, size_t buffer_size);
 bool init_tdisp_dump(void);
 
 void deinit_tdisp_dump(void);
+
+void spdm_dump_set_session_info_use_psk (void *spdm_session_info, bool use_psk);
+
+void spdm_dump_set_session_info_mut_auth_requested (void *spdm_session_info,
+                                                    uint8_t mut_auth_requested);
 
 libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                                uint32_t session_id,
