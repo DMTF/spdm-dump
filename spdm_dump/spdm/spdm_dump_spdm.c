@@ -1435,21 +1435,21 @@ void dump_spdm_measurements_record(uint8_t number_of_blocks,
                 libspdm_copy_mem((void *)&device_mode, sizeof(device_mode),
                                  (void *)(dmtf_block + 1), sizeof(device_mode));
                 printf("\n          DeviceMode(OpCap=0x%08x(",
-                       device_mode.operational_mode_capabilties);
+                       device_mode.operational_mode_capabilities);
                 dump_entry_flags(
                     m_spdm_measurement_device_operation_mode_value_string_table,
                     LIBSPDM_ARRAY_SIZE(m_spdm_measurement_device_operation_mode_value_string_table),
-                    device_mode.operational_mode_capabilties);
+                    device_mode.operational_mode_capabilities);
                 printf("), OpStat=0x%08x(", device_mode.operational_mode_state);
                 dump_entry_flags(
                     m_spdm_measurement_device_operation_mode_value_string_table,
                     LIBSPDM_ARRAY_SIZE(m_spdm_measurement_device_operation_mode_value_string_table),
                     device_mode.operational_mode_state);
-                printf("), ModCap=0x%08x(", device_mode.device_mode_capabilties);
+                printf("), ModCap=0x%08x(", device_mode.device_mode_capabilities);
                 dump_entry_flags(
                     m_spdm_measurement_device_mode_value_string_table,
                     LIBSPDM_ARRAY_SIZE(m_spdm_measurement_device_mode_value_string_table),
-                    device_mode.device_mode_capabilties);
+                    device_mode.device_mode_capabilities);
                 printf("), ModStat=0x%08x(", device_mode.device_mode_state);
                 dump_entry_flags(
                     m_spdm_measurement_device_mode_value_string_table,
@@ -1865,7 +1865,6 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
     uint8_t *signature;
     uint8_t *verify_data;
     uint8_t th1_hash_data[64];
-    libspdm_data_parameter_t parameter;
     uint8_t mut_auth_requested;
 
     printf("SPDM_KEY_EXCHANGE_RSP ");
@@ -1992,12 +1991,8 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
     m_current_session_id = m_cached_session_id;
 
     mut_auth_requested = spdm_response->mut_auth_requested;
-    libspdm_zero_mem(&parameter, sizeof(parameter));
-    parameter.location = LIBSPDM_DATA_LOCATION_SESSION;
-    *(uint32_t *)parameter.additional_data = m_current_session_id;
-    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_MUT_AUTH_REQUESTED,
-                     &parameter, &mut_auth_requested,
-                     sizeof(mut_auth_requested));
+
+    spdm_dump_set_session_info_mut_auth_requested (m_current_session_info, mut_auth_requested);
 
     if (m_dhe_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
         return;
@@ -2284,7 +2279,6 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
     uint8_t *verify_data;
     uint8_t th1_hash_data[64];
     uint8_t th2_hash_data[64];
-    libspdm_data_parameter_t parameter;
     bool use_psk;
 
     printf("SPDM_PSK_EXCHANGE_RSP ");
@@ -2384,11 +2378,7 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
         false);
 
     use_psk = false;
-    libspdm_zero_mem(&parameter, sizeof(parameter));
-    parameter.location = LIBSPDM_DATA_LOCATION_SESSION;
-    *(uint32_t *)parameter.additional_data = m_current_session_id;
-    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
-                     &use_psk, sizeof(use_psk));
+    spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
 
     libspdm_generate_session_handshake_key(
         libspdm_get_secured_message_context_via_session_info(
@@ -2396,11 +2386,7 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
         th1_hash_data);
 
     use_psk = true;
-    libspdm_zero_mem(&parameter, sizeof(parameter));
-    parameter.location = LIBSPDM_DATA_LOCATION_SESSION;
-    *(uint32_t *)parameter.additional_data = m_current_session_id;
-    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
-                     &use_psk, sizeof(use_psk));
+    spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
 
     libspdm_secured_message_set_use_psk(
         libspdm_get_secured_message_context_via_session_info(
@@ -2428,11 +2414,7 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
             false);
 
         use_psk = false;
-        libspdm_zero_mem(&parameter, sizeof(parameter));
-        parameter.location = LIBSPDM_DATA_LOCATION_SESSION;
-        *(uint32_t *)parameter.additional_data = m_current_session_id;
-        libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK,
-                         &parameter, &use_psk, sizeof(use_psk));
+        spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
 
         libspdm_generate_session_data_key(
             libspdm_get_secured_message_context_via_session_info(
@@ -2440,11 +2422,7 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
             th2_hash_data);
 
         use_psk = true;
-        libspdm_zero_mem(&parameter, sizeof(parameter));
-        parameter.location = LIBSPDM_DATA_LOCATION_SESSION;
-        *(uint32_t *)parameter.additional_data = m_current_session_id;
-        libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK,
-                         &parameter, &use_psk, sizeof(use_psk));
+        spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
 
         libspdm_secured_message_set_use_psk(
             libspdm_get_secured_message_context_via_session_info(
@@ -2504,7 +2482,6 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
 {
     size_t message_size;
     uint8_t th2_hash_data[64];
-    libspdm_data_parameter_t parameter;
     bool use_psk;
 
     printf("SPDM_PSK_FINISH_RSP ");
@@ -2552,11 +2529,7 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
         false);
 
     use_psk = false;
-    libspdm_zero_mem(&parameter, sizeof(parameter));
-    parameter.location = LIBSPDM_DATA_LOCATION_SESSION;
-    *(uint32_t *)parameter.additional_data = m_current_session_id;
-    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
-                     &use_psk, sizeof(use_psk));
+    spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
 
     libspdm_generate_session_data_key(
         libspdm_get_secured_message_context_via_session_info(
@@ -2564,11 +2537,7 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
         th2_hash_data);
 
     use_psk = true;
-    libspdm_zero_mem(&parameter, sizeof(parameter));
-    parameter.location = LIBSPDM_DATA_LOCATION_SESSION;
-    *(uint32_t *)parameter.additional_data = m_current_session_id;
-    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_SESSION_USE_PSK, &parameter,
-                     &use_psk, sizeof(use_psk));
+    spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
 
     /*use next key when next seesion start*/
     m_psk_secret_buffer_count++;

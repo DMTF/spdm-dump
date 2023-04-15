@@ -202,20 +202,24 @@ void dump_secured_spdm_message(const void *buffer, size_t buffer_size)
     case LINKTYPE_MCTP:
         sequence_num_size = sizeof(uint16_t);
         spdm_secured_message_callbacks.version =
-            SPDM_SECURED_MESSAGE_CALLBACKS_VERSION;
+            LIBSPDM_SECURED_MESSAGE_CALLBACKS_VERSION;
         spdm_secured_message_callbacks.get_sequence_number =
             libspdm_mctp_get_sequence_number;
         spdm_secured_message_callbacks.get_max_random_number_count =
             libspdm_mctp_get_max_random_number_count;
+        spdm_secured_message_callbacks.get_secured_spdm_version =
+            libspdm_mctp_get_secured_spdm_version;
         break;
     case LINKTYPE_PCI_DOE:
         sequence_num_size = 0;
         spdm_secured_message_callbacks.version =
-            SPDM_SECURED_MESSAGE_CALLBACKS_VERSION;
+            LIBSPDM_SECURED_MESSAGE_CALLBACKS_VERSION;
         spdm_secured_message_callbacks.get_sequence_number =
             libspdm_pci_doe_get_sequence_number;
         spdm_secured_message_callbacks.get_max_random_number_count =
             libspdm_pci_doe_get_max_random_number_count;
+        spdm_secured_message_callbacks.get_secured_spdm_version =
+            libspdm_pci_doe_get_secured_spdm_version;
         break;
     default:
         LIBSPDM_ASSERT(false);

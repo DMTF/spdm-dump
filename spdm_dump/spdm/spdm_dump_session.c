@@ -24,6 +24,23 @@ uint8_t m_requester_cert_chain_slot_id = 0;
 uint8_t m_dhe_secret_buffer_count = 0;
 uint8_t m_psk_secret_buffer_count = 0;
 
+void spdm_dump_set_session_info_use_psk (void *spdm_session_info, bool use_psk)
+{
+    libspdm_session_info_t *session_info;
+
+    session_info = spdm_session_info;
+    session_info->use_psk = use_psk;
+}
+
+void spdm_dump_set_session_info_mut_auth_requested (void *spdm_session_info,
+                                                    uint8_t mut_auth_requested)
+{
+    libspdm_session_info_t *session_info;
+
+    session_info = spdm_session_info;
+    session_info->mut_auth_requested = mut_auth_requested;
+}
+
 libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                                uint32_t session_id,
                                                bool need_mut_auth,
