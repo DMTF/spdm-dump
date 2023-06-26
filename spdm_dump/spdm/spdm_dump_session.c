@@ -241,12 +241,10 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                     ((libspdm_context_t *)spdm_context)->
                     connection_info.local_used_cert_chain_slot_id = 0xFF;
                 } else {
-                    parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
-                    libspdm_set_data(spdm_context,
-                                     LIBSPDM_DATA_LOCAL_USED_CERT_CHAIN_BUFFER,
-                                     &parameter,
-                                     m_local_used_cert_chain_buffer,
-                                     m_local_used_cert_chain_buffer_size);
+                    ((libspdm_context_t *)spdm_context)->connection_info.local_used_cert_chain_buffer =
+                        m_local_used_cert_chain_buffer;
+                    ((libspdm_context_t *)spdm_context)->connection_info.local_used_cert_chain_buffer_size =
+                        m_local_used_cert_chain_buffer_size;
                     ((libspdm_context_t *)spdm_context)->
                     connection_info.local_used_cert_chain_slot_id = m_requester_cert_chain_slot_id;
                 }
@@ -300,12 +298,10 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                 ((libspdm_context_t *)spdm_context)->
                 connection_info.local_used_cert_chain_slot_id = 0xFF;
             } else {
-                parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
-                libspdm_set_data(spdm_context,
-                                 LIBSPDM_DATA_LOCAL_USED_CERT_CHAIN_BUFFER,
-                                 &parameter,
-                                 m_local_used_cert_chain_buffer,
-                                 m_local_used_cert_chain_buffer_size);
+                ((libspdm_context_t *)spdm_context)->connection_info.local_used_cert_chain_buffer =
+                    m_local_used_cert_chain_buffer;
+                ((libspdm_context_t *)spdm_context)->connection_info.local_used_cert_chain_buffer_size =
+                    m_local_used_cert_chain_buffer_size;
                 ((libspdm_context_t *)spdm_context)->
                 connection_info.local_used_cert_chain_slot_id = m_responder_cert_chain_slot_id;
             }
