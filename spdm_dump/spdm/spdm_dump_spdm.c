@@ -179,7 +179,7 @@ size_t m_spdm_key_schedule_value_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_key_schedule_value_string_table);
 
 value_string_entry_t m_spdm_measurement_spec_value_string_table[] = {
-    { SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF, "DMTF" },
+    { SPDM_MEASUREMENT_SPECIFICATION_DMTF, "DMTF" },
 };
 size_t m_spdm_measurement_spec_value_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_measurement_spec_value_string_table);
@@ -1358,7 +1358,7 @@ void dump_spdm_measurements_record(uint8_t number_of_blocks,
         }
         if (dmtf_block->measurement_block_common_header
             .measurement_specification !=
-            SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF) {
+            SPDM_MEASUREMENT_SPECIFICATION_DMTF) {
             break;
         }
         if (dmtf_block->measurement_block_common_header
