@@ -43,6 +43,8 @@ uint16_t m_spdm_aead_cipher_suite;
 uint16_t m_spdm_req_base_asym_alg;
 uint16_t m_spdm_key_schedule;
 uint8_t m_spdm_other_params_support;
+bool m_multi_key_conn_req;
+bool m_multi_key_conn_rsp;
 
 dispatch_table_entry_t m_spdm_vendor_dispatch[] = {
     { SPDM_REGISTRY_ID_DMTF, "DMTF", NULL },
@@ -71,6 +73,11 @@ value_string_entry_t m_spdm_requester_capabilities_string_table[] = {
       "HANDSHAKE_IN_CLEAR" },
     { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_PUB_KEY_ID_CAP, "PUB_KEY_ID" },
     { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CHUNK_CAP, "CHUNK" },
+    { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_EP_INFO_CAP_NO_SIG, "EP_INFO_NO_SIG" },
+    { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_EP_INFO_CAP_SIG, "EP_INFO_SIG" },
+    { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_EVENT_CAP, "EVENT" },
+    { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_MULTI_KEY_CAP_ONLY, "MULTI_KEY_ONLY" },
+    { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_MULTI_KEY_CAP_NEG, "MULTI_KEY_NEG" },
 };
 size_t m_spdm_requester_capabilities_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_requester_capabilities_string_table);
@@ -100,6 +107,14 @@ value_string_entry_t m_spdm_responder_capabilities_string_table[] = {
     { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_SET_CERT_CAP, "SET_CERT" },
     { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CSR_CAP, "CSR" },
     { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_INSTALL_RESET_CAP, "CERT_INSTALL_RESET" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_EP_INFO_CAP_NO_SIG, "EP_INFO_NO_SIG" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_EP_INFO_CAP_SIG, "EP_INFO_SIG" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEL_CAP, "MEL" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_EVENT_CAP, "EVENT" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MULTI_KEY_CAP_ONLY, "MULTI_KEY_ONLY" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MULTI_KEY_CAP_NEG, "MULTI_KEY_NEG" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_GET_KEY_PAIR_INFO_CAP, "GET_KEY_PAIR_INFO" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_SET_KEY_PAIR_INFO_CAP, "SET_KEY_PAIR_INFO" },
 };
 size_t m_spdm_responder_capabilities_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_responder_capabilities_string_table);
@@ -186,6 +201,7 @@ size_t m_spdm_measurement_spec_value_string_table_count =
 
 value_string_entry_t m_spdm_other_param_value_string_table[] = {
     { SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1, "OPAQUE_FMT_1" },
+    { SPDM_ALGORITHMS_MULTI_KEY_CONN, "MULTI_KEY_CONN" },
 };
 size_t m_spdm_other_param_value_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_other_param_value_string_table);
@@ -612,6 +628,13 @@ void dump_spdm_negotiate_algorithms(const void *buffer, size_t buffer_size)
         return;
     }
 
+    m_multi_key_conn_rsp = false;
+    if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+        if ((spdm_request->other_params_support & SPDM_ALGORITHMS_MULTI_KEY_CONN) != 0) {
+            m_multi_key_conn_rsp = true;
+        }
+    }
+
     if (!m_param_quite_mode) {
         printf("(MeasSpec=0x%02x(",
                spdm_request->measurement_specification);
@@ -734,6 +757,13 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
     if (buffer_size < message_size) {
         printf("\n");
         return;
+    }
+
+    m_multi_key_conn_req = false;
+    if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+        if ((spdm_response->other_params_selection & SPDM_ALGORITHMS_MULTI_KEY_CONN) != 0) {
+            m_multi_key_conn_req = true;
+        }
     }
 
     if (!m_param_quite_mode) {
@@ -898,6 +928,10 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
                      &m_spdm_key_schedule, sizeof(uint16_t));
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_OTHER_PARAMS_SUPPORT, &parameter,
                      &m_spdm_other_params_support, sizeof(uint8_t));
+    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_MULTI_KEY_CONN_REQ, &parameter,
+                     &m_multi_key_conn_req, sizeof(bool));
+    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_MULTI_KEY_CONN_RSP, &parameter,
+                     &m_multi_key_conn_rsp, sizeof(bool));
 
     libspdm_append_message_a(m_spdm_context, buffer, message_size);
 }
@@ -969,6 +1003,16 @@ void dump_spdm_digests(const void *buffer, size_t buffer_size)
         }
     }
 
+    if (!m_encapsulated) {
+        if (m_multi_key_conn_rsp) {
+            libspdm_append_message_d(m_spdm_context, buffer, message_size);
+        }
+    } else {
+        if (m_multi_key_conn_req && (m_current_session_info != NULL)) {
+            libspdm_append_message_encap_d(m_spdm_context, m_current_session_info, true,
+                                           buffer, message_size);
+        }
+    }
     printf("\n");
 }
 
