@@ -1161,6 +1161,13 @@ void dump_spdm_challenge(const void *buffer, size_t buffer_size)
     }
 
     spdm_request = buffer;
+    if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+        message_size = sizeof(spdm_challenge_request_t) + SPDM_REQ_CONTEXT_SIZE;
+        if (buffer_size < message_size) {
+            printf("\n");
+            return;
+        }
+    }
 
     m_cached_measurement_summary_hash_type = spdm_request->header.param2;
 
@@ -1176,8 +1183,13 @@ void dump_spdm_challenge(const void *buffer, size_t buffer_size)
 
         if (m_param_all_mode) {
             printf("\n    Nonce(");
-            dump_data(spdm_request->nonce, 32);
+            dump_data(spdm_request->nonce, SPDM_NONCE_SIZE);
             printf(")");
+            if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+                printf("\n    ReqContext(");
+                dump_data((uint8_t *)(spdm_request + 1), SPDM_REQ_CONTEXT_SIZE);
+                printf(")");
+            }
         }
     }
 
@@ -1196,6 +1208,7 @@ void dump_spdm_challenge_auth(const void *buffer, size_t buffer_size)
     uint8_t *nonce;
     uint8_t *measurement_summary_hash;
     uint8_t *opaque_data;
+    uint8_t *req_context;
     uint8_t *signature;
 
     printf("SPDM_CHALLENGE_AUTH ");
@@ -1210,7 +1223,7 @@ void dump_spdm_challenge_auth(const void *buffer, size_t buffer_size)
         spdm_dump_get_measurement_summary_hash_size(
             m_cached_measurement_summary_hash_type);
 
-    message_size = sizeof(spdm_challenge_auth_response_t) + hash_size + 32 +
+    message_size = sizeof(spdm_challenge_auth_response_t) + hash_size + SPDM_NONCE_SIZE +
                    measurement_summary_hash_size + sizeof(uint16_t);
     if (buffer_size < message_size) {
         printf("\n");
@@ -1220,7 +1233,7 @@ void dump_spdm_challenge_auth(const void *buffer, size_t buffer_size)
     opaque_length =
         *(uint16_t *)((size_t)buffer +
                       sizeof(spdm_challenge_auth_response_t) + hash_size +
-                      32 + measurement_summary_hash_size);
+                      SPDM_NONCE_SIZE + measurement_summary_hash_size);
     message_size += opaque_length + signature_size;
     if (buffer_size < message_size) {
         printf("\n");
@@ -1228,6 +1241,13 @@ void dump_spdm_challenge_auth(const void *buffer, size_t buffer_size)
     }
 
     spdm_response = buffer;
+    if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+        message_size += + SPDM_REQ_CONTEXT_SIZE;
+        if (buffer_size < message_size) {
+            printf("\n");
+            return;
+        }
+    }
 
     if (!m_param_quite_mode) {
         printf("(Attr=0x%02x(", spdm_response->header.param1);
@@ -1247,9 +1267,9 @@ void dump_spdm_challenge_auth(const void *buffer, size_t buffer_size)
             printf(")");
             nonce = cert_chain_hash + hash_size;
             printf("\n    Nonce(");
-            dump_data(nonce, 32);
+            dump_data(nonce, SPDM_NONCE_SIZE);
             printf(")");
-            measurement_summary_hash = nonce + 32;
+            measurement_summary_hash = nonce + SPDM_NONCE_SIZE;
             if (measurement_summary_hash_size != 0) {
                 printf("\n    MeasurementSummaryHash(");
                 dump_data(measurement_summary_hash,
@@ -1267,7 +1287,15 @@ void dump_spdm_challenge_auth(const void *buffer, size_t buffer_size)
             printf(")");
             dump_spdm_opaque_data(spdm_response->header.spdm_version,
                                   opaque_data, opaque_length);
-            signature = opaque_data + opaque_length;
+            if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+                req_context = opaque_data + opaque_length;
+                printf("\n    ReqContext(");
+                dump_data(req_context, SPDM_REQ_CONTEXT_SIZE);
+                printf(")");
+                signature = req_context + SPDM_REQ_CONTEXT_SIZE;
+            } else {
+                signature = opaque_data + opaque_length;
+            }
             printf("\n    Signature(");
             dump_data(signature, signature_size);
             printf(")");
