@@ -207,6 +207,12 @@ value_string_entry_t m_spdm_measurement_type_value_string_table[] = {
       "Version" },
     { SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_SECURE_VERSION_NUMBER,
       "SVN" },
+    { SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_HASH_EXTEND_MEASUREMENT,
+      "HEM" },
+    { SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_INFORMATIONAL,
+      "Info" },
+    { SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_STRUCTURED_MEASUREMENT_MANIFEST,
+      "StructManifest" },
 };
 
 value_string_entry_t m_spdm_measurement_device_operation_mode_value_string_table[] = {
