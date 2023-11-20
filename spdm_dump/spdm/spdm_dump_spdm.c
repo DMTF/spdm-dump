@@ -43,6 +43,8 @@ uint16_t m_spdm_aead_cipher_suite;
 uint16_t m_spdm_req_base_asym_alg;
 uint16_t m_spdm_key_schedule;
 uint8_t m_spdm_other_params_support;
+uint8_t m_spdm_mel_spec;
+
 bool m_multi_key_conn_req;
 bool m_multi_key_conn_rsp;
 
@@ -198,6 +200,12 @@ value_string_entry_t m_spdm_measurement_spec_value_string_table[] = {
 };
 size_t m_spdm_measurement_spec_value_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_measurement_spec_value_string_table);
+
+value_string_entry_t m_spdm_mel_spec_value_string_table[] = {
+    { SPDM_MEL_SPECIFICATION_DMTF, "DMTF" },
+};
+size_t m_spdm_mel_spec_value_string_table_count =
+    LIBSPDM_ARRAY_SIZE(m_spdm_mel_spec_value_string_table);
 
 value_string_entry_t m_spdm_other_param_value_string_table[] = {
     { SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1, "OPAQUE_FMT_1" },
@@ -657,6 +665,13 @@ void dump_spdm_negotiate_algorithms(const void *buffer, size_t buffer_size)
         dump_entry_flags(m_spdm_asym_value_string_table,
                          LIBSPDM_ARRAY_SIZE(m_spdm_asym_value_string_table),
                          spdm_request->base_asym_algo);
+        if (spdm_request->header.spdm_version >=
+            SPDM_MESSAGE_VERSION_13) {
+            printf("), MelSpec=0x%02x(", spdm_request->mel_specification);
+            dump_entry_value(m_spdm_mel_spec_value_string_table,
+                             LIBSPDM_ARRAY_SIZE(m_spdm_mel_spec_value_string_table),
+                             spdm_request->mel_specification);
+        }
 
         if (spdm_request->header.spdm_version >=
             SPDM_MESSAGE_VERSION_11) {
@@ -794,6 +809,13 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
         dump_entry_value(m_spdm_asym_value_string_table,
                          LIBSPDM_ARRAY_SIZE(m_spdm_asym_value_string_table),
                          spdm_response->base_asym_sel);
+        if (spdm_response->header.spdm_version >=
+            SPDM_MESSAGE_VERSION_13) {
+            printf("), MelSpec=0x%02x(", spdm_response->mel_specification_sel);
+            dump_entry_value(m_spdm_mel_spec_value_string_table,
+                             LIBSPDM_ARRAY_SIZE(m_spdm_mel_spec_value_string_table),
+                             spdm_response->mel_specification_sel);
+        }
 
         if (spdm_response->header.spdm_version >=
             SPDM_MESSAGE_VERSION_11) {
@@ -905,6 +927,9 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
 
     if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
         m_spdm_other_params_support = spdm_response->other_params_selection;
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+            m_spdm_mel_spec = spdm_response->mel_specification_sel;
+        }
     }
 
     libspdm_zero_mem(&parameter, sizeof(parameter));
@@ -928,6 +953,9 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
                      &m_spdm_key_schedule, sizeof(uint16_t));
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_OTHER_PARAMS_SUPPORT, &parameter,
                      &m_spdm_other_params_support, sizeof(uint8_t));
+    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_MEL_SPEC, &parameter,
+                     &m_spdm_mel_spec, sizeof(uint8_t));
+
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_MULTI_KEY_CONN_REQ, &parameter,
                      &m_multi_key_conn_req, sizeof(bool));
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_MULTI_KEY_CONN_RSP, &parameter,
@@ -3538,6 +3566,8 @@ bool init_spdm_dump(void)
                      &m_spdm_key_schedule, sizeof(uint16_t));
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_OTHER_PARAMS_SUPPORT, &parameter,
                      &m_spdm_other_params_support, sizeof(uint8_t));
+    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_MEL_SPEC, &parameter,
+                     &m_spdm_mel_spec, sizeof(uint8_t));
 
     return true;
 

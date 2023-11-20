@@ -39,6 +39,7 @@ extern uint16_t m_spdm_aead_cipher_suite;
 extern uint16_t m_spdm_req_base_asym_alg;
 extern uint16_t m_spdm_key_schedule;
 extern uint8_t m_spdm_other_params_support;
+extern uint8_t m_spdm_mel_spec;
 
 extern value_string_entry_t m_spdm_requester_capabilities_string_table[];
 extern size_t m_spdm_requester_capabilities_string_table_count;
@@ -60,6 +61,8 @@ extern value_string_entry_t m_spdm_measurement_spec_value_string_table[];
 extern size_t m_spdm_measurement_spec_value_string_table_count;
 extern value_string_entry_t m_spdm_other_param_value_string_table[];
 extern size_t m_spdm_other_param_value_string_table_count;
+extern value_string_entry_t m_spdm_mel_spec_value_string_table[];
+extern size_t m_spdm_mel_spec_value_string_table_count;
 
 value_string_entry_t m_cert_chain_format_string_table[] = {
     { CERT_CHAIN_FORMAT_SPDM, "SPDM" },
@@ -229,6 +232,7 @@ void print_usage(void)
     printf("   [--hash SHA_256|SHA_384|SHA_512|SHA3_256|SHA3_384|SHA3_512|SM3_256]\n");
     printf("   [--meas_spec DMTF]\n");
     printf("   [--meas_hash RAW_BIT|SHA_256|SHA_384|SHA_512|SHA3_256|SHA3_384|SHA3_512|SM3_256]\n");
+    printf("   [--mel_spec DMTF]\n");
     printf(
         "   [--asym RSASSA_2048|RSASSA_3072|RSASSA_4096|RSAPSS_2048|RSAPSS_3072|RSAPSS_4096|ECDSA_P256|ECDSA_P384|ECDSA_P521|SM2_P256|EDDSA_25519|EDDSA_448]\n");
     printf(
@@ -533,6 +537,30 @@ void process_args(int argc, char *argv[])
                 continue;
             } else {
                 printf("invalid --meas_hash\n");
+                print_usage();
+                exit(0);
+            }
+        }
+
+        if (strcmp(argv[0], "--mel_spec") == 0) {
+            if (argc >= 2) {
+                if (!get_value_from_name(
+                        m_spdm_mel_spec_value_string_table,
+                        m_spdm_mel_spec_value_string_table_count,
+                        argv[1], &data32)) {
+                    printf("invalid --mel_spec %s\n",
+                           argv[1]);
+                    print_usage();
+                    exit(0);
+                }
+                m_spdm_mel_spec = (uint8_t)data32;
+                printf("mel_spec - 0x%02x\n",
+                       m_spdm_mel_spec);
+                argc -= 2;
+                argv += 2;
+                continue;
+            } else {
+                printf("invalid --mel_spec\n");
                 print_usage();
                 exit(0);
             }
