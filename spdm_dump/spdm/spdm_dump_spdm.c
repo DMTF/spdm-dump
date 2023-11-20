@@ -1310,6 +1310,7 @@ void dump_spdm_get_measurements(const void *buffer, size_t buffer_size)
     const spdm_get_measurements_request_t *spdm_request;
     size_t message_size;
     bool include_signature;
+    uint8_t *req_context;
 
     printf("SPDM_GET_MEASUREMENTS ");
 
@@ -1336,6 +1337,16 @@ void dump_spdm_get_measurements(const void *buffer, size_t buffer_size)
     if (buffer_size < message_size) {
         printf("\n");
         return;
+    }
+    if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+        req_context = (uint8_t *)spdm_request + message_size;
+        message_size = message_size + SPDM_REQ_CONTEXT_SIZE;
+        if (buffer_size < message_size) {
+            printf("\n");
+            return;
+        }
+    } else {
+        req_context = NULL;
     }
 
     m_cached_get_measurement_request_attribute =
@@ -1366,7 +1377,12 @@ void dump_spdm_get_measurements(const void *buffer, size_t buffer_size)
         if (m_param_all_mode) {
             if (include_signature) {
                 printf("\n    Nonce(");
-                dump_data(spdm_request->nonce, 32);
+                dump_data(spdm_request->nonce, SPDM_NONCE_SIZE);
+                printf(")");
+            }
+            if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+                printf("\n    ReqContext(");
+                dump_data(req_context, SPDM_REQ_CONTEXT_SIZE);
                 printf(")");
             }
         }
@@ -1515,6 +1531,7 @@ void dump_spdm_measurements(const void *buffer, size_t buffer_size)
     uint8_t *measurement_record;
     uint8_t *nonce;
     uint8_t *opaque_data;
+    uint8_t *req_context;
     uint8_t *signature;
 
     printf("SPDM_MEASUREMENTS ");
@@ -1540,21 +1557,33 @@ void dump_spdm_measurements(const void *buffer, size_t buffer_size)
         return;
     }
 
-    if (include_signature) {
-        signature_size =
-            libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+    message_size += SPDM_NONCE_SIZE + sizeof(uint16_t);
+    if (buffer_size < message_size) {
+        printf("\n");
+        return;
+    }
 
-        message_size += 32 + sizeof(uint16_t);
+    opaque_length =
+        *(uint16_t *)((size_t)buffer +
+                      sizeof(spdm_measurements_response_t) +
+                      measurement_record_length + SPDM_NONCE_SIZE);
+    message_size += opaque_length;
+    if (buffer_size < message_size) {
+        printf("\n");
+        return;
+    }
+    if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+        message_size += SPDM_REQ_CONTEXT_SIZE;
         if (buffer_size < message_size) {
             printf("\n");
             return;
         }
+    }
 
-        opaque_length =
-            *(uint16_t *)((size_t)buffer +
-                          sizeof(spdm_measurements_response_t) +
-                          measurement_record_length + 32);
-        message_size += opaque_length + signature_size;
+    if (include_signature) {
+        signature_size =
+            libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+        message_size += signature_size;
         if (buffer_size < message_size) {
             printf("\n");
             return;
@@ -1620,36 +1649,31 @@ void dump_spdm_measurements(const void *buffer, size_t buffer_size)
                     measurement_record,
                     measurement_record_length);
             }
-            if (include_signature) {
-                nonce = measurement_record +
-                        measurement_record_length;
-                printf("\n    Nonce(");
-                dump_data(nonce, 32);
+            nonce = measurement_record +
+                    measurement_record_length;
+            printf("\n    Nonce(");
+            dump_data(nonce, SPDM_NONCE_SIZE);
+            printf(")");
+            opaque_length = *(uint16_t *)(nonce + SPDM_NONCE_SIZE);
+            opaque_data = nonce + SPDM_NONCE_SIZE + sizeof(uint16_t);
+            printf("\n    OpaqueData(");
+            dump_data(opaque_data, opaque_length);
+            printf(")");
+            dump_spdm_opaque_data(spdm_response->header.spdm_version,
+                                  opaque_data, opaque_length);
+            if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+                req_context = opaque_data + opaque_length;
+                printf("\n    ReqContext(");
+                dump_data(req_context, SPDM_REQ_CONTEXT_SIZE);
                 printf(")");
-                opaque_length = *(uint16_t *)(nonce + 32);
-                opaque_data = nonce + 32 + sizeof(uint16_t);
-                printf("\n    OpaqueData(");
-                dump_data(opaque_data, opaque_length);
-                printf(")");
-                dump_spdm_opaque_data(spdm_response->header.spdm_version,
-                                      opaque_data, opaque_length);
+                signature = req_context + SPDM_REQ_CONTEXT_SIZE;
+            } else {
                 signature = opaque_data + opaque_length;
+            }
+            if (include_signature) {
                 printf("\n    Signature(");
                 dump_data(signature, signature_size);
                 printf(")");
-            } else {
-                nonce = measurement_record +
-                        measurement_record_length;
-                printf("\n    Nonce(");
-                dump_data(nonce, 32);
-                printf(")");
-                opaque_length = *(uint16_t *)(nonce + 32);
-                opaque_data = nonce + 32 + sizeof(uint16_t);
-                printf("\n    OpaqueData(");
-                dump_data(opaque_data, opaque_length);
-                printf(")");
-                dump_spdm_opaque_data(spdm_response->header.spdm_version,
-                                      opaque_data, opaque_length);
             }
         }
     }
