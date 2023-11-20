@@ -254,6 +254,8 @@ value_string_entry_t m_spdm_measurement_attribute_string_table[] = {
       "GenSig" },
     { SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_RAW_BIT_STREAM_REQUESTED,
       "RawBitReq" },
+    { SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_NEW_MEASUREMENT_REQUESTED,
+      "NewMeasReq" },
 };
 
 value_string_entry_t m_spdm_measurement_content_change_string_table[] = {
