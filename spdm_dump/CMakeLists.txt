@@ -35,7 +35,7 @@ SET(spdm_dump_LIBRARY
     spdm_secured_message_lib
     spdm_transport_mctp_lib
     spdm_transport_pcidoe_lib
-    spdm_device_secret_lib_null
+    spdm_device_secret_lib_dump
 )
 
 if((TOOLCHAIN STREQUAL "KLEE") OR (TOOLCHAIN STREQUAL "CBMC"))
@@ -52,7 +52,7 @@ if((TOOLCHAIN STREQUAL "KLEE") OR (TOOLCHAIN STREQUAL "CBMC"))
                    $<TARGET_OBJECTS:spdm_secured_message_lib>
                    $<TARGET_OBJECTS:spdm_transport_mctp_lib>
                    $<TARGET_OBJECTS:spdm_transport_pcidoe_lib>
-                   $<TARGET_OBJECTS:spdm_device_secret_lib_null>
+                   $<TARGET_OBJECTS:spdm_device_secret_lib_dump>
     )
 else()
     ADD_EXECUTABLE(spdm_dump ${src_spdm_dump})

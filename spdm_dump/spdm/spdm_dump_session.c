@@ -12,6 +12,9 @@ extern size_t m_local_used_cert_chain_buffer_size;
 extern void *m_peer_cert_chain_buffer;
 extern size_t m_peer_cert_chain_buffer_size;
 
+extern void *m_spdm_dump_psk;
+extern size_t m_spdm_dump_psk_size;
+
 void *m_dhe_secret_buffer[LIBSPDM_MAX_SESSION_COUNT] = {NULL};
 size_t m_dhe_secret_buffer_size[LIBSPDM_MAX_SESSION_COUNT] = {0};
 void *m_psk_buffer[LIBSPDM_MAX_SESSION_COUNT] = {NULL};
@@ -341,13 +344,8 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
             m_psk_buffer_size[m_psk_secret_buffer_count] == 0) {
             return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
         }
-        if (m_psk_buffer_size[m_psk_secret_buffer_count] > LIBSPDM_MAX_DHE_KEY_SIZE) {
-            printf("BUGBUG: PSK size is too large. It will be supported later.\n");
-            return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
-        }
-        libspdm_secured_message_import_dhe_secret(secured_message_context,
-                                                  m_psk_buffer[m_psk_secret_buffer_count],
-                                                  m_psk_buffer_size[m_psk_secret_buffer_count]);
+        m_spdm_dump_psk = m_psk_buffer[m_psk_secret_buffer_count];
+        m_spdm_dump_psk_size = m_psk_buffer_size[m_psk_secret_buffer_count];
     }
 
     return LIBSPDM_STATUS_SUCCESS;
