@@ -2412,7 +2412,6 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
     uint8_t *verify_data;
     uint8_t th1_hash_data[64];
     uint8_t th2_hash_data[64];
-    bool use_psk;
 
     printf("SPDM_PSK_EXCHANGE_RSP ");
 
@@ -2505,26 +2504,12 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
 
     libspdm_calculate_th1_hash(m_spdm_context, m_current_session_info, true,
                                th1_hash_data);
-    libspdm_secured_message_set_use_psk(
-        libspdm_get_secured_message_context_via_session_info(
-            m_current_session_info),
-        false);
-
-    use_psk = false;
-    spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
 
     libspdm_generate_session_handshake_key(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         th1_hash_data);
 
-    use_psk = true;
-    spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
-
-    libspdm_secured_message_set_use_psk(
-        libspdm_get_secured_message_context_via_session_info(
-            m_current_session_info),
-        true);
     libspdm_append_message_k(m_spdm_context, m_current_session_info, true,
                              (uint8_t *)buffer + message_size - hmac_size,
                              hmac_size);
@@ -2541,26 +2526,12 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
 
         libspdm_calculate_th2_hash(m_spdm_context, m_current_session_info,
                                    true, th2_hash_data);
-        libspdm_secured_message_set_use_psk(
-            libspdm_get_secured_message_context_via_session_info(
-                m_current_session_info),
-            false);
-
-        use_psk = false;
-        spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
 
         libspdm_generate_session_data_key(
             libspdm_get_secured_message_context_via_session_info(
                 m_current_session_info),
             th2_hash_data);
 
-        use_psk = true;
-        spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
-
-        libspdm_secured_message_set_use_psk(
-            libspdm_get_secured_message_context_via_session_info(
-                m_current_session_info),
-            true);
         libspdm_secured_message_set_session_state(
             libspdm_get_secured_message_context_via_session_info(
                 m_current_session_info),
@@ -2615,7 +2586,6 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
 {
     size_t message_size;
     uint8_t th2_hash_data[64];
-    bool use_psk;
 
     printf("SPDM_PSK_FINISH_RSP ");
 
@@ -2656,29 +2626,15 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
     }
     libspdm_calculate_th2_hash(m_spdm_context, m_current_session_info, true,
                                th2_hash_data);
-    libspdm_secured_message_set_use_psk(
-        libspdm_get_secured_message_context_via_session_info(
-            m_current_session_info),
-        false);
-
-    use_psk = false;
-    spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
 
     libspdm_generate_session_data_key(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
         th2_hash_data);
 
-    use_psk = true;
-    spdm_dump_set_session_info_use_psk (m_current_session_info, use_psk);
-
     /*use next key when next seesion start*/
     m_psk_secret_buffer_count++;
 
-    libspdm_secured_message_set_use_psk(
-        libspdm_get_secured_message_context_via_session_info(
-            m_current_session_info),
-        true);
     libspdm_secured_message_set_session_state(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),

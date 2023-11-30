@@ -580,6 +580,7 @@ if(NOT ENABLE_BINARY_BUILD STREQUAL "1")
     endif()
 endif()
 
+    ADD_SUBDIRECTORY(library/spdm_device_secret_lib_dump)
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/library/spdm_common_lib out/spdm_common_lib.out)
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/library/spdm_requester_lib out/spdm_requester_lib.out)
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/library/spdm_responder_lib out/spdm_responder_lib.out)
@@ -592,7 +593,6 @@ endif()
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/os_stub/debuglib_null out/debuglib_null.out)
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/os_stub/rnglib out/rnglib.out)
     ADD_SUBDIRECTORY(${LIBSPDM_DIR}/os_stub/malloclib out/malloclib.out)
-    ADD_SUBDIRECTORY(${LIBSPDM_DIR}/os_stub/spdm_device_secret_lib_null out/spdm_device_secret_lib_null.out)
 
     ADD_SUBDIRECTORY(spdm_dump)
 
