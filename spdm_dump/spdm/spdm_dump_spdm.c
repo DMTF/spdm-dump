@@ -208,6 +208,7 @@ size_t m_spdm_mel_spec_value_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_mel_spec_value_string_table);
 
 value_string_entry_t m_spdm_other_param_value_string_table[] = {
+    { SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_0, "OPAQUE_FMT_0" },
     { SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1, "OPAQUE_FMT_1" },
     { SPDM_ALGORITHMS_MULTI_KEY_CONN, "MULTI_KEY_CONN" },
 };
@@ -668,7 +669,7 @@ void dump_spdm_negotiate_algorithms(const void *buffer, size_t buffer_size)
         if (spdm_request->header.spdm_version >=
             SPDM_MESSAGE_VERSION_13) {
             printf("), MelSpec=0x%02x(", spdm_request->mel_specification);
-            dump_entry_value(m_spdm_mel_spec_value_string_table,
+            dump_entry_flags(m_spdm_mel_spec_value_string_table,
                              LIBSPDM_ARRAY_SIZE(m_spdm_mel_spec_value_string_table),
                              spdm_request->mel_specification);
         }
@@ -791,7 +792,7 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
         if (spdm_response->header.spdm_version >=
             SPDM_MESSAGE_VERSION_12) {
             printf("), OtherParam=0x%02x(", spdm_response->other_params_selection);
-            dump_entry_value(m_spdm_other_param_value_string_table,
+            dump_entry_flags(m_spdm_other_param_value_string_table,
                              LIBSPDM_ARRAY_SIZE(m_spdm_other_param_value_string_table),
                              spdm_response->other_params_selection);
         }
