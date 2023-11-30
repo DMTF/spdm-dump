@@ -215,6 +215,26 @@ value_string_entry_t m_spdm_other_param_value_string_table[] = {
 size_t m_spdm_other_param_value_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_other_param_value_string_table);
 
+value_string_entry_t m_spdm_cert_model_string_table[] = {
+    { SPDM_CERTIFICATE_INFO_CERT_MODEL_NONE, "NONE" },
+    { SPDM_CERTIFICATE_INFO_CERT_MODEL_DEVICE_CERT, "DEVICE" },
+    { SPDM_CERTIFICATE_INFO_CERT_MODEL_ALIAS_CERT, "ALIAS" },
+    { SPDM_CERTIFICATE_INFO_CERT_MODEL_GENERIC_CERT, "GENERIC" },
+};
+
+value_string_entry_t m_spdm_key_usage_value_string_table[] = {
+    { SPDM_KEY_USAGE_BIT_MASK_KEY_EX_USE, "KEY_EX" },
+    { SPDM_KEY_USAGE_BIT_MASK_CHALLENGE_USE, "CHALL" },
+    { SPDM_KEY_USAGE_BIT_MASK_MEASUREMENT_USE, "MEAS" },
+    { SPDM_KEY_USAGE_BIT_MASK_ENDPOINT_INFO_USE, "EP_INFO" },
+    { SPDM_KEY_USAGE_BIT_MASK_STANDARDS_KEY_USE, "STD" },
+    { SPDM_KEY_USAGE_BIT_MASK_VENDOR_KEY_USE, "VENDOR" },
+};
+
+value_string_entry_t m_spdm_get_cert_attribute_string_table[] = {
+    { SPDM_GET_CERTIFICATE_REQUEST_ATTRIBUTES_SLOT_SIZE_REQUESTED, "SLOT_SIZE" },
+};
+
 value_string_entry_t m_spdm_measurement_type_value_string_table[] = {
     { SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_IMMUTABLE_ROM,
       "ImmutableROM" },
@@ -992,6 +1012,10 @@ void dump_spdm_digests(const void *buffer, size_t buffer_size)
     size_t slot_count;
     size_t index;
     uint8_t *digest;
+    size_t additional_size;
+    spdm_key_pair_id_t *key_pair_id;
+    spdm_certificate_info_t *cert_info;
+    spdm_key_usage_bit_mask_t *key_usage_bit_mask;
 
     printf("SPDM_DIGESTS ");
 
@@ -1010,19 +1034,71 @@ void dump_spdm_digests(const void *buffer, size_t buffer_size)
         }
     }
 
+    additional_size = 0;
+    if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+        if (((!m_encapsulated) && m_multi_key_conn_rsp) ||
+            (m_encapsulated && m_multi_key_conn_req)) {
+            additional_size = sizeof(spdm_key_pair_id_t) + sizeof(spdm_certificate_info_t) +
+                              sizeof(spdm_key_usage_bit_mask_t);
+        }
+    }
+
     hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
-    message_size += slot_count * hash_size;
+    message_size += slot_count * (hash_size + additional_size);
     if (buffer_size < message_size) {
         printf("\n");
         return;
     }
 
     if (!m_param_quite_mode) {
-        printf("(SlotMask=0x%02x) ", spdm_response->header.param2);
+        printf("(");
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+            printf("SupportedSlotMask=0x%02x, ", spdm_response->header.param1);
+        }
+        printf("ProvisionedSlotMask=0x%02x) ", spdm_response->header.param2);
+
+        digest = (void *)(spdm_response + 1);
+        key_pair_id =
+            (spdm_key_pair_id_t *)((uint8_t *)digest + hash_size * slot_count);
+        cert_info =
+            (spdm_certificate_info_t *)((uint8_t *)key_pair_id + sizeof(spdm_key_pair_id_t) *
+                                        slot_count);
+        key_usage_bit_mask =
+            (spdm_key_usage_bit_mask_t *)((uint8_t *)cert_info + sizeof(spdm_certificate_info_t) *
+                                          slot_count);
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+            if (((!m_encapsulated) && m_multi_key_conn_rsp) ||
+                (m_encapsulated && m_multi_key_conn_req)) {
+                printf("(KeyPairId=");
+                for (index = 0; index < slot_count; index++) {
+                    printf("0x%02x,", key_pair_id[index]);
+                }
+                printf(" CertInfo=");
+                for (index = 0; index < slot_count; index++) {
+                    printf("0x%02x(", cert_info[index]);
+                    dump_entry_value(
+                        m_spdm_cert_model_string_table,
+                        LIBSPDM_ARRAY_SIZE(
+                            m_spdm_cert_model_string_table),
+                        cert_info[index] & SPDM_CERTIFICATE_INFO_CERT_MODEL_MASK);
+                    printf("),");
+                }
+                printf(" KeyUsage=");
+                for (index = 0; index < slot_count; index++) {
+                    printf("0x%04x(", key_usage_bit_mask[index]);
+                    dump_entry_flags(
+                        m_spdm_key_usage_value_string_table,
+                        LIBSPDM_ARRAY_SIZE(
+                            m_spdm_key_usage_value_string_table),
+                        key_usage_bit_mask[index]);
+                    printf("),");
+                }
+                printf(") ");
+            }
+        }
 
         if (m_param_all_mode) {
-            digest = (void *)(spdm_response + 1);
             for (index = 0; index < slot_count; index++) {
                 printf("\n    Digest_%d(", (uint32_t)index);
                 dump_data(digest, hash_size);
@@ -1061,9 +1137,17 @@ void dump_spdm_get_certificate(const void *buffer, size_t buffer_size)
     spdm_request = buffer;
 
     if (!m_param_quite_mode) {
-        printf("(SlotID=0x%02x, Offset=0x%x, Length=0x%x) ",
-               spdm_request->header.param1, spdm_request->offset,
-               spdm_request->length);
+        printf("(SlotID=0x%02x", spdm_request->header.param1);
+        if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+            printf(", Attr=0x%02x(", spdm_request->header.param2);
+            dump_entry_flags(
+                m_spdm_get_cert_attribute_string_table,
+                LIBSPDM_ARRAY_SIZE(m_spdm_get_cert_attribute_string_table),
+                spdm_request->header.param2);
+            printf(")");
+        }
+        printf(", Offset=0x%x, Length=0x%x) ",
+               spdm_request->offset, spdm_request->length);
     }
 
     m_cached_spdm_cert_chain_buffer_offset = spdm_request->offset;
@@ -1098,8 +1182,17 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
     }
 
     if (!m_param_quite_mode) {
-        printf("(SlotID=0x%02x, PortLen=0x%x, RemLen=0x%x) ",
-               spdm_response->header.param1,
+        printf("(SlotID=0x%02x", spdm_response->header.param1);
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+            printf(", Attr=0x%02x(", spdm_response->header.param2);
+            dump_entry_value(
+                m_spdm_cert_model_string_table,
+                LIBSPDM_ARRAY_SIZE(m_spdm_cert_model_string_table),
+                spdm_response->header.param2 &
+                SPDM_CERTIFICATE_RESPONSE_ATTRIBUTES_CERTIFICATE_INFO_MASK);
+            printf(")");
+        }
+        printf(", PortLen=0x%x, RemLen=0x%x) ",
                spdm_response->portion_length,
                spdm_response->remainder_length);
     }
