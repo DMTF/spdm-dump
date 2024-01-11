@@ -3043,7 +3043,25 @@ void dump_spdm_get_csr(const void *buffer, size_t buffer_size)
     }
 
     if (!m_param_quite_mode) {
-        printf("() ");
+        printf("(");
+        if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+            printf("KeyPairID=0x%02x", spdm_request->header.param1);
+            printf(", Attr=0x%02x(", spdm_request->header.param2);
+            dump_entry_value(
+                m_spdm_cert_model_string_table,
+                LIBSPDM_ARRAY_SIZE(m_spdm_cert_model_string_table),
+                spdm_request->header.param2 &
+                SPDM_GET_CSR_REQUEST_ATTRIBUTES_CERT_MODEL_MASK);
+            printf(", Tag=0x%x",
+                (spdm_request->header.param2  &
+                 SPDM_GET_CSR_REQUEST_ATTRIBUTES_CSR_TRACKING_TAG_MASK) >>
+                SPDM_GET_CSR_REQUEST_ATTRIBUTES_CSR_TRACKING_TAG_OFFSET);
+            printf(", Overwrite=%x",
+                (spdm_request->header.param2 &
+                 SPDM_GET_CSR_REQUEST_ATTRIBUTES_OVERWRITE) >> 7);
+            printf(")");
+        }
+        printf(") ");
         if (m_param_all_mode) {
             printf("\n    RequesterInfo(");
             ptr = (void *)(spdm_request + 1);
@@ -3113,7 +3131,25 @@ void dump_spdm_set_certificate(const void *buffer, size_t buffer_size)
     }
 
     if (!m_param_quite_mode) {
-        printf("(SlotID=0x%02x) ", spdm_request->header.param1 & 0xF);
+        printf("(Attr=0x%02x(", spdm_request->header.param1);
+        printf("SlotID=0x%02x", spdm_request->header.param1 & 0xF);
+        if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+            printf(", ");
+            dump_entry_value(
+                m_spdm_cert_model_string_table,
+                LIBSPDM_ARRAY_SIZE(m_spdm_cert_model_string_table),
+                (spdm_request->header.param1 &
+                 SPDM_SET_CERTIFICATE_REQUEST_ATTRIBUTES_CERT_MODEL_MASK) >>
+                SPDM_SET_CERTIFICATE_REQUEST_ATTRIBUTES_CERT_MODEL_OFFSET);
+            printf(", Erase=%x",
+                (spdm_request->header.param1 &
+                 SPDM_SET_CERTIFICATE_REQUEST_ATTRIBUTES_ERASE) >> 7);
+        }
+        printf(")");
+        if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
+            printf(", KeyPairID=0x%02x", spdm_request->header.param2);
+        }
+        printf(")");
         if (m_param_all_mode) {
                 printf("\n    CertChain(\n");
                 dump_hex((void *)cert_chain, cert_chain->length);
