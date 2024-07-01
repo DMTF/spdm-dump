@@ -32,6 +32,10 @@ size_t m_local_used_cert_chain_buffer_size;
 void *m_peer_cert_chain_buffer;
 size_t m_peer_cert_chain_buffer_size;
 
+void *m_spdm_mel_buffer;
+size_t m_spdm_mel_buffer_size;
+size_t m_cached_spdm_mel_buffer_offset;
+
 uint32_t m_spdm_requester_capabilities_flags;
 uint32_t m_spdm_responder_capabilities_flags;
 uint8_t m_spdm_measurement_spec;
@@ -1847,6 +1851,101 @@ void dump_spdm_measurements(const void *buffer, size_t buffer_size)
     printf("\n");
 }
 
+void dump_spdm_get_mel(const void *buffer, size_t buffer_size)
+{
+    const spdm_get_measurement_extension_log_request_t *spdm_request;
+    size_t message_size;
+
+    printf("SPDM_GET_MEASUREMENT_EXTENSION_LOG ");
+
+    message_size = sizeof(spdm_get_measurement_extension_log_request_t);
+    if (buffer_size < message_size) {
+        printf("\n");
+        return;
+    }
+
+    spdm_request = buffer;
+
+    if (!m_param_quite_mode) {
+        printf(", Offset=0x%08x, Length=0x%08x) ",
+               spdm_request->offset, spdm_request->length);
+    }
+
+    m_cached_spdm_mel_buffer_offset = spdm_request->offset;
+
+    printf("\n");
+}
+
+void dump_spdm_mel(const void *buffer, size_t buffer_size)
+{
+    const spdm_measurement_extension_log_response_t *spdm_response;
+    size_t message_size;
+    spdm_measurement_extension_log_dmtf_t *spdm_mel;
+    spdm_mel_entry_dmtf_t *mel_entry;
+    uint32_t mel_index;
+    uint8_t *mel_entry_value;
+
+    printf("SPDM_MEASUREMENT_EXTENSION_LOG ");
+
+    message_size = sizeof(spdm_measurement_extension_log_response_t);
+    if (buffer_size < message_size) {
+        printf("\n");
+        return;
+    }
+
+    spdm_response = buffer;
+    message_size += spdm_response->portion_length;
+    if (buffer_size < message_size) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf(", PortLen=0x%08x, RemLen=0x%08x) ",
+               spdm_response->portion_length,
+               spdm_response->remainder_length);
+    }
+
+    if (m_cached_spdm_mel_buffer_offset + spdm_response->portion_length >
+        LIBSPDM_MAX_MEASUREMENT_EXTENSION_LOG_SIZE) {
+        printf(
+            "SPDM MEL is too larger. Please increase LIBSPDM_MAX_MEASUREMENT_EXTENSION_LOG_SIZE and rebuild.\n");
+        exit(0);
+    }
+    memcpy((uint8_t *)m_spdm_mel_buffer +
+           m_cached_spdm_mel_buffer_offset,
+           (spdm_response + 1), spdm_response->portion_length);
+    m_spdm_mel_buffer_size = m_cached_spdm_mel_buffer_offset +
+                             spdm_response->portion_length;
+    spdm_mel = m_spdm_mel_buffer;
+
+    if (!m_param_quite_mode) {
+        if (m_param_all_mode) {
+            if (m_spdm_mel_buffer_size >= spdm_mel->mel_entries_len + sizeof(spdm_measurement_extension_log_dmtf_t)) {
+                printf("\n    SpdmMelNumber(0x%08x)",
+                       spdm_mel->number_of_entries);
+                printf("\n    SpdmMelTotalLen(0x%08x)",
+                       spdm_mel->mel_entries_len);
+
+                mel_entry = (spdm_mel_entry_dmtf_t *)(spdm_mel + 1);
+                for (mel_index = 0; mel_index < spdm_mel->number_of_entries; mel_index++) {
+                    printf("\n    The %d MEL entry is:", mel_index);
+                    printf("\n        The MEL entry MELIndex is: 0x%08x", mel_entry->mel_index);
+                    printf("\n        The MEL entry MeasIndex is:0x%08x", mel_entry->meas_index);
+                    printf("\n        The MEL entry value is: ");
+                    mel_entry_value = (uint8_t *)(mel_entry + 1);
+                    dump_data(mel_entry_value, mel_entry->measurement_block_dmtf_header.dmtf_spec_measurement_value_size);
+                    mel_entry = (spdm_mel_entry_dmtf_t *)((uint8_t *)(mel_entry + 1) +
+                                                           mel_entry->measurement_block_dmtf_header.dmtf_spec_measurement_value_size);
+                }
+
+            }
+        }
+    }
+
+    printf("\n");
+}
+
 void dump_spdm_respond_if_ready(const void *buffer, size_t buffer_size)
 {
     const spdm_response_if_ready_request_t *spdm_request;
@@ -3480,6 +3579,7 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       dump_spdm_challenge_auth },
     { SPDM_VERSION, "SPDM_VERSION", dump_spdm_version },
     { SPDM_MEASUREMENTS, "SPDM_MEASUREMENTS", dump_spdm_measurements },
+    { SPDM_MEASUREMENT_EXTENSION_LOG, "SPDM_MEASUREMENT_EXTENSION_LOG", dump_spdm_mel },
     { SPDM_CAPABILITIES, "SPDM_CAPABILITIES", dump_spdm_capabilities },
     { SPDM_ALGORITHMS, "SPDM_ALGORITHMS", dump_spdm_algorithms },
     { SPDM_VENDOR_DEFINED_RESPONSE, "SPDM_VENDOR_DEFINED_RESPONSE",
@@ -3517,6 +3617,8 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
     { SPDM_GET_VERSION, "SPDM_GET_VERSION", dump_spdm_get_version },
     { SPDM_GET_MEASUREMENTS, "SPDM_GET_MEASUREMENTS",
       dump_spdm_get_measurements },
+    { SPDM_GET_MEASUREMENT_EXTENSION_LOG, "SPDM_GET_MEASUREMENT_EXTENSION_LOG",
+      dump_spdm_get_mel },
     { SPDM_GET_CAPABILITIES, "SPDM_GET_CAPABILITIES",
       dump_spdm_get_capabilities },
     { SPDM_NEGOTIATE_ALGORITHMS, "SPDM_NEGOTIATE_ALGORITHMS",
@@ -3616,6 +3718,12 @@ bool init_spdm_dump(void)
         goto error;
     }
 
+    m_spdm_mel_buffer = (void *)malloc(LIBSPDM_MAX_MEASUREMENT_EXTENSION_LOG_SIZE);
+    if (m_spdm_mel_buffer == NULL) {
+        printf("!!!memory out of resources!!!\n");
+        goto error;
+    }
+
     m_spdm_context = (void *)malloc(libspdm_get_context_size());
     if (m_spdm_context == NULL) {
         printf("!!!memory out of resources!!!\n");
@@ -3678,6 +3786,10 @@ error:
         free(m_peer_cert_chain_buffer);
         m_peer_cert_chain_buffer = NULL;
     }
+    if (m_spdm_mel_buffer != NULL) {
+        free(m_spdm_mel_buffer);
+        m_spdm_mel_buffer = NULL;
+    }
     if (m_spdm_context != NULL) {
         free(m_spdm_context);
         m_spdm_context = NULL;
@@ -3692,5 +3804,6 @@ void deinit_spdm_dump(void)
     free(m_spdm_cert_chain_buffer);
     free(m_local_used_cert_chain_buffer);
     free(m_peer_cert_chain_buffer);
+    free(m_spdm_mel_buffer);
     free(m_spdm_context);
 }
