@@ -1150,7 +1150,7 @@ void dump_spdm_get_certificate(const void *buffer, size_t buffer_size)
                 spdm_request->header.param2);
             printf(")");
         }
-        printf(", Offset=0x%x, Length=0x%x) ",
+        printf(", Offset=0x%04x, Length=0x%04x) ",
                spdm_request->offset, spdm_request->length);
     }
 
@@ -1196,7 +1196,7 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
                 SPDM_CERTIFICATE_RESPONSE_ATTRIBUTES_CERTIFICATE_INFO_MASK);
             printf(")");
         }
-        printf(", PortLen=0x%x, RemLen=0x%x) ",
+        printf(", PortLen=0x%04x, RemLen=0x%04x) ",
                spdm_response->portion_length,
                spdm_response->remainder_length);
     }
@@ -1783,7 +1783,7 @@ void dump_spdm_measurements(const void *buffer, size_t buffer_size)
             }
             printf(") ");
         } else {
-            printf("(NumOfBlocks=0x%x, MeasRecordLen=0x%x",
+            printf("(NumOfBlocks=0x%02x, MeasRecordLen=0x%08x",
                    spdm_response->number_of_blocks,
                    measurement_record_length);
             if (include_signature) {
@@ -2342,7 +2342,7 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
                                  message_size);
     }
 
-    LIBSPDM_DEBUG((LIBSPDM_DEBUG_INFO, "libspdm_generate_session_handshake_key[%x]\n",
+    LIBSPDM_DEBUG((LIBSPDM_DEBUG_INFO, "libspdm_generate_session_handshake_key[%08x]\n",
                    m_current_session_id));
 
     libspdm_calculate_th1_hash(m_spdm_context, m_current_session_info, true,
@@ -2501,7 +2501,7 @@ void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
                              m_spdm_last_message_buffer_size);
     libspdm_append_message_f(m_spdm_context, m_current_session_info, true, buffer, message_size);
 
-    LIBSPDM_DEBUG((LIBSPDM_DEBUG_INFO, "libspdm_generate_session_data_key[%x]\n",
+    LIBSPDM_DEBUG((LIBSPDM_DEBUG_INFO, "libspdm_generate_session_data_key[%08x]\n",
                    m_current_session_id));
 
     if (spdm_dump_session_data_check(m_spdm_context, m_current_session_id,
@@ -2691,7 +2691,7 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
     libspdm_append_message_k(m_spdm_context, m_current_session_info, true, buffer,
                              message_size - hmac_size);
 
-    LIBSPDM_DEBUG((LIBSPDM_DEBUG_INFO, "libspdm_generate_session_handshake_key[%x]\n",
+    LIBSPDM_DEBUG((LIBSPDM_DEBUG_INFO, "libspdm_generate_session_handshake_key[%08x]\n",
                    m_current_session_id));
 
     libspdm_calculate_th1_hash(m_spdm_context, m_current_session_info, true,
@@ -2809,7 +2809,7 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
 
     libspdm_append_message_f(m_spdm_context, m_current_session_info, true, buffer, message_size);
 
-    LIBSPDM_DEBUG((LIBSPDM_DEBUG_INFO, "libspdm_generate_session_data_key[%x]\n",
+    LIBSPDM_DEBUG((LIBSPDM_DEBUG_INFO, "libspdm_generate_session_data_key[%08x]\n",
                    m_current_session_id));
 
     if (spdm_dump_session_data_check(m_spdm_context, m_current_session_id,
@@ -3151,11 +3151,11 @@ void dump_spdm_get_csr(const void *buffer, size_t buffer_size)
                 LIBSPDM_ARRAY_SIZE(m_spdm_cert_model_string_table),
                 spdm_request->header.param2 &
                 SPDM_GET_CSR_REQUEST_ATTRIBUTES_CERT_MODEL_MASK);
-            printf(", Tag=0x%x",
+            printf(", Tag=0x%02x",
                 (spdm_request->header.param2  &
                  SPDM_GET_CSR_REQUEST_ATTRIBUTES_CSR_TRACKING_TAG_MASK) >>
                 SPDM_GET_CSR_REQUEST_ATTRIBUTES_CSR_TRACKING_TAG_OFFSET);
-            printf(", Overwrite=%x",
+            printf(", Overwrite=%02x",
                 (spdm_request->header.param2 &
                  SPDM_GET_CSR_REQUEST_ATTRIBUTES_OVERWRITE) >> 7);
             printf(")");
@@ -3240,7 +3240,7 @@ void dump_spdm_set_certificate(const void *buffer, size_t buffer_size)
                 (spdm_request->header.param1 &
                  SPDM_SET_CERTIFICATE_REQUEST_ATTRIBUTES_CERT_MODEL_MASK) >>
                 SPDM_SET_CERTIFICATE_REQUEST_ATTRIBUTES_CERT_MODEL_OFFSET);
-            printf(", Erase=%x",
+            printf(", Erase=%02x",
                 (spdm_request->header.param1 &
                  SPDM_SET_CERTIFICATE_REQUEST_ATTRIBUTES_ERASE) >> 7);
         }
@@ -3667,7 +3667,7 @@ void dump_spdm_message(const void *buffer, size_t buffer_size)
             printf("RSP->REQ ");
         }
     }
-    printf("SPDM(%x, 0x%02x) ", SpdmHeader->spdm_version,
+    printf("SPDM(%02x, 0x%02x) ", SpdmHeader->spdm_version,
            SpdmHeader->request_response_code);
 
     dump_dispatch_message(m_spdm_dispatch, LIBSPDM_ARRAY_SIZE(m_spdm_dispatch),
