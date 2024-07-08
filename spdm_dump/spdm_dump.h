@@ -167,4 +167,7 @@ extern uint8_t m_psk_secret_buffer_count;
 
 extern uint8_t m_responder_cert_chain_slot_id;
 extern uint8_t m_requester_cert_chain_slot_id;
+
+#define LIBSPDM_MAX_MEASUREMENT_EXTENSION_LOG_SIZE 0x1000
+
 #endif
