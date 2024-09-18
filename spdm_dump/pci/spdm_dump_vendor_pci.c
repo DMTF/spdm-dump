@@ -13,6 +13,7 @@ dispatch_table_entry_t m_spdm_pci_protocol_dispatch[] = {
 
 dispatch_table_entry_t m_spdm_pci_cxl_protocol_dispatch[] = {
     { CXL_PROTOCOL_ID_IDE_KM, "CXL_IDE_KM", dump_cxl_ide_km_message },
+    { CXL_PROTOCOL_ID_TSP, "CXL_TSP", dump_cxl_tsp_message },
 };
 
 void dump_spdm_vendor_pci(const void *buffer, size_t buffer_size)
