@@ -35,7 +35,7 @@
 
    Use x86 command prompt for ARCH=ia32 and x64 command prompt for ARCH=x64. (TOOLCHAIN=VS2019|VS2015|CLANG)
    ```
-   cd spdm_dump
+   cd spdm-dump
    mkdir build
    cd build
    cmake -G"NMake Makefiles" -DARCH=<x64|ia32> -DTOOLCHAIN=<toolchain> -DTARGET=<Debug|Release> -DCRYPTO=<mbedtls|openssl> ..
@@ -47,7 +47,7 @@
 
    (TOOLCHAIN=GCC|CLANG)
    ```
-   cd spdm_dump
+   cd spdm-dump
    mkdir build
    cd build
    cmake -DARCH=<x64|ia32|arm|aarch64|riscv32|riscv64|arc> -DTOOLCHAIN=<toolchain> -DTARGET=<Debug|Release> -DCRYPTO=<mbedtls|openssl> ..
@@ -59,7 +59,7 @@
 
 ### Run spdm_dump
 
-   The tool output is at spdm_dump/build/bin. It can be used to parse the pcap file for offline analysis.
+   The tool output is at spdm-dump/build/bin. It can be used to parse the pcap file for offline analysis.
 
    Please refer to [spdm_dump](https://github.com/DMTF/spdm-dump/blob/main/doc/spdm_dump.md) for detail. 
 
