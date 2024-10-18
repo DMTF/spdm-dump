@@ -343,6 +343,402 @@ void dump_cxl_tsp_lock_configuration_rsp(const void *buffer, size_t buffer_size)
     printf("\n");
 }
 
+void dump_cxl_tsp_set_ckid_specific_key(const void *buffer, size_t buffer_size)
+{
+    const cxl_tsp_set_target_ckid_specific_key_req_t *request;
+    size_t index;
+
+    printf("SET_CKID_SPECIFIC_KEY ");
+
+    if (buffer_size < sizeof(cxl_tsp_set_target_ckid_specific_key_req_t)) {
+        printf("\n");
+        return;
+    }
+
+    request = buffer;
+    if (!m_param_quite_mode) {
+        printf("(ckid=0x%08x, ", request->ckid);
+        printf("type=0x%02x, ", request->ckid_type);
+        printf("valid=0x%02x, ", request->validity_flags);
+        printf("enc_key=");
+        for (index = 0;
+             index < LIBSPDM_ARRAY_SIZE(request->data_encryption_key);
+             index++) {
+            printf("%02x", request->data_encryption_key[index]);
+        }
+        printf(", tweak_key=");
+        for (index = 0;
+             index < LIBSPDM_ARRAY_SIZE(request->tweak_key);
+             index++) {
+            printf("%02x", request->tweak_key[index]);
+        }
+        printf(") ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_set_ckid_specific_key_rsp(const void *buffer, size_t buffer_size)
+{
+    printf("SET_CKID_SPECIFIC_KEY_RSP ");
+
+    if (buffer_size < sizeof(cxl_tsp_set_target_ckid_specific_key_rsp_t)) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_set_ckid_random_key(const void *buffer, size_t buffer_size)
+{
+    const cxl_tsp_set_target_ckid_random_key_req_t *request;
+    size_t index;
+
+    printf("SET_CKID_RANDOM_KEY ");
+
+    if (buffer_size < sizeof(cxl_tsp_set_target_ckid_specific_key_req_t)) {
+        printf("\n");
+        return;
+    }
+
+    request = buffer;
+    if (!m_param_quite_mode) {
+        printf("(ckid=0x%08x, ", request->ckid);
+        printf("attrib=0x%02x, ", request->attributes);
+        printf("valid=0x%02x, ", request->validity_flags);
+        printf("enc_key=");
+        for (index = 0;
+             index < LIBSPDM_ARRAY_SIZE(request->data_encryption_key);
+             index++) {
+            printf("%02x", request->data_encryption_key[index]);
+        }
+        printf(", tweak_key=");
+        for (index = 0;
+             index < LIBSPDM_ARRAY_SIZE(request->tweak_key);
+             index++) {
+            printf("%02x", request->tweak_key[index]);
+        }
+        printf(") ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_set_ckid_random_key_rsp(const void *buffer, size_t buffer_size)
+{
+    printf("SET_CKID_RANDOM_KEY_RSP ");
+
+    if (buffer_size < sizeof(cxl_tsp_set_target_ckid_random_key_rsp_t)) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_clear_ckid_key(const void *buffer, size_t buffer_size)
+{
+    const cxl_tsp_clear_target_ckid_key_req_t *request;
+
+    printf("CLEAR_CKID_KEY ");
+
+    if (buffer_size < sizeof(cxl_tsp_clear_target_ckid_key_req_t)) {
+        printf("\n");
+        return;
+    }
+
+    request = buffer;
+    if (!m_param_quite_mode) {
+        printf("(ckid=0x%08x) ", request->ckid);
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_clear_ckid_key_rsp(const void *buffer, size_t buffer_size)
+{
+    printf("CLEAR_CKID_KEY_RSP ");
+
+    if (buffer_size < sizeof(cxl_tsp_clear_target_ckid_key_rsp_t)) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_set_range_specific_key(const void *buffer, size_t buffer_size)
+{
+    const cxl_tsp_set_target_range_specific_key_req_t *request;
+    size_t index;
+
+    printf("SET_RANGE_SPECIFIC_KEY ");
+
+    if (buffer_size < sizeof(cxl_tsp_set_target_range_specific_key_req_t)) {
+        printf("\n");
+        return;
+    }
+
+    request = buffer;
+    if (!m_param_quite_mode) {
+        printf("(range_id=0x%08x, ", request->range_id);
+        printf("range=0x%08x%08x-",
+               (uint32_t)(request->range_start >> 32),
+               (uint32_t)request->range_start);
+        printf("0x%08x%08x, ",
+               (uint32_t)(request->range_end >> 32),
+               (uint32_t)request->range_end);
+        printf("valid=0x%02x, ", request->validity_flags);
+        printf("enc_key=");
+        for (index = 0;
+             index < LIBSPDM_ARRAY_SIZE(request->data_encryption_key);
+             index++) {
+            printf("%02x", request->data_encryption_key[index]);
+        }
+        printf(", tweak_key=");
+        for (index = 0;
+             index < LIBSPDM_ARRAY_SIZE(request->tweak_key);
+             index++) {
+            printf("%02x", request->tweak_key[index]);
+        }
+        printf(") ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_set_range_specific_key_rsp(const void *buffer, size_t buffer_size)
+{
+    printf("SET_RANGE_SPECIFIC_KEY_RSP ");
+
+    if (buffer_size < sizeof(cxl_tsp_set_target_range_specific_key_rsp_t)) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_set_range_random_key(const void *buffer, size_t buffer_size)
+{
+    const cxl_tsp_set_target_range_random_key_req_t *request;
+    size_t index;
+
+    printf("SET_RANGE_RANDOM_KEY ");
+
+    if (buffer_size < sizeof(cxl_tsp_set_target_range_random_key_req_t)) {
+        printf("\n");
+        return;
+    }
+
+    request = buffer;
+    if (!m_param_quite_mode) {
+        printf("(range_id=0x%08x, ", request->range_id);
+        printf("range=0x%08x%08x-",
+               (uint32_t)(request->range_start >> 32),
+               (uint32_t)request->range_start);
+        printf("0x%08x%08x, ",
+               (uint32_t)(request->range_end >> 32),
+               (uint32_t)request->range_end);
+        printf("valid=0x%02x, ", request->validity_flags);
+        printf("enc_key=");
+        for (index = 0;
+             index < LIBSPDM_ARRAY_SIZE(request->data_encryption_key);
+             index++) {
+            printf("%02x", request->data_encryption_key[index]);
+        }
+        printf(", tweak_key=");
+        for (index = 0;
+             index < LIBSPDM_ARRAY_SIZE(request->tweak_key);
+             index++) {
+            printf("%02x", request->tweak_key[index]);
+        }
+        printf(") ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_set_range_random_key_rsp(const void *buffer, size_t buffer_size)
+{
+    printf("SET_RANGE_RANDOM_KEY_RSP ");
+
+    if (buffer_size < sizeof(cxl_tsp_set_target_range_random_key_rsp_t)) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_clear_range_key(const void *buffer, size_t buffer_size)
+{
+    const cxl_tsp_clear_target_range_key_req_t *request;
+
+    printf("CLEAR_RANGE_KEY ");
+
+    if (buffer_size < sizeof(cxl_tsp_clear_target_range_key_req_t)) {
+        printf("\n");
+        return;
+    }
+
+    request = buffer;
+    if (!m_param_quite_mode) {
+        printf("(range_id=0x%08x) ", request->range_id);
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_clear_range_key_rsp(const void *buffer, size_t buffer_size)
+{
+    printf("CLEAR_RANGE_KEY_RSP ");
+
+    if (buffer_size < sizeof(cxl_tsp_clear_target_range_key_rsp_t)) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_set_te_state(const void *buffer, size_t buffer_size)
+{
+    const cxl_tsp_set_target_te_state_req_t *request;
+    size_t index;
+    const cxl_tsp_memory_range_t *memory_ranges;
+
+    printf("SET_TE_STATE ");
+
+    if (buffer_size < sizeof(cxl_tsp_set_target_te_state_req_t)) {
+        printf("\n");
+        return;
+    }
+
+    request = buffer;
+    if (buffer_size < sizeof(cxl_tsp_set_target_te_state_req_t) +
+                      request->number_of_memory_ranges * sizeof(cxl_tsp_memory_range_t)) {
+        printf("\n");
+        return;
+    }
+
+    memory_ranges = (void *)(request + 1);
+    if (!m_param_quite_mode) {
+        printf("(te_state=0x%02x, ", request->te_state);
+        printf("(num_mem_range=0x%02x, ", request->number_of_memory_ranges);
+        printf("mem_range=[");
+        for (index = 0;
+             index < request->number_of_memory_ranges;
+             index++) {
+            printf("0x%08x%08x-",
+                (uint32_t)(memory_ranges[index].starting_address >> 32),
+                (uint32_t)memory_ranges[index].starting_address);
+            printf("0x%08x%08x",
+                (uint32_t)(memory_ranges[index].length >> 32),
+                (uint32_t)memory_ranges[index].length);
+            if (index != request->number_of_memory_ranges - 1) {
+                printf(",");
+            }
+        }
+        printf("])");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_set_te_state_rsp(const void *buffer, size_t buffer_size)
+{
+    printf("SET_TE_STATE_RSP ");
+
+    if (buffer_size < sizeof(cxl_tsp_set_target_te_state_rsp_t)) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_check_delayed_completion(const void *buffer, size_t buffer_size)
+{
+    printf("CHECK_TARGET_DELAYED_COMPLETION ");
+
+    if (buffer_size < sizeof(cxl_tsp_check_delayed_completion_req_t)) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_check_delayed_completion_rsp(const void *buffer, size_t buffer_size)
+{
+    printf("CHECK_TARGET_DELAYED_COMPLETION_RSP ");
+
+    if (buffer_size < sizeof(cxl_tsp_check_delayed_completion_rsp_t)) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+    }
+
+    printf("\n");
+}
+
+void dump_cxl_tsp_delayed_rsp(const void *buffer, size_t buffer_size)
+{
+    const cxl_tsp_delayed_rsp_t *response;
+
+    printf("DELAYED_RSP ");
+
+    if (buffer_size < sizeof(cxl_tsp_delayed_rsp_t)) {
+        printf("\n");
+        return;
+    }
+
+    response = buffer;
+    if (!m_param_quite_mode) {
+        printf("(delay_time=0x%08x) ",
+            response->delay_time);
+    }
+
+    printf("\n");
+}
+
 void dump_cxl_tsp_error(const void *buffer, size_t buffer_size)
 {
     const cxl_tsp_error_rsp_t *response;
@@ -370,6 +766,14 @@ dispatch_table_entry_t m_cxl_tsp_dispatch[] = {
     { CXL_TSP_OPCODE_GET_TARGET_CONFIGURATION, "GET_CONFIGURATION", dump_cxl_tsp_get_configuration },
     { CXL_TSP_OPCODE_GET_TARGET_CONFIGURATION_REPORT, "GET_CONFIGURATION_REPORT", dump_cxl_tsp_get_configuration_report },
     { CXL_TSP_OPCODE_LOCK_TARGET_CONFIGURATION, "LOCK_CONFIGURATION", dump_cxl_tsp_lock_configuration },
+    { CXL_TSP_OPCODE_SET_TARGET_CKID_SPECIFIC_KEY, "SET_CKID_SPECIFIC_KEY", dump_cxl_tsp_set_ckid_specific_key },
+    { CXL_TSP_OPCODE_SET_TARGET_CKID_RANDOM_KEY, "SET_CKID_RANDOM_KEY", dump_cxl_tsp_set_ckid_random_key },
+    { CXL_TSP_OPCODE_CLEAR_TARGET_CKID_KEY, "CLEAR_CKID_KEY", dump_cxl_tsp_clear_ckid_key },
+    { CXL_TSP_OPCODE_SET_TARGET_RANGE_SPECIFIC_KEY, "SET_RANGE_SPECIFIC_KEY", dump_cxl_tsp_set_range_specific_key },
+    { CXL_TSP_OPCODE_SET_TARGET_RANGE_RANDOM_KEY, "SET_RANGE_RANDOM_KEY", dump_cxl_tsp_set_range_random_key },
+    { CXL_TSP_OPCODE_CLEAR_TARGET_RANGE_KEY, "CLEAR_RANGE_KEY", dump_cxl_tsp_clear_range_key },
+    { CXL_TSP_OPCODE_SET_TARGET_TE_STATE, "SET_TE_STATE", dump_cxl_tsp_set_te_state },
+    { CXL_TSP_OPCODE_CHECK_TARGET_DELAYED_COMPLETION, "CHECK_TARGET_DELAYED_COMPLETION", dump_cxl_tsp_check_delayed_completion },
 
     { CXL_TSP_OPCODE_GET_TARGET_TSP_VERSION_RSP, "GET_VERSION_RSP", dump_cxl_tsp_get_version_rsp },
     { CXL_TSP_OPCODE_GET_TARGET_CAPABILITIES_RSP, "GET_CAPABILITIES_RSP", dump_cxl_tsp_get_capabilities_rsp },
@@ -377,6 +781,15 @@ dispatch_table_entry_t m_cxl_tsp_dispatch[] = {
     { CXL_TSP_OPCODE_GET_TARGET_CONFIGURATION_RSP, "GET_CONFIGURATION_RSP", dump_cxl_tsp_get_configuration_rsp },
     { CXL_TSP_OPCODE_GET_TARGET_CONFIGURATION_REPORT_RSP, "GET_CONFIGURATION_REPORT_RSP", dump_cxl_tsp_get_configuration_report_rsp },
     { CXL_TSP_OPCODE_LOCK_TARGET_CONFIGURATION_RSP, "LOCK_CONFIGURATION_RSP", dump_cxl_tsp_lock_configuration_rsp },
+    { CXL_TSP_OPCODE_SET_TARGET_CKID_SPECIFIC_KEY_RSP, "SET_CKID_SPECIFIC_KEY_RSP", dump_cxl_tsp_set_ckid_specific_key_rsp },
+    { CXL_TSP_OPCODE_SET_TARGET_CKID_RANDOM_KEY_RSP, "SET_CKID_RANDOM_KEY_RSP", dump_cxl_tsp_set_ckid_random_key_rsp },
+    { CXL_TSP_OPCODE_CLEAR_TARGET_CKID_KEY_RSP, "CLEAR_CKID_KEY_RSP", dump_cxl_tsp_clear_ckid_key_rsp },
+    { CXL_TSP_OPCODE_SET_TARGET_RANGE_SPECIFIC_KEY_RSP, "SET_RANGE_SPECIFIC_KEY_RSP", dump_cxl_tsp_set_range_specific_key_rsp },
+    { CXL_TSP_OPCODE_SET_TARGET_RANGE_RANDOM_KEY_RSP, "SET_RANGE_RANDOM_KEY_RSP", dump_cxl_tsp_set_range_random_key_rsp },
+    { CXL_TSP_OPCODE_CLEAR_TARGET_RANGE_KEY_RSP, "CLEAR_RANGE_KEY_RSP", dump_cxl_tsp_clear_range_key_rsp },
+    { CXL_TSP_OPCODE_SET_TARGET_TE_STATE_RSP, "SET_TE_STATE_RSP", dump_cxl_tsp_set_te_state_rsp },
+    { CXL_TSP_OPCODE_CHECK_TARGET_DELAYED_COMPLETION_RSP, "CHECK_TARGET_DELAYED_COMPLETION_RSP", dump_cxl_tsp_check_delayed_completion_rsp },
+    { CXL_TSP_OPCODE_DELAYED_RSP, "DELAYED_RSP", dump_cxl_tsp_delayed_rsp },
     { CXL_TSP_OPCODE_ERROR_RSP, "ERROR", dump_cxl_tsp_error },
 };
 
