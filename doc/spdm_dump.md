@@ -233,7 +233,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
 
    For example, `spdm_dump -r SpdmNegotiatedState.pcap --psk 5465737450736b4461746100 --dhe_secret c7ac17ee29b6a4f84e978223040b7eddff792477a6f7fc0f51faa553fee58175 --req_cap CERT,CHAL,ENCRYPT,MAC,MUT_AUTH,KEY_EX,PSK,ENCAP,HBEAT,KEY_UPD,HANDSHAKE_IN_CLEAR --rsp_cap CACHE,CERT,CHAL,MEAS_SIG,MEAS_FRESH,ENCRYPT,MAC,MUT_AUTH,KEY_EX,PSK_WITH_CONTEXT,ENCAP,HBEAT,KEY_UPD,HANDSHAKE_IN_CLEAR --hash SHA_384 --meas_spec DMTF --meas_hash SHA_512 --asym ECDSA_P384 --req_asym RSAPSS_3072 --dhe SECP_384_R1 --aead AES_256_GCM --key_schedule HMAC_HASH --other_param OPAQUE_FMT_1`
 
-5. By default, spdm_dump only displays SPDM messge. If you want to dump other application message, you need use `-d`.
+5. By default, spdm_dump only displays SPDM message. If you want to dump other application message, you need use `-d`.
 
    Then you can see the MCTP message, such as:
 
