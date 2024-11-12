@@ -15,8 +15,13 @@ extern size_t m_peer_cert_chain_buffer_size;
 extern void *m_spdm_dump_psk;
 extern size_t m_spdm_dump_psk_size;
 
+extern uint16_t m_spdm_dhe_named_group;
+extern uint32_t m_spdm_kem_alg;
+
 void *m_dhe_secret_buffer[LIBSPDM_MAX_SESSION_COUNT] = {NULL};
 size_t m_dhe_secret_buffer_size[LIBSPDM_MAX_SESSION_COUNT] = {0};
+void *m_kem_secret_buffer[LIBSPDM_MAX_SESSION_COUNT] = {NULL};
+size_t m_kem_secret_buffer_size[LIBSPDM_MAX_SESSION_COUNT] = {0};
 void *m_psk_buffer[LIBSPDM_MAX_SESSION_COUNT] = {NULL};
 size_t m_psk_buffer_size[LIBSPDM_MAX_SESSION_COUNT] = {0};
 uint8_t m_responder_cert_chain_slot_id = 0;
@@ -25,6 +30,7 @@ uint8_t m_requester_cert_chain_slot_id = 0;
 
 /*current used key index, index++ when finish command dump complete*/
 uint8_t m_dhe_secret_buffer_count = 0;
+uint8_t m_kem_secret_buffer_count = 0;
 uint8_t m_psk_secret_buffer_count = 0;
 
 void spdm_dump_set_session_info_use_psk (void *spdm_session_info, bool use_psk)
@@ -90,13 +96,24 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                      &parameter, &mut_auth_requested, &data_size);
 
     if (!use_psk) {
-        if (m_dhe_secret_buffer[m_dhe_secret_buffer_count] == NULL ||
-            m_dhe_secret_buffer_size[m_dhe_secret_buffer_count] == 0) {
-            return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
+        if (m_spdm_dhe_named_group != 0) {
+            if (m_dhe_secret_buffer[m_dhe_secret_buffer_count] == NULL ||
+                m_dhe_secret_buffer_size[m_dhe_secret_buffer_count] == 0) {
+                return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
+            }
+            libspdm_secured_message_import_shared_secret(
+                secured_message_context, m_dhe_secret_buffer[m_dhe_secret_buffer_count],
+                m_dhe_secret_buffer_size[m_dhe_secret_buffer_count]);
         }
-        libspdm_secured_message_import_dhe_secret(
-            secured_message_context, m_dhe_secret_buffer[m_dhe_secret_buffer_count],
-            m_dhe_secret_buffer_size[m_dhe_secret_buffer_count]);
+        if (m_spdm_kem_alg != 0) {
+            if (m_kem_secret_buffer[m_kem_secret_buffer_count] == NULL ||
+                m_kem_secret_buffer_size[m_kem_secret_buffer_count] == 0) {
+                return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
+            }
+            libspdm_secured_message_import_shared_secret(
+                secured_message_context, m_kem_secret_buffer[m_kem_secret_buffer_count],
+                m_kem_secret_buffer_size[m_kem_secret_buffer_count]);
+        }
 
         hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
@@ -146,7 +163,6 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                             (uint16_t)(
                                 m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id] +
                                 cert_chain_offset);
-                        cert_chain_header->reserved = 0;
                         res = libspdm_x509_get_cert_from_cert_chain(
                                 m_requester_cert_chain_data[m_requester_cert_chain_slot_id],
                                 m_requester_cert_chain_data_size[m_requester_cert_chain_slot_id],
@@ -203,7 +219,6 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                             (uint16_t)(
                                 m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id] +
                                 cert_chain_offset);
-                        cert_chain_header->reserved = 0;
                         res = libspdm_x509_get_cert_from_cert_chain(
                                 m_responder_cert_chain_data[m_responder_cert_chain_slot_id],
                                 m_responder_cert_chain_data_size[m_responder_cert_chain_slot_id],
@@ -379,9 +394,17 @@ libspdm_return_t spdm_dump_session_data_check(void *spdm_context,
                      &parameter, &mut_auth_requested, &data_size);
 
     if (!use_psk) {
-        if (m_dhe_secret_buffer[m_dhe_secret_buffer_count] == NULL ||
-            m_dhe_secret_buffer_size[m_dhe_secret_buffer_count] == 0) {
-            return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
+        if (m_spdm_dhe_named_group != 0) {
+            if (m_dhe_secret_buffer[m_dhe_secret_buffer_count] == NULL ||
+                m_dhe_secret_buffer_size[m_dhe_secret_buffer_count] == 0) {
+                return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
+            }
+        }
+        if (m_spdm_kem_alg != 0) {
+            if (m_kem_secret_buffer[m_kem_secret_buffer_count] == NULL ||
+                m_kem_secret_buffer_size[m_kem_secret_buffer_count] == 0) {
+                return LIBSPDM_STATUS_INVALID_STATE_LOCAL;
+            }
         }
         if (is_requester) {
             if (mut_auth_requested) {

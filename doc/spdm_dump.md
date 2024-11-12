@@ -23,8 +23,9 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
          [-x] (dump message in hex)
          [--psk <pre-shared key>]
          [--dhe_secret <session DHE secret>]
-         [--req_cap       CERT|CHAL|                                ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|                 ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID|                                EP_INFO_NO_SIG|EP_INFO_SIG|    EVENT|MULTI_KEY_ONLY|MULTI_KEY_NEG]
-         [--rsp_cap CACHE|CERT|CHAL|MEAS_NO_SIG|MEAS_SIG|MEAS_FRESH|ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|PSK_WITH_CONTEXT|ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID|SET_CERT|CSR|CERT_INSTALL_RESET|EP_INFO_NO_SIG|EP_INFO_SIG|MEL|EVENT|MULTI_KEY_ONLY|MULTI_KEY_NEG|GET_KEY_PAIR_INFO|SET_KEY_PAIR_INFO]
+         [--kem_secret <session KEM secret>]
+         [--req_cap       CERT|CHAL|                                ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|                 ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID|                                EP_INFO_NO_SIG|EP_INFO_SIG|    EVENT|MULTI_KEY_ONLY|MULTI_KEY_NEG|                                                       LARGE_RESP]
+         [--rsp_cap CACHE|CERT|CHAL|MEAS_NO_SIG|MEAS_SIG|MEAS_FRESH|ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|PSK_WITH_CONTEXT|ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID|SET_CERT|CSR|CERT_INSTALL_RESET|EP_INFO_NO_SIG|EP_INFO_SIG|MEL|EVENT|MULTI_KEY_ONLY|MULTI_KEY_NEG|GET_KEY_PAIR_INFO|SET_KEY_PAIR_INFO|SET_KEY_PAIR_RESET|LARGE_RESP]
          [--hash SHA_256|SHA_384|SHA_512|SHA3_256|SHA3_384|SHA3_512|SM3_256]
          [--meas_spec DMTF]
          [--meas_hash RAW_BIT|SHA_256|SHA_384|SHA_512|SHA3_256|SHA3_384|SHA3_512|SM3_256]
@@ -47,7 +48,7 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
 
       NOTE:
          [--psk] is required to decrypt a PSK session
-         [--dhe_secret] is required to decrypt a non-PSK session
+         [--dhe_secret] or [--kem_secret] is required to decrypt a non-PSK session
             Format: A hex string, whose count of char must be even.
                   It must not have prefix '0x'. The leading '0' must be included.
                   '0123CDEF' means 4 bytes 0x01, 0x23, 0xCD, 0xEF,
@@ -149,13 +150,15 @@ This document describes spdm_dump tool. It can be used to parse the SPDM message
       ......
    ```
 
-2. In order to dump the SPDM secure session, you need use `--psk` or `--dhe_secret`.
+2. In order to dump the SPDM secure session, you need use `--psk`, `--dhe_secret` or `--kem_secret`.
 
    The DHE secret can be found from SPDM debug message.
-   Take [spdm_emu](https://github.com/DMTF/spdm-emu/blob/main/doc/spdm_emu.md) tool as an example, a user may use `spdm_requester_emu --pcap SpdmRequester.pcap > SpdmRequester.log` or `spdm_responder_emu --pcap SpdmResponder.pcap > SpdmResponder.log` to get the PCAP file and the log file, search "\[DHE Secret\]" or "\[PSK\]" in the log file to get the HEX string.
+   Take [spdm_emu](https://github.com/DMTF/spdm-emu/blob/main/doc/spdm_emu.md) tool as an example, a user may use `spdm_requester_emu --pcap SpdmRequester.pcap > SpdmRequester.log` or `spdm_responder_emu --pcap SpdmResponder.pcap > SpdmResponder.log` to get the PCAP file and the log file, search "\[DHE Secret\]", "\[KEM Secret\]" or "\[PSK\]" in the log file to get the HEX string.
 
    ```
    [DHE Secret]: c7ac17ee29b6a4f84e978223040b7eddff792477a6f7fc0f51faa553fee58175
+   ...
+   [KEM Secret]: d74195f8f57188ccb773de4d95350a9bbe940d035c9aa764c253d495c8ad8d57
    ...
    [PSK]: 5465737450736b4461746100
    ```
