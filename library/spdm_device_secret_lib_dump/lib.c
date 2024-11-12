@@ -84,7 +84,7 @@ bool libspdm_generate_measurement_summary_hash(
 #if LIBSPDM_ENABLE_CAPABILITY_MUT_AUTH_CAP
 bool libspdm_requester_data_sign(
     spdm_version_number_t spdm_version, uint8_t op_code,
-    uint16_t req_base_asym_alg,
+    uint16_t req_base_asym_alg, uint32_t req_pqc_asym_alg,
     uint32_t base_hash_algo, bool is_data_hash,
     const uint8_t *message, size_t message_size,
     uint8_t *signature, size_t *sig_size)
@@ -95,7 +95,7 @@ bool libspdm_requester_data_sign(
 
 bool libspdm_responder_data_sign(
     spdm_version_number_t spdm_version, uint8_t op_code,
-    uint32_t base_asym_algo,
+    uint32_t base_asym_algo, uint32_t base_pqc_algo,
     uint32_t base_hash_algo, bool is_data_hash,
     const uint8_t *message, size_t message_size,
     uint8_t *signature, size_t *sig_size)
@@ -224,7 +224,8 @@ bool libspdm_is_in_trusted_environment()
 
 bool libspdm_write_certificate_to_nvm(uint8_t slot_id, const void * cert_chain,
                                       size_t cert_chain_size,
-                                      uint32_t base_hash_algo, uint32_t base_asym_algo)
+                                      uint32_t base_hash_algo, uint32_t base_asym_algo,
+                                      uint32_t pqc_asym_algo)
 {
     return false;
 }

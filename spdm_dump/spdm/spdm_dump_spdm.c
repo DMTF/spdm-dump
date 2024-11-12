@@ -43,12 +43,15 @@ uint8_t m_spdm_measurement_spec;
 uint32_t m_spdm_measurement_hash_algo;
 uint32_t m_spdm_base_asym_algo;
 uint32_t m_spdm_base_hash_algo;
+uint32_t m_spdm_pqc_asym_algo;
 uint16_t m_spdm_dhe_named_group;
 uint16_t m_spdm_aead_cipher_suite;
 uint16_t m_spdm_req_base_asym_alg;
 uint16_t m_spdm_key_schedule;
 uint8_t m_spdm_other_params_support;
 uint8_t m_spdm_mel_spec;
+uint32_t m_spdm_req_pqc_asym_alg;
+uint32_t m_spdm_kem_alg;
 
 bool m_multi_key_conn_req;
 bool m_multi_key_conn_rsp;
@@ -85,6 +88,7 @@ value_string_entry_t m_spdm_requester_capabilities_string_table[] = {
     { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_EVENT_CAP, "EVENT" },
     { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_MULTI_KEY_CAP_ONLY, "MULTI_KEY_ONLY" },
     { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_MULTI_KEY_CAP_NEG, "MULTI_KEY_NEG" },
+    { SPDM_GET_CAPABILITIES_REQUEST_FLAGS_LARGE_RESP_CAP, "LARGE_RESP" },
 };
 size_t m_spdm_requester_capabilities_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_requester_capabilities_string_table);
@@ -122,6 +126,8 @@ value_string_entry_t m_spdm_responder_capabilities_string_table[] = {
     { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MULTI_KEY_CAP_NEG, "MULTI_KEY_NEG" },
     { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_GET_KEY_PAIR_INFO_CAP, "GET_KEY_PAIR_INFO" },
     { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_SET_KEY_PAIR_INFO_CAP, "SET_KEY_PAIR_INFO" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_SET_KEY_PAIR_RESET_CAP, "SET_KEY_PAIR_RESET" },
+    { SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_LARGE_RESP_CAP, "LARGE_RESP" },
 };
 size_t m_spdm_responder_capabilities_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_responder_capabilities_string_table);
@@ -219,6 +225,34 @@ value_string_entry_t m_spdm_other_param_value_string_table[] = {
 };
 size_t m_spdm_other_param_value_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_other_param_value_string_table);
+
+value_string_entry_t m_spdm_pqc_asym_value_string_table[] = {
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_ML_DSA_44, "ML_DSA_44" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_ML_DSA_65, "ML_DSA_65" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_ML_DSA_87, "ML_DSA_87" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHA2_128S, "SLH_DSA_SHA2_128S" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHAKE_128S, "SLH_DSA_SHAKE_128S" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHA2_128F, "SLH_DSA_SHA2_128F" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHAKE_128F, "SLH_DSA_SHAKE_128F" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHA2_192S, "SLH_DSA_SHA2_192S" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHAKE_192S, "SLH_DSA_SHAKE_192S" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHA2_192F, "SLH_DSA_SHA2_192F" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHAKE_192F, "SLH_DSA_SHAKE_192F" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHA2_256S, "SLH_DSA_SHA2_256S" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHAKE_256S, "SLH_DSA_SHAKE_256S" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHA2_256F, "SLH_DSA_SHA2_256F" },
+    { SPDM_ALGORITHMS_PQC_ASYM_ALGO_SLH_DSA_SHAKE_256F, "SLH_DSA_SHAKE_256F" },
+};
+size_t m_spdm_pqc_asym_value_string_table_count =
+    LIBSPDM_ARRAY_SIZE(m_spdm_pqc_asym_value_string_table);
+
+value_string_entry_t m_spdm_kem_value_string_table[] = {
+    { SPDM_ALGORITHMS_KEM_ALG_ML_KEM_512, "ML_KEM_512" },
+    { SPDM_ALGORITHMS_KEM_ALG_ML_KEM_768, "ML_KEM_768" },
+    { SPDM_ALGORITHMS_KEM_ALG_ML_KEM_1024, "ML_KEM_1024" },
+};
+size_t m_spdm_kem_value_string_table_count =
+    LIBSPDM_ARRAY_SIZE(m_spdm_kem_value_string_table);
 
 value_string_entry_t m_spdm_cert_model_string_table[] = {
     { SPDM_CERTIFICATE_INFO_CERT_MODEL_NONE, "NONE" },
@@ -719,6 +753,13 @@ void dump_spdm_negotiate_algorithms(const void *buffer, size_t buffer_size)
                          LIBSPDM_ARRAY_SIZE(m_spdm_asym_value_string_table),
                          spdm_request->base_asym_algo);
         if (spdm_request->header.spdm_version >=
+            SPDM_MESSAGE_VERSION_14) {
+            printf("), PqcAsym=0x%08x(", spdm_request->pqc_asym_algo);
+            dump_entry_flags(m_spdm_pqc_asym_value_string_table,
+                             LIBSPDM_ARRAY_SIZE(m_spdm_pqc_asym_value_string_table),
+                             spdm_request->pqc_asym_algo);
+        }
+        if (spdm_request->header.spdm_version >=
             SPDM_MESSAGE_VERSION_13) {
             printf("), MelSpec=0x%02x(", spdm_request->mel_specification);
             dump_entry_flags(m_spdm_mel_spec_value_string_table,
@@ -772,6 +813,24 @@ void dump_spdm_negotiate_algorithms(const void *buffer, size_t buffer_size)
                         m_spdm_key_schedule_value_string_table,
                         LIBSPDM_ARRAY_SIZE(
                             m_spdm_key_schedule_value_string_table),
+                        struct_table->alg_supported);
+                    break;
+                case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_REQ_PQC_ASYM_ALG:
+                    printf("), ReqPqcAsym=0x%04x(",
+                           struct_table->alg_supported);
+                    dump_entry_flags(
+                        m_spdm_pqc_asym_value_string_table,
+                        LIBSPDM_ARRAY_SIZE(
+                            m_spdm_pqc_asym_value_string_table),
+                        struct_table->alg_supported);
+                    break;
+                case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_KEM_ALG:
+                    printf("), KEM=0x%04x(",
+                           struct_table->alg_supported);
+                    dump_entry_flags(
+                        m_spdm_kem_value_string_table,
+                        LIBSPDM_ARRAY_SIZE(
+                            m_spdm_kem_value_string_table),
                         struct_table->alg_supported);
                     break;
                 }
@@ -863,6 +922,13 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
                          LIBSPDM_ARRAY_SIZE(m_spdm_asym_value_string_table),
                          spdm_response->base_asym_sel);
         if (spdm_response->header.spdm_version >=
+            SPDM_MESSAGE_VERSION_14) {
+            printf("), PqcAsym=0x%02x(", spdm_response->pqc_asym_sel);
+            dump_entry_value(m_spdm_pqc_asym_value_string_table,
+                             LIBSPDM_ARRAY_SIZE(m_spdm_pqc_asym_value_string_table),
+                             spdm_response->pqc_asym_sel);
+        }
+        if (spdm_response->header.spdm_version >=
             SPDM_MESSAGE_VERSION_13) {
             printf("), MelSpec=0x%02x(", spdm_response->mel_specification_sel);
             dump_entry_value(m_spdm_mel_spec_value_string_table,
@@ -918,6 +984,24 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
                             m_spdm_key_schedule_value_string_table),
                         struct_table->alg_supported);
                     break;
+                case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_REQ_PQC_ASYM_ALG:
+                    printf("), ReqPqcAsym=0x%04x(",
+                           struct_table->alg_supported);
+                    dump_entry_value(
+                        m_spdm_pqc_asym_value_string_table,
+                        LIBSPDM_ARRAY_SIZE(
+                            m_spdm_pqc_asym_value_string_table),
+                        struct_table->alg_supported);
+                    break;
+                case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_KEM_ALG:
+                    printf("), KEM=0x%04x(",
+                           struct_table->alg_supported);
+                    dump_entry_value(
+                        m_spdm_kem_value_string_table,
+                        LIBSPDM_ARRAY_SIZE(
+                            m_spdm_kem_value_string_table),
+                        struct_table->alg_supported);
+                    break;
                 }
                 ext_alg_count = struct_table->alg_count & 0xF;
                 struct_table =
@@ -942,6 +1026,9 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
     m_spdm_measurement_hash_algo = spdm_response->measurement_hash_algo;
     m_spdm_base_asym_algo = spdm_response->base_asym_sel;
     m_spdm_base_hash_algo = spdm_response->base_hash_sel;
+    if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+        m_spdm_pqc_asym_algo = spdm_response->pqc_asym_sel;
+    }
 
     if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_11) {
         struct_table =
@@ -967,6 +1054,14 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
                 break;
             case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_KEY_SCHEDULE:
                 m_spdm_key_schedule =
+                    struct_table->alg_supported;
+                break;
+            case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_REQ_PQC_ASYM_ALG:
+                m_spdm_req_pqc_asym_alg =
+                    struct_table->alg_supported;
+                break;
+            case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_KEM_ALG:
+                m_spdm_kem_alg =
                     struct_table->alg_supported;
                 break;
             }
@@ -996,6 +1091,8 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
                      &m_spdm_base_asym_algo, sizeof(uint32_t));
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_BASE_HASH_ALGO, &parameter,
                      &m_spdm_base_hash_algo, sizeof(uint32_t));
+    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_PQC_ASYM_ALGO, &parameter,
+                     &m_spdm_pqc_asym_algo, sizeof(uint32_t));
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_DHE_NAME_GROUP, &parameter,
                      &m_spdm_dhe_named_group, sizeof(uint16_t));
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_AEAD_CIPHER_SUITE, &parameter,
@@ -1008,6 +1105,10 @@ void dump_spdm_algorithms(const void *buffer, size_t buffer_size)
                      &m_spdm_other_params_support, sizeof(uint8_t));
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_MEL_SPEC, &parameter,
                      &m_spdm_mel_spec, sizeof(uint8_t));
+    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_REQ_PQC_ASYM_ALG, &parameter,
+                     &m_spdm_req_pqc_asym_alg, sizeof(uint32_t));
+    libspdm_set_data(m_spdm_context, LIBSPDM_DATA_KEM_ALG, &parameter,
+                     &m_spdm_kem_alg, sizeof(uint32_t));
 
     libspdm_set_data(m_spdm_context, LIBSPDM_DATA_MULTI_KEY_CONN_REQ, &parameter,
                      &m_multi_key_conn_req, sizeof(bool));
@@ -1155,8 +1256,11 @@ void dump_spdm_digests(const void *buffer, size_t buffer_size)
 
 void dump_spdm_get_certificate(const void *buffer, size_t buffer_size)
 {
-    const spdm_get_certificate_request_t *spdm_request;
+    const spdm_get_certificate_large_request_t *spdm_request;
     size_t message_size;
+    bool use_large_cert_chain;
+    size_t req_msg_length;
+    size_t req_msg_offset;
 
     printf("SPDM_GET_CERTIFICATE ");
 
@@ -1168,8 +1272,31 @@ void dump_spdm_get_certificate(const void *buffer, size_t buffer_size)
 
     spdm_request = buffer;
 
+    if ((spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_14) &&
+        ((spdm_request->header.param1 & SPDM_GET_CERTIFICATE_REQUEST_LARGE_CERT_CHAIN) != 0)) {
+        use_large_cert_chain = true;
+    } else {
+        use_large_cert_chain = false;
+    }
+
+    if (use_large_cert_chain) {
+        message_size = sizeof(spdm_get_certificate_large_request_t);
+        if (buffer_size < message_size) {
+            printf("\n");
+            return;
+        }
+        req_msg_length = spdm_request->large_length;
+        req_msg_offset = spdm_request->large_offset;
+    } else {
+        req_msg_length = spdm_request->length;
+        req_msg_offset = spdm_request->offset;
+    }
+
     if (!m_param_quite_mode) {
-        printf("(SlotID=0x%02x", spdm_request->header.param1);
+        printf("(SlotID=0x%02x", spdm_request->header.param1 & SPDM_GET_CERTIFICATE_REQUEST_SLOT_ID_MASK);
+        if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+            printf(", LargeCert=0x%02x", spdm_request->header.param1 & SPDM_GET_CERTIFICATE_REQUEST_LARGE_CERT_CHAIN);
+        }
         if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
             printf(", Attr=0x%02x(", spdm_request->header.param2);
             dump_entry_flags(
@@ -1178,18 +1305,21 @@ void dump_spdm_get_certificate(const void *buffer, size_t buffer_size)
                 spdm_request->header.param2);
             printf(")");
         }
-        printf(", Offset=0x%04x, Length=0x%04x) ",
-               spdm_request->offset, spdm_request->length);
+        if (use_large_cert_chain) {
+            printf(", Offset=0x%08x, Length=0x%08x) ", (uint32_t)req_msg_offset, (uint32_t)req_msg_length);
+        } else {
+            printf(", Offset=0x%04x, Length=0x%04x) ", (uint16_t)req_msg_offset, (uint16_t)req_msg_length);
+        }
     }
 
-    m_cached_spdm_cert_chain_buffer_offset = spdm_request->offset;
+    m_cached_spdm_cert_chain_buffer_offset = req_msg_offset;
 
     printf("\n");
 }
 
 void dump_spdm_certificate(const void *buffer, size_t buffer_size)
 {
-    const spdm_certificate_response_t *spdm_response;
+    const spdm_certificate_large_response_t *spdm_response;
     size_t message_size;
     void *cert_chain;
     size_t cert_chain_size;
@@ -1197,6 +1327,11 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
     spdm_cert_chain_t *spdm_cert_chain;
     uint8_t *root_hash;
     size_t cert_chain_offset;
+    bool use_large_cert_chain;
+    size_t rsp_msg_portion_length;
+    size_t rsp_msg_remainder_length;
+    size_t rsp_msg_header_size;
+    uint8_t slot_id;
 
     printf("SPDM_CERTIFICATE ");
 
@@ -1207,14 +1342,40 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
     }
 
     spdm_response = buffer;
-    message_size += spdm_response->portion_length;
+
+    if ((spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) &&
+        ((spdm_response->header.param1 & SPDM_CERTIFICATE_RESPONSE_LARGE_CERT_CHAIN) != 0)) {
+        use_large_cert_chain = true;
+    } else {
+        use_large_cert_chain = false;
+    }
+
+    if (use_large_cert_chain) {
+        message_size = sizeof(spdm_certificate_large_response_t);
+        if (buffer_size < message_size) {
+            printf("\n");
+            return;
+        }
+        rsp_msg_portion_length = spdm_response->large_portion_length;
+        rsp_msg_remainder_length = spdm_response->large_remainder_length;
+        rsp_msg_header_size = sizeof(spdm_certificate_large_response_t);
+    } else {
+        rsp_msg_portion_length = spdm_response->portion_length;
+        rsp_msg_remainder_length = spdm_response->remainder_length;
+        rsp_msg_header_size = sizeof(spdm_certificate_response_t);
+    }
+
+    message_size += rsp_msg_portion_length;
     if (buffer_size < message_size) {
         printf("\n");
         return;
     }
 
     if (!m_param_quite_mode) {
-        printf("(SlotID=0x%02x", spdm_response->header.param1);
+        printf("(SlotID=0x%02x", spdm_response->header.param1 & SPDM_CERTIFICATE_RESPONSE_SLOT_ID_MASK);
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+            printf(", LargeCert=0x%02x", spdm_response->header.param1 & SPDM_CERTIFICATE_RESPONSE_LARGE_CERT_CHAIN);
+        }
         if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) {
             printf(", Attr=0x%02x(", spdm_response->header.param2);
             dump_entry_value(
@@ -1224,13 +1385,17 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
                 SPDM_CERTIFICATE_RESPONSE_ATTRIBUTES_CERTIFICATE_INFO_MASK);
             printf(")");
         }
-        printf(", PortLen=0x%04x, RemLen=0x%04x) ",
-               spdm_response->portion_length,
-               spdm_response->remainder_length);
+        if (use_large_cert_chain) {
+            printf(", PortLen=0x%08x, RemLen=0x%08x) ",
+                   (uint32_t)rsp_msg_portion_length, (uint32_t)rsp_msg_remainder_length);
+        } else {
+            printf(", PortLen=0x%04x, RemLen=0x%04x) ",
+                   (uint16_t)rsp_msg_portion_length, (uint16_t)rsp_msg_remainder_length);
+        }
     }
 
     if (m_cached_spdm_cert_chain_buffer_offset +
-        spdm_response->portion_length >
+        rsp_msg_portion_length >
         LIBSPDM_MAX_CERT_CHAIN_SIZE) {
         printf(
             "SPDM cert_chain is too larger. Please increase LIBSPDM_MAX_CERT_CHAIN_SIZE and rebuild.\n");
@@ -1238,13 +1403,13 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
     }
     memcpy((uint8_t *)m_spdm_cert_chain_buffer +
            m_cached_spdm_cert_chain_buffer_offset,
-           (spdm_response + 1), spdm_response->portion_length);
+           (uint8_t *)spdm_response + rsp_msg_header_size, rsp_msg_portion_length);
     m_spdm_cert_chain_buffer_size = m_cached_spdm_cert_chain_buffer_offset +
-                                    spdm_response->portion_length;
+                                    rsp_msg_portion_length;
 
     hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
-    if (spdm_response->remainder_length == 0) {
+    if (rsp_msg_remainder_length == 0) {
         if (m_spdm_cert_chain_buffer_size <=
             sizeof(spdm_cert_chain_t) + hash_size) {
             printf("\n");
@@ -1260,7 +1425,7 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
 
     if (!m_param_quite_mode) {
         if (m_param_all_mode) {
-            if (spdm_response->remainder_length == 0) {
+            if (rsp_msg_remainder_length == 0) {
                 spdm_cert_chain = m_spdm_cert_chain_buffer;
                 printf("\n    SpdmCertChainSize(0x%04x)",
                        spdm_cert_chain->length);
@@ -1283,7 +1448,7 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
         }
     }
 
-    if (spdm_response->remainder_length == 0) {
+    if (rsp_msg_remainder_length == 0) {
         cert_chain = (uint8_t *)m_spdm_cert_chain_buffer;
         cert_chain_size = m_spdm_cert_chain_buffer_size;
 
@@ -1299,44 +1464,45 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
         }
 
         /* override rule: alway record the latest data */
+        slot_id = spdm_response->header.param1 & SPDM_CERTIFICATE_RESPONSE_SLOT_ID_MASK;
         if (m_encapsulated) {
-            if (m_param_out_rsq_cert_chain_file_name[spdm_response->header.param1] != NULL) {
+            if (m_param_out_rsq_cert_chain_file_name[slot_id] != NULL) {
                 if (!write_output_file(
-                        m_param_out_rsq_cert_chain_file_name[spdm_response->header.param1],
+                        m_param_out_rsq_cert_chain_file_name[slot_id],
                         (uint8_t *)cert_chain + cert_chain_offset,
                         cert_chain_size - cert_chain_offset)) {
                     printf("Fail to write out_req_cert_chain\n");
                 }
             }
-            if (m_requester_cert_chain_buffer[spdm_response->header.param1] != NULL) {
-                free (m_requester_cert_chain_buffer[spdm_response->header.param1]);
+            if (m_requester_cert_chain_buffer[slot_id] != NULL) {
+                free (m_requester_cert_chain_buffer[slot_id]);
             }
-            m_requester_cert_chain_buffer[spdm_response->header.param1] =
+            m_requester_cert_chain_buffer[slot_id] =
                 malloc(cert_chain_size);
-            if (m_requester_cert_chain_buffer[spdm_response->header.param1] != NULL) {
-                memcpy(m_requester_cert_chain_buffer[spdm_response->header.param1],
+            if (m_requester_cert_chain_buffer[slot_id] != NULL) {
+                memcpy(m_requester_cert_chain_buffer[slot_id],
                        cert_chain, cert_chain_size);
-                m_requester_cert_chain_buffer_size[spdm_response->header.param1] =
+                m_requester_cert_chain_buffer_size[slot_id] =
                     cert_chain_size;
             }
         } else {
-            if (m_param_out_rsp_cert_chain_file_name[spdm_response->header.param1] != NULL) {
+            if (m_param_out_rsp_cert_chain_file_name[slot_id] != NULL) {
                 if (!write_output_file(
-                        m_param_out_rsp_cert_chain_file_name[spdm_response->header.param1],
+                        m_param_out_rsp_cert_chain_file_name[slot_id],
                         (uint8_t *)cert_chain + cert_chain_offset,
                         cert_chain_size - cert_chain_offset)) {
                     printf("Fail to write out_rsp_cert_chain\n");
                 }
             }
-            if (m_responder_cert_chain_buffer[spdm_response->header.param1] != NULL) {
-                free (m_responder_cert_chain_buffer[spdm_response->header.param1]);
+            if (m_responder_cert_chain_buffer[slot_id] != NULL) {
+                free (m_responder_cert_chain_buffer[slot_id]);
             }
-            m_responder_cert_chain_buffer[spdm_response->header.param1] =
+            m_responder_cert_chain_buffer[slot_id] =
                 malloc(cert_chain_size);
-            if (m_responder_cert_chain_buffer[spdm_response->header.param1] != NULL) {
-                memcpy(m_responder_cert_chain_buffer[spdm_response->header.param1],
+            if (m_responder_cert_chain_buffer[slot_id] != NULL) {
+                memcpy(m_responder_cert_chain_buffer[slot_id],
                        cert_chain, cert_chain_size);
-                m_responder_cert_chain_buffer_size[spdm_response->header.param1] =
+                m_responder_cert_chain_buffer_size[slot_id] =
                     cert_chain_size;
             }
         }
@@ -1413,9 +1579,19 @@ void dump_spdm_challenge_auth(const void *buffer, size_t buffer_size)
 
     hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
     if (m_encapsulated) {
-        signature_size = libspdm_get_req_asym_signature_size(m_spdm_req_base_asym_alg);
+        if (m_spdm_req_base_asym_alg != 0) {
+            signature_size = libspdm_get_req_asym_signature_size(m_spdm_req_base_asym_alg);
+        }
+        if (m_spdm_req_pqc_asym_alg != 0) {
+            signature_size = libspdm_get_req_pqc_asym_signature_size(m_spdm_req_pqc_asym_alg);
+        }
     } else {
-        signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+        if (m_spdm_base_asym_algo != 0) {
+            signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+        }
+        if (m_spdm_pqc_asym_algo != 0) {
+            signature_size = libspdm_get_pqc_asym_signature_size(m_spdm_pqc_asym_algo);
+        }
     }
     measurement_summary_hash_size =
         spdm_dump_get_measurement_summary_hash_size(
@@ -1779,8 +1955,12 @@ void dump_spdm_measurements(const void *buffer, size_t buffer_size)
     }
 
     if (include_signature) {
-        signature_size =
-            libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+        if (m_spdm_base_asym_algo != 0) {
+            signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+        }
+        if (m_spdm_pqc_asym_algo != 0) {
+            signature_size = libspdm_get_asym_signature_size(m_spdm_pqc_asym_algo);
+        }
         message_size += signature_size;
         if (buffer_size < message_size) {
             printf("\n");
@@ -2114,7 +2294,7 @@ void dump_spdm_key_exchange(const void *buffer, size_t buffer_size)
 {
     const spdm_key_exchange_request_t *spdm_request;
     size_t message_size;
-    size_t dhe_key_size;
+    size_t exchange_data_size;
     uint16_t opaque_length;
     uint8_t *exchange_data;
     uint8_t *opaque_data;
@@ -2128,8 +2308,13 @@ void dump_spdm_key_exchange(const void *buffer, size_t buffer_size)
     }
 
     spdm_request = buffer;
-    dhe_key_size = libspdm_get_dhe_pub_key_size(m_spdm_dhe_named_group);
-    message_size += dhe_key_size + sizeof(uint16_t);
+    if (m_spdm_dhe_named_group != 0) {
+        exchange_data_size = libspdm_get_dhe_pub_key_size(m_spdm_dhe_named_group);
+    }
+    if (m_spdm_kem_alg != 0) {
+        exchange_data_size = libspdm_get_kem_encap_key_size(m_spdm_kem_alg);
+    }
+    message_size += exchange_data_size + sizeof(uint16_t);
     if (buffer_size < message_size) {
         printf("\n");
         return;
@@ -2137,7 +2322,7 @@ void dump_spdm_key_exchange(const void *buffer, size_t buffer_size)
 
     opaque_length =
         *(uint16_t *)((size_t)buffer +
-                      sizeof(spdm_key_exchange_request_t) + dhe_key_size);
+                      sizeof(spdm_key_exchange_request_t) + exchange_data_size);
     message_size += opaque_length;
     if (buffer_size < message_size) {
         printf("\n");
@@ -2172,12 +2357,12 @@ void dump_spdm_key_exchange(const void *buffer, size_t buffer_size)
             printf(")");
             exchange_data = (void *)(spdm_request + 1);
             printf("\n    ExchangeData(");
-            dump_data(exchange_data, dhe_key_size);
+            dump_data(exchange_data, exchange_data_size);
             printf(")");
             opaque_length = *(uint16_t *)((uint8_t *)exchange_data +
-                                          dhe_key_size);
+                                          exchange_data_size);
             opaque_data = (void *)((uint8_t *)exchange_data +
-                                   dhe_key_size + sizeof(uint16_t));
+                                   exchange_data_size + sizeof(uint16_t));
             printf("\n    OpaqueData(");
             dump_data(opaque_data, opaque_length);
             printf(")");
@@ -2208,7 +2393,7 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
 {
     const spdm_key_exchange_response_t *spdm_response;
     size_t message_size;
-    size_t dhe_key_size;
+    size_t exchange_data_size;
     size_t measurement_summary_hash_size;
     size_t signature_size;
     size_t hmac_size;
@@ -2231,15 +2416,25 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
     }
 
     spdm_response = buffer;
-    dhe_key_size = libspdm_get_dhe_pub_key_size(m_spdm_dhe_named_group);
-    signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+    if (m_spdm_dhe_named_group != 0) {
+        exchange_data_size = libspdm_get_dhe_pub_key_size(m_spdm_dhe_named_group);
+    }
+    if (m_spdm_kem_alg != 0) {
+        exchange_data_size = libspdm_get_kem_encap_key_size(m_spdm_kem_alg);
+    }
+    if (m_spdm_base_asym_algo != 0) {
+        signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+    }
+    if (m_spdm_pqc_asym_algo != 0) {
+        signature_size = libspdm_get_pqc_asym_signature_size(m_spdm_pqc_asym_algo);
+    }
     measurement_summary_hash_size =
         spdm_dump_get_measurement_summary_hash_size(
             m_cached_measurement_summary_hash_type);
     hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
     message_size +=
-        dhe_key_size + measurement_summary_hash_size + sizeof(uint16_t);
+        exchange_data_size + measurement_summary_hash_size + sizeof(uint16_t);
     if (buffer_size < message_size) {
         printf("\n");
         return;
@@ -2247,7 +2442,7 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
 
     opaque_length = *(
         uint16_t *)((size_t)buffer + sizeof(spdm_key_exchange_response_t) +
-                    dhe_key_size + measurement_summary_hash_size);
+                    exchange_data_size + measurement_summary_hash_size);
     message_size += opaque_length + signature_size;
     include_hmac =
         ((m_spdm_responder_capabilities_flags &
@@ -2282,9 +2477,9 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
             printf(")");
             exchange_data = (void *)(spdm_response + 1);
             printf("\n    ExchangeData(");
-            dump_data(exchange_data, dhe_key_size);
+            dump_data(exchange_data, exchange_data_size);
             printf(")");
-            measurement_summary_hash = exchange_data + dhe_key_size;
+            measurement_summary_hash = exchange_data + exchange_data_size;
             if (measurement_summary_hash_size != 0) {
                 printf("\n    MeasurementSummaryHash(");
                 dump_data(measurement_summary_hash,
@@ -2349,8 +2544,15 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
 
     spdm_dump_set_session_info_mut_auth_requested (m_current_session_info, mut_auth_requested);
 
-    if (m_dhe_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
-        return;
+    if (m_spdm_dhe_named_group != 0) {
+        if (m_dhe_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
+            return;
+        }
+    }
+    if (m_spdm_kem_alg != 0) {
+        if (m_kem_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
+            return;
+        }
     }
 
     if (spdm_dump_session_data_provision(m_spdm_context,
@@ -2412,8 +2614,12 @@ void dump_spdm_finish(const void *buffer, size_t buffer_size)
     }
 
     spdm_request = buffer;
-    signature_size =
-        libspdm_get_req_asym_signature_size(m_spdm_req_base_asym_alg);
+    if (m_spdm_req_base_asym_alg != 0) {
+        signature_size = libspdm_get_req_asym_signature_size(m_spdm_req_base_asym_alg);
+    }
+    if (m_spdm_req_pqc_asym_alg != 0) {
+        signature_size = libspdm_get_req_pqc_asym_signature_size(m_spdm_req_pqc_asym_alg);
+    }
     hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
     include_signature =
@@ -2516,8 +2722,15 @@ void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
         return;
     }
 
-    if (m_dhe_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
-        return;
+    if (m_spdm_dhe_named_group != 0) {
+        if (m_dhe_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
+            return;
+        }
+    }
+    if (m_spdm_kem_alg != 0) {
+        if (m_kem_secret_buffer_count >= LIBSPDM_MAX_SESSION_COUNT) {
+            return;
+        }
     }
 
     if (spdm_dump_session_data_provision(m_spdm_context,
@@ -2545,7 +2758,13 @@ void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
             m_current_session_info),
         th2_hash_data);
     /*use next key when next seesion start*/
-    m_dhe_secret_buffer_count++;
+    if (m_spdm_dhe_named_group != 0) {
+        m_dhe_secret_buffer_count++;
+    }
+    if (m_spdm_kem_alg != 0) {
+        m_kem_secret_buffer_count++;
+    }
+
     libspdm_secured_message_set_session_state(
         libspdm_get_secured_message_context_via_session_info(
             m_current_session_info),
