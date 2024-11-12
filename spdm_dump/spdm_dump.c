@@ -225,10 +225,11 @@ void print_usage(void)
     printf("   [-x] (dump message in hex)\n");
     printf("   [--psk <pre-shared key>]\n");
     printf("   [--dhe_secret <session DHE secret>]\n");
+    printf("   [--kem_secret <session KEM secret>]\n");
     printf(
-        "   [--req_cap       CERT|CHAL|                                ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|                 ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID|                                EP_INFO_NO_SIG|EP_INFO_SIG|    EVENT|MULTI_KEY_ONLY|MULTI_KEY_NEG]\n");
+        "   [--req_cap       CERT|CHAL|                                ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|                 ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID|                                EP_INFO_NO_SIG|EP_INFO_SIG|    EVENT|MULTI_KEY_ONLY|MULTI_KEY_NEG|                                                       LARGE_CERT]\n");
     printf(
-        "   [--rsp_cap CACHE|CERT|CHAL|MEAS_NO_SIG|MEAS_SIG|MEAS_FRESH|ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|PSK_WITH_CONTEXT|ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID|SET_CERT|CSR|CERT_INSTALL_RESET|EP_INFO_NO_SIG|EP_INFO_SIG|MEL|EVENT|MULTI_KEY_ONLY|MULTI_KEY_NEG|GET_KEY_PAIR_INFO|SET_KEY_PAIR_INFO]\n");
+        "   [--rsp_cap CACHE|CERT|CHAL|MEAS_NO_SIG|MEAS_SIG|MEAS_FRESH|ENCRYPT|MAC|MUT_AUTH|KEY_EX|PSK|PSK_WITH_CONTEXT|ENCAP|HBEAT|KEY_UPD|HANDSHAKE_IN_CLEAR|PUB_KEY_ID|SET_CERT|CSR|CERT_INSTALL_RESET|EP_INFO_NO_SIG|EP_INFO_SIG|MEL|EVENT|MULTI_KEY_ONLY|MULTI_KEY_NEG|GET_KEY_PAIR_INFO|SET_KEY_PAIR_INFO|SET_KEY_PAIR_RESET|LARGE_CERT]\n");
     printf("   [--hash SHA_256|SHA_384|SHA_512|SHA3_256|SHA3_384|SHA3_512|SM3_256]\n");
     printf("   [--meas_spec DMTF]\n");
     printf("   [--meas_hash RAW_BIT|SHA_256|SHA_384|SHA_512|SHA3_256|SHA3_384|SHA3_512|SM3_256]\n");
@@ -254,7 +255,7 @@ void print_usage(void)
     printf("\n");
     printf("NOTE:\n");
     printf("   [--psk] is required to decrypt a PSK session\n");
-    printf("   [--dhe_secret] is required to decrypt a non-PSK session\n");
+    printf("   [--dhe_secret] or [--kem_secret] is required to decrypt a non-PSK session\n");
     printf("      format: A hex string, whose count of char must be even.\n");
     printf("              It must not have prefix '0x'. The leading '0' must be included.\n");
     printf("              '0123CDEF' means 4 bytes 0x01, 0x23, 0xCD, 0xEF,\n");
@@ -311,8 +312,10 @@ void process_args(int argc, char *argv[])
     /*key params input time*/
     uint8_t psk_key_input_count;
     uint8_t dhe_key_input_count;
+    uint8_t kem_key_input_count;
     psk_key_input_count = 0;
     dhe_key_input_count = 0;
+    kem_key_input_count = 0;
 
     pcap_file_name = NULL;
 
@@ -419,6 +422,32 @@ void process_args(int argc, char *argv[])
                 continue;
             } else {
                 printf("invalid --dhe_secret\n");
+                print_usage();
+                exit(0);
+            }
+        }
+
+        if (strcmp(argv[0], "--kem_secret") == 0) {
+            if (argc >= 2) {
+                if (dhe_key_input_count >= LIBSPDM_MAX_SESSION_COUNT) {
+                    printf("too many kem key input \n");
+                    print_usage();
+                    exit(0);
+                }
+                if (!hex_string_to_buffer(
+                        argv[1], &m_kem_secret_buffer[kem_key_input_count],
+                        &m_kem_secret_buffer_size[kem_key_input_count])) {
+                    printf("invalid --kem_secret\n");
+                    print_usage();
+                    exit(0);
+                }
+                argc -= 2;
+                argv += 2;
+
+                kem_key_input_count++;
+                continue;
+            } else {
+                printf("invalid --kem_secret\n");
                 print_usage();
                 exit(0);
             }
