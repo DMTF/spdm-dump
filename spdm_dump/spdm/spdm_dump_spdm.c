@@ -1867,7 +1867,7 @@ void dump_spdm_get_mel(const void *buffer, size_t buffer_size)
     spdm_request = buffer;
 
     if (!m_param_quite_mode) {
-        printf(", Offset=0x%08x, Length=0x%08x) ",
+        printf("(Offset=0x%08x, Length=0x%08x) ",
                spdm_request->offset, spdm_request->length);
     }
 
@@ -1901,7 +1901,7 @@ void dump_spdm_mel(const void *buffer, size_t buffer_size)
     }
 
     if (!m_param_quite_mode) {
-        printf(", PortLen=0x%08x, RemLen=0x%08x) ",
+        printf("(PortLen=0x%08x, RemLen=0x%08x) ",
                spdm_response->portion_length,
                spdm_response->remainder_length);
     }
