@@ -345,6 +345,33 @@ value_string_entry_t m_spdm_end_session_attribute_string_table[] = {
       "PreserveStateClear" },
 };
 
+value_string_entry_t m_spdm_set_key_pair_info_operation_string_table[] = {
+    { SPDM_SET_KEY_PAIR_INFO_CHANGE_OPERATION, "Change" },
+    { SPDM_SET_KEY_PAIR_INFO_ERASE_OPERATION, "Erase" },
+    { SPDM_SET_KEY_PAIR_INFO_GENERATE_OPERATION, "Generate" },
+};
+
+value_string_entry_t m_spdm_key_pair_capability_string_table[] = {
+    { SPDM_KEY_PAIR_CAP_GEN_KEY_CAP, "GenKey" },
+    { SPDM_KEY_PAIR_CAP_ERASABLE_CAP, "Erasable" },
+    { SPDM_KEY_PAIR_CAP_CERT_ASSOC_CAP, "CertAssoc" },
+    { SPDM_KEY_PAIR_CAP_KEY_USAGE_CAP, "KeyUsage" },
+    { SPDM_KEY_PAIR_CAP_ASYM_ALGO_CAP, "AsymAlgo" },
+    { SPDM_KEY_PAIR_CAP_SHAREABLE_CAP, "Sharable" },
+};
+
+value_string_entry_t m_spdm_key_pair_asym_algo_string_table[] = {
+    { SPDM_KEY_PAIR_ASYM_ALGO_CAP_RSA2048, "RSA2048" },
+    { SPDM_KEY_PAIR_ASYM_ALGO_CAP_RSA3072, "RSA3072" },
+    { SPDM_KEY_PAIR_ASYM_ALGO_CAP_RSA4096, "RSA4096" },
+    { SPDM_KEY_PAIR_ASYM_ALGO_CAP_ECC256, "ECC256" },
+    { SPDM_KEY_PAIR_ASYM_ALGO_CAP_ECC384, "ECC384" },
+    { SPDM_KEY_PAIR_ASYM_ALGO_CAP_ECC521, "ECC521" },
+    { SPDM_KEY_PAIR_ASYM_ALGO_CAP_SM2, "SM2" },
+    { SPDM_KEY_PAIR_ASYM_ALGO_CAP_ED25519, "Ed25519" },
+    { SPDM_KEY_PAIR_ASYM_ALGO_CAP_ED448, "Ed448" },
+};
+
 value_string_entry_t m_spdm_chunk_send_attribute_string_table[] = {
     { SPDM_CHUNK_SEND_REQUEST_ATTRIBUTE_LAST_CHUNK,
       "LastChunk" },
@@ -3279,6 +3306,167 @@ void dump_spdm_set_certificate_rsp(const void *buffer, size_t buffer_size)
     printf("\n");
 }
 
+void dump_spdm_get_key_pair_info(const void *buffer, size_t buffer_size)
+{
+    const spdm_get_key_pair_info_request_t *spdm_request;
+
+    printf("SPDM_GET_KEY_PAIR_INFO ");
+
+    if (buffer_size < sizeof(spdm_get_key_pair_info_request_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_request = buffer;
+
+    if (!m_param_quite_mode) {
+        printf("(KeyPairID=0x%02x) ", spdm_request->key_pair_id);
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_key_pair_info(const void *buffer, size_t buffer_size)
+{
+    const spdm_key_pair_info_response_t *spdm_response;
+
+    printf("SPDM_KEY_PAIR_INFO ");
+
+    if (buffer_size < sizeof(spdm_key_pair_info_response_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_response = buffer;
+    if (buffer_size < sizeof(spdm_key_pair_info_response_t) + spdm_response->public_key_info_len) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("(TotalKeyPairs=0x%02x", spdm_response->total_key_pairs);
+        printf(", KeyPairID=0x%02x", spdm_response->key_pair_id);
+        printf(", Cap=0x%04x(", spdm_response->capabilities);
+        dump_entry_flags(
+            m_spdm_key_pair_capability_string_table,
+            LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_capability_string_table),
+            spdm_response->capabilities);
+        printf("), KeyUsageCap=0x%04x(", spdm_response->key_usage_capabilities);
+        dump_entry_flags(
+            m_spdm_key_usage_value_string_table,
+            LIBSPDM_ARRAY_SIZE(m_spdm_key_usage_value_string_table),
+            spdm_response->key_usage_capabilities);
+        printf("), CurrKeyUsage=0x%04x(", spdm_response->current_key_usage);
+        dump_entry_flags(
+            m_spdm_key_usage_value_string_table,
+            LIBSPDM_ARRAY_SIZE(m_spdm_key_usage_value_string_table),
+            spdm_response->current_key_usage);
+        printf("), AsymCap=0x%08x(", spdm_response->asym_algo_capabilities);
+        dump_entry_flags(
+            m_spdm_key_pair_asym_algo_string_table,
+            LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_asym_algo_string_table),
+            spdm_response->asym_algo_capabilities);
+        printf("), CurrAsym=0x%08x(", spdm_response->current_asym_algo);
+        dump_entry_flags(
+            m_spdm_key_pair_asym_algo_string_table,
+            LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_asym_algo_string_table),
+            spdm_response->current_asym_algo);
+        printf("), AssicSlotMask=0x%02x", spdm_response->assoc_cert_slot_mask);
+        printf(", PubKeyInfo(Len=0x%04x, ", spdm_response->public_key_info_len);
+        dump_data((const void *)(spdm_response + 1), spdm_response->public_key_info_len);
+        printf("))");
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_set_key_pair_info(const void *buffer, size_t buffer_size)
+{
+    const spdm_set_key_pair_info_request_t *spdm_request;
+    uint16_t desired_key_usage;
+    uint32_t desired_asym_algo;
+    uint8_t desired_assoc_cert_slot_mask;
+    const uint8_t *ptr;
+
+    printf("SPDM_SET_KEY_PAIR_INFO ");
+
+    if (buffer_size < sizeof(spdm_set_key_pair_info_request_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_request = buffer;
+    if (spdm_request->header.param1 > SPDM_SET_KEY_PAIR_INFO_GENERATE_OPERATION) {
+        printf("\n");
+        return;
+    }
+    if ((spdm_request->header.param1 != SPDM_SET_KEY_PAIR_INFO_ERASE_OPERATION) &&
+        (buffer_size < sizeof(spdm_set_key_pair_info_request_t) +
+                              sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t) +
+                              sizeof(uint8_t))) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("(Operation=0x%02x(", spdm_request->header.param1);
+        dump_entry_value(
+            m_spdm_set_key_pair_info_operation_string_table,
+            LIBSPDM_ARRAY_SIZE(m_spdm_set_key_pair_info_operation_string_table),
+            spdm_request->header.param1);
+        printf("), KeyPairID=0x%02x", spdm_request->key_pair_id);
+        switch(spdm_request->header.param1) {
+        case SPDM_SET_KEY_PAIR_INFO_ERASE_OPERATION:
+            printf(")");
+            break;
+        case SPDM_SET_KEY_PAIR_INFO_CHANGE_OPERATION:
+        case SPDM_SET_KEY_PAIR_INFO_GENERATE_OPERATION:
+            ptr = (const void *)(spdm_request + 1);
+            ptr += sizeof(uint8_t);
+            desired_key_usage = libspdm_read_uint16(ptr);
+            ptr += sizeof(uint16_t);
+            desired_asym_algo = libspdm_read_uint32(ptr);
+            ptr += sizeof(uint32_t);
+            desired_assoc_cert_slot_mask = *ptr;
+            ptr += sizeof(uint8_t);
+            printf(", DesiredKeyUsage=0x%04x(", desired_key_usage);
+            dump_entry_flags(
+                m_spdm_key_usage_value_string_table,
+                LIBSPDM_ARRAY_SIZE(m_spdm_key_usage_value_string_table),
+                desired_key_usage);
+            printf("), DesiredAsymAlgo=0x%08x(", desired_asym_algo);
+            dump_entry_flags(
+                m_spdm_key_pair_asym_algo_string_table,
+                LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_asym_algo_string_table),
+                desired_asym_algo);
+            printf("), DesiredAssocCertSlotMask=0x%02x", desired_assoc_cert_slot_mask);
+            printf(")");
+            break;
+        default:
+            printf("\n");
+            return ;
+        }
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_set_key_pair_info_ack(const void *buffer, size_t buffer_size)
+{
+    printf("SPDM_SET_KEY_PAIR_INFO_ACK ");
+
+    if (buffer_size < sizeof(spdm_set_key_pair_info_ack_response_t)) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("() ");
+    }
+
+    printf("\n");
+}
+
 void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
 {
     const spdm_chunk_send_request_t *spdm_request;
@@ -3605,6 +3793,10 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       dump_spdm_csr },
     { SPDM_SET_CERTIFICATE_RSP, "SPDM_SET_CERTIFICATE_RSP",
       dump_spdm_set_certificate_rsp },
+    { SPDM_KEY_PAIR_INFO, "SPDM_KEY_PAIR_INFO",
+      dump_spdm_key_pair_info },
+    { SPDM_SET_KEY_PAIR_INFO_ACK, "SPDM_SET_KEY_PAIR_INFO_ACK",
+      dump_spdm_set_key_pair_info_ack },
     { SPDM_CHUNK_SEND_ACK, "SPDM_CHUNK_SEND_ACK",
       dump_spdm_chunk_send_ack },
     { SPDM_CHUNK_RESPONSE, "SPDM_CHUNK_RESPONSE",
@@ -3643,6 +3835,10 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       dump_spdm_get_csr },
     { SPDM_SET_CERTIFICATE, "SPDM_SET_CERTIFICATE",
       dump_spdm_set_certificate },
+    { SPDM_GET_KEY_PAIR_INFO, "SPDM_GET_KEY_PAIR_INFO",
+      dump_spdm_get_key_pair_info },
+    { SPDM_SET_KEY_PAIR_INFO, "SPDM_SET_KEY_PAIR_INFO",
+      dump_spdm_set_key_pair_info },
     { SPDM_CHUNK_SEND, "SPDM_CHUNK_SEND",
       dump_spdm_chunk_send },
     { SPDM_CHUNK_GET, "SPDM_CHUNK_GET",
