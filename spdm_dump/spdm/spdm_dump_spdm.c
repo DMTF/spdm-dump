@@ -1929,14 +1929,16 @@ void dump_spdm_mel(const void *buffer, size_t buffer_size)
 
                 mel_entry = (spdm_mel_entry_dmtf_t *)(spdm_mel + 1);
                 for (mel_index = 0; mel_index < spdm_mel->number_of_entries; mel_index++) {
-                    printf("\n    The %d MEL entry is:", mel_index);
-                    printf("\n        The MEL entry MELIndex is: 0x%08x", mel_entry->mel_index);
-                    printf("\n        The MEL entry MeasIndex is:0x%08x", mel_entry->meas_index);
-                    printf("\n        The MEL entry value is: ");
+                    printf("\n    MelEntry_%d(", mel_index);
+                    printf("MelIndex=0x%08x,", mel_entry->mel_index);
+                    printf("MeasIndex=0x%08x,", mel_entry->meas_index);
+                    printf("\n        Value(");
                     mel_entry_value = (uint8_t *)(mel_entry + 1);
                     dump_data(mel_entry_value, mel_entry->measurement_block_dmtf_header.dmtf_spec_measurement_value_size);
                     mel_entry = (spdm_mel_entry_dmtf_t *)((uint8_t *)(mel_entry + 1) +
                                                            mel_entry->measurement_block_dmtf_header.dmtf_spec_measurement_value_size);
+                    printf(")");
+                    printf("\n    )");
                 }
 
             }
