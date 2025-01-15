@@ -14,7 +14,7 @@
 
 ### Build Tool
 
-1) [Visual Studio](https://visualstudio.microsoft.com/) (VS2015 or VS2019)
+1) [Visual Studio](https://visualstudio.microsoft.com/) (VS2015 or VS2019 or VS2022)
 
 2) [GCC](https://gcc.gnu.org/) (above GCC5)
 
