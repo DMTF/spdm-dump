@@ -91,11 +91,33 @@ bool libspdm_requester_data_sign(
 {
     return false;
 }
+
+bool libspdm_requester_data_pqc_sign(
+    void *spdm_context,
+    spdm_version_number_t spdm_version, uint8_t op_code,
+    uint32_t req_pqc_asym_alg,
+    uint32_t base_hash_algo, bool is_data_hash,
+    const uint8_t *message, size_t message_size,
+    uint8_t *signature, size_t *sig_size)
+{
+    return false;
+}
 #endif /* LIBSPDM_ENABLE_CAPABILITY_MUT_AUTH_CAP */
 
 bool libspdm_responder_data_sign(
     spdm_version_number_t spdm_version, uint8_t op_code,
     uint32_t base_asym_algo,
+    uint32_t base_hash_algo, bool is_data_hash,
+    const uint8_t *message, size_t message_size,
+    uint8_t *signature, size_t *sig_size)
+{
+    return false;
+}
+
+bool libspdm_responder_data_pqc_sign(
+    void *spdm_context,
+    spdm_version_number_t spdm_version, uint8_t op_code,
+    uint32_t base_pqc_algo,
     uint32_t base_hash_algo, bool is_data_hash,
     const uint8_t *message, size_t message_size,
     uint8_t *signature, size_t *sig_size)
