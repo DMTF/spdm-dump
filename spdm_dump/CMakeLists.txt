@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.5)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/spdm_dump
                     ${LIBSPDM_DIR}/include
