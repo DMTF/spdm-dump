@@ -14,6 +14,7 @@ size_t m_spdm_last_message_buffer_size;
 uint8_t m_cached_get_measurement_request_attribute;
 uint8_t m_cached_get_measurement_operation;
 uint8_t m_cached_measurement_summary_hash_type;
+uint8_t m_cached_get_endpoint_info_request_attribute;
 uint32_t m_cached_session_id;
 void *m_current_session_info;
 uint32_t m_current_session_id;
@@ -3469,6 +3470,127 @@ void dump_spdm_set_key_pair_info_ack(const void *buffer, size_t buffer_size)
     printf("\n");
 }
 
+void dump_spdm_get_endpoint_info(const void *buffer, size_t buffer_size)
+{
+    const spdm_get_endpoint_info_request_t *spdm_request;
+    const uint8_t *ptr;
+    size_t message_size;
+
+    printf("SPDM_GET_ENDPOINT_INFO ");
+
+    if (buffer_size < sizeof(spdm_get_endpoint_info_request_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_request = buffer;
+    if (spdm_request->request_attributes ==
+        SPDM_GET_ENDPOINT_INFO_REQUEST_ATTRIBUTE_SIGNATURE_REQUESTED) {
+        message_size = sizeof(spdm_get_endpoint_info_request_t) + SPDM_NONCE_SIZE;
+        if (buffer_size < message_size) {
+            printf("\n");
+            return;
+        }
+    }
+
+    m_cached_get_endpoint_info_request_attribute =
+        spdm_request->request_attributes;
+
+    if (!m_param_quite_mode) {
+        printf("(SubCode=0x%02x, SlotID=0x%02x, RequestAttribute=0x%02x) ",
+               spdm_request->header.param1,
+               spdm_request->header.param2,
+               spdm_request->request_attributes);
+        if (m_param_all_mode) {
+            if (spdm_request->request_attributes ==
+                SPDM_GET_ENDPOINT_INFO_REQUEST_ATTRIBUTE_SIGNATURE_REQUESTED) {
+                printf("\n    Nonce(");
+                ptr = (void *)(spdm_request + 1);
+                dump_data(ptr, SPDM_NONCE_SIZE);
+                printf(")");
+            }
+        }
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_endpoint_info(const void *buffer, size_t buffer_size)
+{
+    const spdm_endpoint_info_response_t *spdm_response;
+    const uint8_t *ptr;
+    size_t message_size;
+    uint32_t endpoint_info_size;
+    size_t signature_size;
+    bool include_signature;
+
+    printf("SPDM_ENDPOINT_INFO ");
+
+    if (buffer_size < sizeof(spdm_endpoint_info_response_t)) {
+        printf("\n");
+        return;
+    }
+
+    include_signature =
+        ((m_cached_get_endpoint_info_request_attribute &
+          SPDM_GET_ENDPOINT_INFO_REQUEST_ATTRIBUTE_SIGNATURE_REQUESTED) !=
+         0);
+
+    spdm_response = buffer;
+
+    ptr = (void *)(spdm_response + 1);
+    if (include_signature) {
+        ptr += SPDM_NONCE_SIZE;
+        endpoint_info_size = *(uint32_t *)ptr;
+        if (m_encapsulated) {
+            signature_size = libspdm_get_req_asym_signature_size(m_spdm_req_base_asym_alg);
+        } else {
+            signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
+        }
+        message_size = sizeof(spdm_endpoint_info_response_t) + SPDM_NONCE_SIZE +
+                       sizeof(uint32_t) + endpoint_info_size + signature_size;
+    } else {
+        endpoint_info_size = *(uint32_t *)ptr;
+        message_size = sizeof(spdm_endpoint_info_response_t) +
+                       sizeof(uint32_t) + endpoint_info_size;
+    }
+
+    if (buffer_size < message_size) {
+        printf("\n");
+        return;
+    }
+
+    if (!m_param_quite_mode) {
+        printf("(SlotID=0x%02x, EndpointInfoSize=0x%08x) ",
+               spdm_response->header.param2,
+               endpoint_info_size);
+
+        if (m_param_all_mode) {
+            ptr = (void *)(spdm_response + 1);
+            if (include_signature) {
+                printf("\n    Nonce(");
+                dump_data(ptr, SPDM_NONCE_SIZE);
+                printf(")");
+                ptr += SPDM_NONCE_SIZE;
+            }
+
+            ptr += sizeof(uint32_t);
+            printf("\n    EndpointInfo(");
+            dump_data(ptr, endpoint_info_size);
+            printf(")");
+            ptr += endpoint_info_size;
+
+            if (include_signature) {
+                printf("\n    Signature(");
+                dump_data(ptr, signature_size);
+                printf(")");
+            }
+        }
+    }
+
+    printf("\n");
+}
+
 void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
 {
     const spdm_chunk_send_request_t *spdm_request;
@@ -3799,6 +3921,8 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       dump_spdm_key_pair_info },
     { SPDM_SET_KEY_PAIR_INFO_ACK, "SPDM_SET_KEY_PAIR_INFO_ACK",
       dump_spdm_set_key_pair_info_ack },
+    { SPDM_GET_ENDPOINT_INFO, "SPDM_GET_ENDPOINT_INFO",
+      dump_spdm_get_endpoint_info },
     { SPDM_CHUNK_SEND_ACK, "SPDM_CHUNK_SEND_ACK",
       dump_spdm_chunk_send_ack },
     { SPDM_CHUNK_RESPONSE, "SPDM_CHUNK_RESPONSE",
@@ -3841,6 +3965,8 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       dump_spdm_get_key_pair_info },
     { SPDM_SET_KEY_PAIR_INFO, "SPDM_SET_KEY_PAIR_INFO",
       dump_spdm_set_key_pair_info },
+    { SPDM_ENDPOINT_INFO, "SPDM_ENDPOINT_INFO",
+      dump_spdm_endpoint_info },
     { SPDM_CHUNK_SEND, "SPDM_CHUNK_SEND",
       dump_spdm_chunk_send },
     { SPDM_CHUNK_GET, "SPDM_CHUNK_GET",
