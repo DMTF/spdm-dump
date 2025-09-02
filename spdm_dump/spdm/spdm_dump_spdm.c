@@ -2599,10 +2599,12 @@ void dump_spdm_finish(const void *buffer, size_t buffer_size)
 {
     const spdm_finish_request_t *spdm_request;
     size_t message_size;
+    size_t opaque_size;
     size_t signature_size;
     size_t hmac_size;
     bool include_signature;
     uint8_t *signature;
+    uint8_t *ptr;
     uint8_t *verify_data;
 
     printf("SPDM_FINISH ");
@@ -2621,6 +2623,14 @@ void dump_spdm_finish(const void *buffer, size_t buffer_size)
         signature_size = libspdm_get_req_pqc_asym_signature_size(m_spdm_req_pqc_asym_alg);
     }
     hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
+
+    if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+        opaque_size = *(uint16_t *)((size_t)buffer + sizeof(spdm_finish_request_t));
+        message_size += sizeof(uint16_t);
+    } else {
+        opaque_size = 0;
+    }
+    message_size += opaque_size;
 
     include_signature =
         ((spdm_request->header.param1 &
@@ -2645,14 +2655,23 @@ void dump_spdm_finish(const void *buffer, size_t buffer_size)
                spdm_request->header.param2);
 
         if (m_param_all_mode) {
+            ptr = (void *)(spdm_request + 1);
+            if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+                ptr += sizeof(uint16_t);
+                printf("\n    OpaqueData(");
+                dump_data(ptr, opaque_size);
+                printf(")");
+                ptr += opaque_size;
+            }
+
             if (include_signature) {
-                signature = (void *)(spdm_request + 1);
+                signature = ptr;
                 printf("\n    Signature(");
                 dump_data(signature, signature_size);
                 printf(")");
-                verify_data = signature + signature_size;
+                verify_data = ptr + signature_size;
             } else {
-                verify_data = (void *)(spdm_request + 1);
+                verify_data = ptr;
             }
             printf("\n    VerifyData(");
             dump_data(verify_data, hmac_size);
@@ -2671,8 +2690,10 @@ void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
 {
     const spdm_finish_response_t *spdm_response;
     size_t message_size;
+    size_t opaque_size;
     size_t hmac_size;
     bool include_hmac;
+    uint8_t *ptr;
     uint8_t *verify_data;
     uint8_t th2_hash_data[64];
 
@@ -2685,6 +2706,15 @@ void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
     }
 
     spdm_response = buffer;
+
+    if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+        opaque_size = *(uint16_t *)((size_t)buffer + sizeof(spdm_finish_response_t));
+        message_size += sizeof(uint16_t);
+    } else {
+        opaque_size = 0;
+    }
+    message_size += opaque_size;
+
     hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
 
     include_hmac =
@@ -2706,8 +2736,16 @@ void dump_spdm_finish_rsp(const void *buffer, size_t buffer_size)
         printf("() ");
 
         if (m_param_all_mode) {
+            ptr = (void *)(spdm_response + 1);
+            if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+                ptr += sizeof(uint16_t);
+                printf("\n    OpaqueData(");
+                dump_data(ptr, opaque_size);
+                printf(")");
+                ptr += opaque_size;
+            }
             if (include_hmac) {
-                verify_data = (void *)(spdm_response + 1);
+                verify_data = ptr;
                 printf("\n    VerifyData(");
                 dump_data(verify_data, hmac_size);
                 printf(")");
@@ -2984,8 +3022,10 @@ void dump_spdm_psk_finish(const void *buffer, size_t buffer_size)
 {
     const spdm_psk_finish_request_t *spdm_request;
     size_t message_size;
+    size_t opaque_size;
     size_t hmac_size;
     uint8_t *verify_data;
+    uint8_t *ptr;
 
     printf("SPDM_PSK_FINISH ");
 
@@ -2996,6 +3036,15 @@ void dump_spdm_psk_finish(const void *buffer, size_t buffer_size)
     }
 
     spdm_request = buffer;
+
+    if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+        opaque_size = *(uint16_t *)((size_t)buffer + sizeof(spdm_psk_finish_request_t));
+        message_size += sizeof(uint16_t);
+    } else {
+        opaque_size = 0;
+    }
+    message_size += opaque_size;
+
     hmac_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
     message_size += hmac_size;
     if (buffer_size < message_size) {
@@ -3007,7 +3056,16 @@ void dump_spdm_psk_finish(const void *buffer, size_t buffer_size)
         printf("() ");
 
         if (m_param_all_mode) {
-            verify_data = (void *)(spdm_request + 1);
+            ptr = (void *)(spdm_request + 1);
+            if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+                ptr += sizeof(uint16_t);
+                printf("\n    OpaqueData(");
+                dump_data(ptr, opaque_size);
+                printf(")");
+                ptr += opaque_size;
+            }
+
+            verify_data = ptr;
             printf("\n    VerifyData(");
             dump_data(verify_data, hmac_size);
             printf(")");
@@ -3025,7 +3083,10 @@ void dump_spdm_psk_finish(const void *buffer, size_t buffer_size)
 
 void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
 {
+    const spdm_psk_finish_response_t *spdm_response;
     size_t message_size;
+    size_t opaque_size;
+    uint8_t *ptr;
     uint8_t th2_hash_data[64];
 
     printf("SPDM_PSK_FINISH_RSP ");
@@ -3035,9 +3096,30 @@ void dump_spdm_psk_finish_rsp(const void *buffer, size_t buffer_size)
         printf("\n");
         return;
     }
+    spdm_response = buffer;
+
+    if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+        opaque_size = *(uint16_t *)((size_t)buffer + sizeof(spdm_psk_finish_response_t));
+        message_size += sizeof(uint16_t);
+    } else {
+        opaque_size = 0;
+    }
+    message_size += opaque_size;
+
+    if (buffer_size < message_size) {
+        printf("\n");
+        return;
+    }
 
     if (!m_param_quite_mode) {
         printf("() ");
+        ptr = (void *)(spdm_response + 1);
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+            ptr += sizeof(uint16_t);
+            printf("\n    OpaqueData(");
+            dump_data(ptr, opaque_size);
+            printf(")");
+        }
     }
 
     printf("\n");
