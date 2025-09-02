@@ -1452,7 +1452,7 @@ void dump_spdm_certificate(const void *buffer, size_t buffer_size)
         cert_chain = (uint8_t *)m_spdm_cert_chain_buffer;
         cert_chain_size = m_spdm_cert_chain_buffer_size;
 
-        if (spdm_response->header.param1 >= SPDM_MAX_SLOT_COUNT) {
+        if ((spdm_response->header.param1 & SPDM_CERTIFICATE_RESPONSE_SLOT_ID_MASK) >= SPDM_MAX_SLOT_COUNT) {
             printf("spdm_response->header.param1 is not right\n");
             return;
         }
