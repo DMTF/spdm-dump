@@ -2246,7 +2246,12 @@ void dump_spdm_vendor_defined_request(const void *buffer, size_t buffer_size)
     spdm_request = buffer;
 
     if (!m_param_quite_mode) {
-        printf("(StandID=0x%04x) ", spdm_request->standard_id);
+        if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+            printf("(LargeReq=0x%02x, ", spdm_request->header.param1 & SPDM_VENDOR_DEFINED_REQUEST_LARGE_REQ);
+        } else {
+            printf("(");
+        }
+        printf("StandID=0x%04x) ", spdm_request->standard_id);
     }
 
     if (m_param_dump_vendor_app) {
@@ -2276,7 +2281,12 @@ void dump_spdm_vendor_defined_response(const void *buffer, size_t buffer_size)
     spdm_response = buffer;
 
     if (!m_param_quite_mode) {
-        printf("(StandID=0x%04x) ", spdm_response->standard_id);
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+            printf("(LargeReq=0x%02x, ", spdm_response->header.param1 & SPDM_VENDOR_DEFINED_RESONSE_LARGE_RESP);
+        } else {
+            printf("(");
+        }
+        printf("StandID=0x%04x) ", spdm_response->standard_id);
     }
 
     if (m_param_dump_vendor_app) {
