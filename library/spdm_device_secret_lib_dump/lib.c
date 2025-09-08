@@ -21,6 +21,7 @@
 
 #if LIBSPDM_ENABLE_CAPABILITY_MEAS_CAP
 libspdm_return_t libspdm_measurement_collection(
+    void *spdm_context,
     spdm_version_number_t spdm_version,
     uint8_t measurement_specification,
     uint32_t measurement_hash_algo,
@@ -35,6 +36,7 @@ libspdm_return_t libspdm_measurement_collection(
 }
 
 bool libspdm_measurement_opaque_data(
+    void *spdm_context,
     spdm_version_number_t spdm_version,
     uint8_t measurement_specification,
     uint32_t measurement_hash_algo,
@@ -47,6 +49,7 @@ bool libspdm_measurement_opaque_data(
 }
 
 bool libspdm_challenge_opaque_data(
+    void *spdm_context,
     spdm_version_number_t spdm_version,
     uint8_t slot_id,
     uint8_t *measurement_summary_hash,
@@ -58,6 +61,7 @@ bool libspdm_challenge_opaque_data(
 }
 
 bool libspdm_encap_challenge_opaque_data(
+    void *spdm_context,
     spdm_version_number_t spdm_version,
     uint8_t slot_id,
     uint8_t *measurement_summary_hash,
@@ -69,6 +73,7 @@ bool libspdm_encap_challenge_opaque_data(
 }
 
 bool libspdm_generate_measurement_summary_hash(
+    void *spdm_context,
     spdm_version_number_t spdm_version,
     uint32_t base_hash_algo,
     uint8_t measurement_specification,
@@ -83,6 +88,7 @@ bool libspdm_generate_measurement_summary_hash(
 
 #if LIBSPDM_ENABLE_CAPABILITY_MUT_AUTH_CAP
 bool libspdm_requester_data_sign(
+    void *spdm_context,
     spdm_version_number_t spdm_version, uint8_t op_code,
     uint16_t req_base_asym_alg, uint32_t req_pqc_asym_alg,
     uint32_t base_hash_algo, bool is_data_hash,
@@ -94,6 +100,7 @@ bool libspdm_requester_data_sign(
 #endif /* LIBSPDM_ENABLE_CAPABILITY_MUT_AUTH_CAP */
 
 bool libspdm_responder_data_sign(
+    void *spdm_context,
     spdm_version_number_t spdm_version, uint8_t op_code,
     uint32_t base_asym_algo, uint32_t base_pqc_algo,
     uint32_t base_hash_algo, bool is_data_hash,
@@ -217,12 +224,13 @@ bool libspdm_psk_master_secret_hkdf_expand(
 #endif /* LIBSPDM_ENABLE_CAPABILITY_PSK_CAP */
 
 #if LIBSPDM_ENABLE_CAPABILITY_SET_CERT_CAP
-bool libspdm_is_in_trusted_environment()
+bool libspdm_is_in_trusted_environment(void *spdm_context)
 {
     return false;
 }
 
-bool libspdm_write_certificate_to_nvm(uint8_t slot_id, const void * cert_chain,
+bool libspdm_write_certificate_to_nvm(void *spdm_context, uint8_t slot_id,
+                                      const void * cert_chain,
                                       size_t cert_chain_size,
                                       uint32_t base_hash_algo, uint32_t base_asym_algo,
                                       uint32_t pqc_asym_algo)
@@ -232,7 +240,9 @@ bool libspdm_write_certificate_to_nvm(uint8_t slot_id, const void * cert_chain,
 #endif /* LIBSPDM_ENABLE_CAPABILITY_SET_CERT_CAP */
 
 #if LIBSPDM_ENABLE_CAPABILITY_CSR_CAP
-bool libspdm_gen_csr(uint32_t base_hash_algo, uint32_t base_asym_algo, bool *need_reset,
+
+bool libspdm_gen_csr(void *spdm_context, uint32_t base_hash_algo,
+                     uint32_t base_asym_algo, bool *need_reset,
                      const void *request, size_t request_size,
                      uint8_t *requester_info, size_t requester_info_length,
                      uint8_t *opaque_data, uint16_t opaque_data_length,
