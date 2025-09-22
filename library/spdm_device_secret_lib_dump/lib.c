@@ -233,7 +233,8 @@ bool libspdm_write_certificate_to_nvm(void *spdm_context, uint8_t slot_id,
                                       const void * cert_chain,
                                       size_t cert_chain_size,
                                       uint32_t base_hash_algo, uint32_t base_asym_algo,
-                                      uint32_t pqc_asym_algo)
+                                      uint32_t pqc_asym_algo,
+                                      bool *need_reset, bool *is_busy)
 {
     return false;
 }
@@ -247,7 +248,7 @@ bool libspdm_gen_csr(void *spdm_context, uint32_t base_hash_algo,
                      uint8_t *requester_info, size_t requester_info_length,
                      uint8_t *opaque_data, uint16_t opaque_data_length,
                      size_t *csr_len, uint8_t *csr_pointer,
-                     bool is_device_cert_model)
+                     bool is_device_cert_model, bool *is_busy, bool *unexpected_request)
 {
     return false;
 }
