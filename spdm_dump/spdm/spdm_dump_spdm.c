@@ -201,7 +201,7 @@ size_t m_spdm_aead_value_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_aead_value_string_table);
 
 value_string_entry_t m_spdm_key_schedule_value_string_table[] = {
-    { SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH, "HMAC_HASH" },
+    { SPDM_ALGORITHMS_KEY_SCHEDULE_SPDM, "HMAC_HASH" },
 };
 size_t m_spdm_key_schedule_value_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_key_schedule_value_string_table);
