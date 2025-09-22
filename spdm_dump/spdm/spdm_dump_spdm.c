@@ -3905,6 +3905,7 @@ void dump_spdm_endpoint_info(const void *buffer, size_t buffer_size)
 void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
 {
     const spdm_chunk_send_request_t *spdm_request;
+    const spdm_chunk_send_request_14_t *spdm_request_14;
     uint32_t *large_message_size_ptr;
     /*current chunk data*/
     uint8_t *ptr;
@@ -3914,6 +3915,8 @@ void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
     static uint32_t chunk_send_large_message_current_size;
     /*store the total message_size*/
     static uint32_t chunk_send_large_message_buf_size;
+    /*store chunk_seq_no*/
+    static uint32_t chunk_seq_no;
 
     printf("SPDM_CHUNK_SEND ");
 
@@ -3928,7 +3931,15 @@ void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
         printf("\n");
         return;
     }
-    if (spdm_request->chunk_seq_no == 0) {
+
+    if (spdm_request->header.spdm_version < SPDM_MESSAGE_VERSION_14) {
+        chunk_seq_no = spdm_request->chunk_seq_no;
+    } else {
+        spdm_request_14 = buffer;
+        chunk_seq_no = spdm_request_14->chunk_seq_no;
+    }
+
+    if (chunk_seq_no == 0) {
         if (buffer_size - sizeof(spdm_chunk_send_request_t) - spdm_request->chunk_size <
             sizeof(uint32_t)) {
             printf("\n");
@@ -3942,13 +3953,21 @@ void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
             m_spdm_chunk_send_attribute_string_table,
             LIBSPDM_ARRAY_SIZE(m_spdm_chunk_send_attribute_string_table),
             spdm_request->header.param1);
-        printf("), Handle=0x%02x, ChunkSeqNo=0x%04x, ChunkSize=0x%08x",
-               spdm_request->header.param2,
-               spdm_request->chunk_seq_no,
-               spdm_request->chunk_size);
+        if (spdm_request->header.spdm_version < SPDM_MESSAGE_VERSION_14) {
+            printf("), Handle=0x%02x, ChunkSeqNo=0x%04x, ChunkSize=0x%04x",
+                   spdm_request->header.param2,
+                   spdm_request->chunk_seq_no,
+                   spdm_request->chunk_size);
+        } else {
+            printf("), Handle=0x%02x, ChunkSeqNo=0x%08x, ChunkSize=0x%08x",
+                   spdm_request_14->header.param2,
+                   spdm_request_14->chunk_seq_no,
+                   spdm_request_14->chunk_size);
+        }
+
     }
 
-    if (spdm_request->chunk_seq_no == 0) {
+    if (chunk_seq_no == 0) {
         /*first chunk*/
         large_message_size_ptr = (void *)(spdm_request + 1);
         if (!m_param_quite_mode) {
@@ -4022,18 +4041,24 @@ void dump_spdm_chunk_send(const void *buffer, size_t buffer_size)
 void dump_spdm_chunk_send_ack(const void *buffer, size_t buffer_size)
 {
     const spdm_chunk_send_ack_response_t *spdm_response;
+    const spdm_chunk_send_ack_response_14_t *spdm_response_14;
     size_t header_size;
 
-    header_size = sizeof(spdm_chunk_send_ack_response_t);
+    spdm_response = buffer;
+
+    if (spdm_response->header.spdm_version < SPDM_MESSAGE_VERSION_14) {
+        header_size = sizeof(spdm_chunk_send_ack_response_t);
+    } else {
+        spdm_response_14 = buffer;
+        header_size = sizeof(spdm_chunk_send_ack_response_14_t);
+    }
 
     printf("SPDM_CHUNK_SEND_ACK ");
 
-    if (buffer_size < sizeof(spdm_chunk_send_ack_response_t)) {
+    if (buffer_size < header_size) {
         printf("\n");
         return;
     }
-
-    spdm_response = buffer;
 
     if (!m_param_quite_mode) {
         printf("(Attr=0x%02x(", spdm_response->header.param1);
@@ -4041,9 +4066,15 @@ void dump_spdm_chunk_send_ack(const void *buffer, size_t buffer_size)
             m_spdm_chunk_send_ack_attribute_string_table,
             LIBSPDM_ARRAY_SIZE(m_spdm_chunk_send_ack_attribute_string_table),
             spdm_response->header.param1);
-        printf("), Handle=0x%02x, ChunkSeqNo=0x%04x) ",
-               spdm_response->header.param2,
-               spdm_response->chunk_seq_no);
+        if (spdm_response->header.spdm_version < SPDM_MESSAGE_VERSION_14) {
+            printf("), Handle=0x%02x, ChunkSeqNo=0x%04x) ",
+                   spdm_response->header.param2,
+                   spdm_response->chunk_seq_no);
+        } else {
+            printf("), Handle=0x%02x, ChunkSeqNo=0x%08x) ",
+                   spdm_response_14->header.param2,
+                   spdm_response_14->chunk_seq_no);
+        }
     }
 
     if (m_chunk_send_lask_chunk_flag) {
@@ -4063,20 +4094,35 @@ void dump_spdm_chunk_send_ack(const void *buffer, size_t buffer_size)
 void dump_spdm_chunk_get(const void *buffer, size_t buffer_size)
 {
     const spdm_chunk_get_request_t *spdm_request;
+    const spdm_chunk_get_request_14_t *spdm_request_14;
+    size_t header_size;
+
+    spdm_request = buffer;
+
+    if (spdm_request->header.spdm_version < SPDM_MESSAGE_VERSION_14) {
+        header_size = sizeof(spdm_chunk_get_request_t);
+    } else {
+        spdm_request_14 = buffer;
+        header_size = sizeof(spdm_chunk_get_request_14_t);
+    }
 
     printf("SPDM_CHUNK_GET ");
 
-    if (buffer_size < sizeof(spdm_chunk_get_request_t)) {
+    if (buffer_size < header_size) {
         printf("\n");
         return;
     }
 
-    spdm_request = buffer;
-
     if (!m_param_quite_mode) {
-        printf("(Handle=0x%02x, ChunkSeqNo=0x%04x) ",
-               spdm_request->header.param2,
-               spdm_request->chunk_seq_no);
+        if (spdm_request->header.spdm_version < SPDM_MESSAGE_VERSION_14) {
+            printf("(Handle=0x%02x, ChunkSeqNo=0x%04x) ",
+                spdm_request->header.param2,
+                spdm_request->chunk_seq_no);
+        } else {
+            printf("(Handle=0x%02x, ChunkSeqNo=0x%08x) ",
+                spdm_request_14->header.param2,
+                spdm_request_14->chunk_seq_no);
+        }
     }
 
     printf("\n");
@@ -4085,6 +4131,7 @@ void dump_spdm_chunk_get(const void *buffer, size_t buffer_size)
 void dump_spdm_chunk_response(const void *buffer, size_t buffer_size)
 {
     const spdm_chunk_response_response_t *spdm_response;
+    const spdm_chunk_response_response_14_t *spdm_response_14;
     uint32_t *large_message_size_ptr;
     /*current chunk data*/
     uint8_t *ptr;
@@ -4094,6 +4141,8 @@ void dump_spdm_chunk_response(const void *buffer, size_t buffer_size)
     static uint32_t chunk_response_large_message_current_size;
     /*store the total message_size*/
     static uint32_t chunk_response_large_message_buf_size = 0;
+    /*store chunk_seq_no*/
+    static uint32_t chunk_seq_no;
 
     printf("SPDM_CHUNK_RESPONSE ");
 
@@ -4108,7 +4157,15 @@ void dump_spdm_chunk_response(const void *buffer, size_t buffer_size)
         printf("\n");
         return;
     }
-    if (spdm_response->chunk_seq_no == 0) {
+
+    if (spdm_response->header.spdm_version < SPDM_MESSAGE_VERSION_14) {
+        chunk_seq_no = spdm_response->chunk_seq_no;
+    } else {
+        spdm_response_14 = buffer;
+        chunk_seq_no = spdm_response_14->chunk_seq_no;
+    }
+
+    if (chunk_seq_no == 0) {
         if (buffer_size - sizeof(spdm_chunk_response_response_t) - spdm_response->chunk_size <
             sizeof(uint32_t)) {
             printf("\n");
@@ -4122,13 +4179,20 @@ void dump_spdm_chunk_response(const void *buffer, size_t buffer_size)
             m_spdm_chunk_send_attribute_string_table,
             LIBSPDM_ARRAY_SIZE(m_spdm_chunk_send_attribute_string_table),
             spdm_response->header.param1);
-        printf("), Handle=0x%02x, ChunkSeqNo=0x%04x, ChunkSize=0x%08x",
-               spdm_response->header.param2,
-               spdm_response->chunk_seq_no,
-               spdm_response->chunk_size);
+        if (spdm_response->header.spdm_version < SPDM_MESSAGE_VERSION_14) {
+            printf("), Handle=0x%02x, ChunkSeqNo=0x%04x, ChunkSize=0x%08x",
+                spdm_response->header.param2,
+                spdm_response->chunk_seq_no,
+                spdm_response->chunk_size);
+        } else {
+            printf("), Handle=0x%02x, ChunkSeqNo=0x%08x, ChunkSize=0x%08x",
+                spdm_response_14->header.param2,
+                spdm_response_14->chunk_seq_no,
+                spdm_response_14->chunk_size);
+        }
     }
 
-    if (spdm_response->chunk_seq_no == 0) {
+    if (chunk_seq_no == 0) {
         /*first chunk*/
         large_message_size_ptr = (void *)(spdm_response + 1);
         if (!m_param_quite_mode) {
