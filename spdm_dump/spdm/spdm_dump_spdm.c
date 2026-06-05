@@ -628,6 +628,112 @@ void dump_spdm_version(const void *buffer, size_t buffer_size)
     libspdm_append_message_a(m_spdm_context, buffer, message_size);
 }
 
+/* Dump the optional SupportedAlgorithms block that GET_CAPABILITIES (request) and CAPABILITIES
+ * (response) may carry in SPDM 1.3 and later (signaled by param1 BIT[0]). The block has the same
+ * layout as the NEGOTIATE_ALGORITHMS body, including the 1.4 PqcAsym field and the per-type
+ * algorithm structure tables. */
+void dump_spdm_supported_algorithms_block(uint8_t spdm_version,
+                                          const void *block, size_t block_size)
+{
+    const spdm_supported_algorithms_block_t *alg_block;
+    const spdm_negotiate_algorithms_common_struct_table_t *struct_table;
+    size_t needed;
+    size_t index;
+    uint8_t ext_alg_count;
+
+    if (block_size < sizeof(spdm_supported_algorithms_block_t)) {
+        return;
+    }
+    alg_block = block;
+    needed = sizeof(spdm_supported_algorithms_block_t) +
+             alg_block->ext_asym_count * sizeof(spdm_extended_algorithm_t) +
+             alg_block->ext_hash_count * sizeof(spdm_extended_algorithm_t) +
+             alg_block->param1 * sizeof(spdm_negotiate_algorithms_common_struct_table_t);
+    if (block_size < needed) {
+        return;
+    }
+
+    printf(", SupportedAlgorithms(Length=0x%04x, MeasSpec=0x%02x(", alg_block->length,
+           alg_block->measurement_specification);
+    dump_entry_flags(m_spdm_measurement_spec_value_string_table,
+                     LIBSPDM_ARRAY_SIZE(m_spdm_measurement_spec_value_string_table),
+                     alg_block->measurement_specification);
+    printf("), OtherParam=0x%02x(", alg_block->other_params_support);
+    dump_entry_flags(m_spdm_other_param_value_string_table,
+                     LIBSPDM_ARRAY_SIZE(m_spdm_other_param_value_string_table),
+                     alg_block->other_params_support);
+    printf("), Hash=0x%08x(", alg_block->base_hash_algo);
+    dump_entry_flags(m_spdm_hash_value_string_table,
+                     LIBSPDM_ARRAY_SIZE(m_spdm_hash_value_string_table),
+                     alg_block->base_hash_algo);
+    printf("), Asym=0x%08x(", alg_block->base_asym_algo);
+    dump_entry_flags(m_spdm_asym_value_string_table,
+                     LIBSPDM_ARRAY_SIZE(m_spdm_asym_value_string_table),
+                     alg_block->base_asym_algo);
+    if (spdm_version >= SPDM_MESSAGE_VERSION_14) {
+        printf("), PqcAsym=0x%08x(", alg_block->pqc_asym_algo);
+        dump_entry_flags(m_spdm_pqc_asym_value_string_table,
+                         LIBSPDM_ARRAY_SIZE(m_spdm_pqc_asym_value_string_table),
+                         alg_block->pqc_asym_algo);
+    }
+    printf("), MelSpec=0x%02x(", alg_block->mel_specification);
+    dump_entry_flags(m_spdm_mel_spec_value_string_table,
+                     LIBSPDM_ARRAY_SIZE(m_spdm_mel_spec_value_string_table),
+                     alg_block->mel_specification);
+
+    struct_table =
+        (const void *)((const uint8_t *)block +
+                       sizeof(spdm_supported_algorithms_block_t) +
+                       alg_block->ext_asym_count * sizeof(spdm_extended_algorithm_t) +
+                       alg_block->ext_hash_count * sizeof(spdm_extended_algorithm_t));
+    for (index = 0; index < alg_block->param1; index++) {
+        switch (struct_table->alg_type) {
+        case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_DHE:
+            printf("), DHE=0x%04x(", struct_table->alg_supported);
+            dump_entry_flags(m_spdm_dhe_value_string_table,
+                             LIBSPDM_ARRAY_SIZE(m_spdm_dhe_value_string_table),
+                             struct_table->alg_supported);
+            break;
+        case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_AEAD:
+            printf("), AEAD=0x%04x(", struct_table->alg_supported);
+            dump_entry_flags(m_spdm_aead_value_string_table,
+                             LIBSPDM_ARRAY_SIZE(m_spdm_aead_value_string_table),
+                             struct_table->alg_supported);
+            break;
+        case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_REQ_BASE_ASYM_ALG:
+            printf("), ReqAsym=0x%04x(", struct_table->alg_supported);
+            dump_entry_flags(m_spdm_asym_value_string_table,
+                             LIBSPDM_ARRAY_SIZE(m_spdm_asym_value_string_table),
+                             struct_table->alg_supported);
+            break;
+        case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_KEY_SCHEDULE:
+            printf("), KeySchedule=0x%04x(", struct_table->alg_supported);
+            dump_entry_flags(m_spdm_key_schedule_value_string_table,
+                             LIBSPDM_ARRAY_SIZE(m_spdm_key_schedule_value_string_table),
+                             struct_table->alg_supported);
+            break;
+        case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_REQ_PQC_ASYM_ALG:
+            printf("), ReqPqcAsym=0x%04x(", struct_table->alg_supported);
+            dump_entry_flags(m_spdm_pqc_asym_value_string_table,
+                             LIBSPDM_ARRAY_SIZE(m_spdm_pqc_asym_value_string_table),
+                             struct_table->alg_supported);
+            break;
+        case SPDM_NEGOTIATE_ALGORITHMS_STRUCT_TABLE_ALG_TYPE_KEM_ALG:
+            printf("), KEM=0x%04x(", struct_table->alg_supported);
+            dump_entry_flags(m_spdm_kem_value_string_table,
+                             LIBSPDM_ARRAY_SIZE(m_spdm_kem_value_string_table),
+                             struct_table->alg_supported);
+            break;
+        }
+        ext_alg_count = struct_table->alg_count & 0xF;
+        struct_table =
+            (const void *)((const uint8_t *)struct_table +
+                           sizeof(spdm_negotiate_algorithms_common_struct_table_t) +
+                           sizeof(uint32_t) * ext_alg_count);
+    }
+    printf("))");
+}
+
 void dump_spdm_get_capabilities(const void *buffer, size_t buffer_size)
 {
     size_t message_size;
@@ -672,6 +778,16 @@ void dump_spdm_get_capabilities(const void *buffer, size_t buffer_size)
             if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
                 printf(", DataTransSize=0x%08x, MaxSpdmMsgSize=0x%08x",
                        spdm_request->data_transfer_size, spdm_request->max_spdm_msg_size);
+            }
+            /* SPDM 1.3+ may append a SupportedAlgorithms block (param1 BIT[0]). */
+            if ((spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_13) &&
+                ((spdm_request->header.param1 &
+                  SPDM_GET_CAPABILITIES_REQUEST_PARAM1_SUPPORTED_ALGORITHMS) != 0) &&
+                (buffer_size > sizeof(spdm_get_capabilities_request_t))) {
+                dump_spdm_supported_algorithms_block(
+                    spdm_request->header.spdm_version,
+                    (const uint8_t *)buffer + sizeof(spdm_get_capabilities_request_t),
+                    buffer_size - sizeof(spdm_get_capabilities_request_t));
             }
             printf(") ");
 
@@ -753,6 +869,16 @@ void dump_spdm_capabilities(const void *buffer, size_t buffer_size)
         if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
             printf(", DataTransSize=0x%08x, MaxSpdmMsgSize=0x%08x",
                    spdm_response->data_transfer_size, spdm_response->max_spdm_msg_size);
+        }
+        /* SPDM 1.3+ may append a SupportedAlgorithms block (param1 BIT[0]). */
+        if ((spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_13) &&
+            ((spdm_response->header.param1 &
+              SPDM_CAPABILITIES_RESPONSE_PARAM1_SUPPORTED_ALGORITHMS) != 0) &&
+            (buffer_size > sizeof(spdm_capabilities_response_t))) {
+            dump_spdm_supported_algorithms_block(
+                spdm_response->header.spdm_version,
+                (const uint8_t *)buffer + sizeof(spdm_capabilities_response_t),
+                buffer_size - sizeof(spdm_capabilities_response_t));
         }
         printf(") ");
 
