@@ -412,6 +412,24 @@ value_string_entry_t m_spdm_key_pair_asym_algo_string_table[] = {
     { SPDM_KEY_PAIR_ASYM_ALGO_CAP_ED448, "Ed448" },
 };
 
+value_string_entry_t m_spdm_key_pair_pqc_asym_algo_string_table[] = {
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_ML_DSA_44, "ML_DSA_44" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_ML_DSA_65, "ML_DSA_65" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_ML_DSA_87, "ML_DSA_87" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHA2_128S, "SLH_DSA_SHA2_128S" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHAKE_128S, "SLH_DSA_SHAKE_128S" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHA2_128F, "SLH_DSA_SHA2_128F" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHAKE_128F, "SLH_DSA_SHAKE_128F" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHA2_192S, "SLH_DSA_SHA2_192S" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHAKE_192S, "SLH_DSA_SHAKE_192S" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHA2_192F, "SLH_DSA_SHA2_192F" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHAKE_192F, "SLH_DSA_SHAKE_192F" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHA2_256S, "SLH_DSA_SHA2_256S" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHAKE_256S, "SLH_DSA_SHAKE_256S" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHA2_256F, "SLH_DSA_SHA2_256F" },
+    { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHAKE_256F, "SLH_DSA_SHAKE_256F" },
+};
+
 value_string_entry_t m_spdm_chunk_send_attribute_string_table[] = {
     { SPDM_CHUNK_SEND_REQUEST_ATTRIBUTE_LAST_CHUNK,
       "LastChunk" },
@@ -491,6 +509,22 @@ uint32_t spdm_dump_get_measurement_summary_hash_size(
     }
 
     return 0;
+}
+
+/* Read a little-endian value of "len" bytes (the SPDM variable-length value encoding, where
+ * len may be 1, 2, 3 or 4). Bytes beyond 4 are ignored. */
+uint32_t dump_spdm_read_bytes_le(const uint8_t *ptr, uint8_t len)
+{
+    uint32_t value = 0;
+    uint8_t index;
+
+    if (len > sizeof(uint32_t)) {
+        len = sizeof(uint32_t);
+    }
+    for (index = 0; index < len; index++) {
+        value |= ((uint32_t)ptr[index]) << (8 * index);
+    }
+    return value;
 }
 
 /* Determine the secured message version of a session being established.
@@ -3716,6 +3750,8 @@ void dump_spdm_get_key_pair_info(const void *buffer, size_t buffer_size)
 void dump_spdm_key_pair_info(const void *buffer, size_t buffer_size)
 {
     const spdm_key_pair_info_response_t *spdm_response;
+    const uint8_t *ptr;
+    const uint8_t *end;
 
     printf("SPDM_KEY_PAIR_INFO ");
 
@@ -3762,6 +3798,35 @@ void dump_spdm_key_pair_info(const void *buffer, size_t buffer_size)
         printf(", PubKeyInfo(Len=0x%04x, ", spdm_response->public_key_info_len);
         dump_data((const void *)(spdm_response + 1), spdm_response->public_key_info_len);
         printf("))");
+
+        /* SPDM 1.4 adds length-prefixed PQC algorithm fields after PubKeyInfo:
+         * PqcAsymCapabilities then CurrPqcAsym (each: length byte + value). */
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+            const char *pqc_names[2] = {"PqcAsymCap", "CurrPqcAsym"};
+            uint8_t pqc_index;
+            ptr = (const uint8_t *)(spdm_response + 1) + spdm_response->public_key_info_len;
+            end = (const uint8_t *)buffer + buffer_size;
+            for (pqc_index = 0; pqc_index < 2; pqc_index++) {
+                uint8_t pqc_len;
+                uint32_t pqc_value;
+                if (ptr + 1 > end) {
+                    break;
+                }
+                pqc_len = *ptr;
+                ptr += 1;
+                if (ptr + pqc_len > end) {
+                    break;
+                }
+                pqc_value = dump_spdm_read_bytes_le(ptr, pqc_len);
+                printf(", %s(Len=0x%02x, 0x%08x(", pqc_names[pqc_index], pqc_len, pqc_value);
+                dump_entry_flags(
+                    m_spdm_key_pair_pqc_asym_algo_string_table,
+                    LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_pqc_asym_algo_string_table),
+                    pqc_value);
+                printf("))");
+                ptr += pqc_len;
+            }
+        }
     }
 
     printf("\n");
@@ -3827,6 +3892,28 @@ void dump_spdm_set_key_pair_info(const void *buffer, size_t buffer_size)
                 LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_asym_algo_string_table),
                 desired_asym_algo);
             printf("), DesiredAssocCertSlotMask=0x%02x", desired_assoc_cert_slot_mask);
+            /* SPDM 1.4 adds a length-prefixed DesiredPqcAsymAlgo field (length byte + value)
+             * after DesiredAssocCertSlotMask. */
+            if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+                const uint8_t *end = (const uint8_t *)buffer + buffer_size;
+                uint8_t desired_pqc_len;
+                uint32_t desired_pqc_asym_algo;
+                if (ptr + 1 <= end) {
+                    desired_pqc_len = *ptr;
+                    ptr += 1;
+                    if (ptr + desired_pqc_len <= end) {
+                        desired_pqc_asym_algo = dump_spdm_read_bytes_le(ptr, desired_pqc_len);
+                        printf(", DesiredPqcAsymAlgo(Len=0x%02x, 0x%08x(",
+                               desired_pqc_len, desired_pqc_asym_algo);
+                        dump_entry_flags(
+                            m_spdm_key_pair_pqc_asym_algo_string_table,
+                            LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_pqc_asym_algo_string_table),
+                            desired_pqc_asym_algo);
+                        printf("))");
+                        ptr += desired_pqc_len;
+                    }
+                }
+            }
             printf(")");
             break;
         default:
