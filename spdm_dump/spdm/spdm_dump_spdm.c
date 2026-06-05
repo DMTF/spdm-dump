@@ -370,9 +370,9 @@ value_string_entry_t m_spdm_key_exchange_mut_auth_string_table[] = {
 };
 
 value_string_entry_t m_spdm_key_update_operation_string_table[] = {
-    { SPDM_KEY_UPDATE_OPERATIONS_TABLE_UPDATE_KEY, "UpdateKey" },
-    { SPDM_KEY_UPDATE_OPERATIONS_TABLE_UPDATE_ALL_KEYS, "UpdateAllkeys" },
-    { SPDM_KEY_UPDATE_OPERATIONS_TABLE_VERIFY_NEW_KEY, "VerifyNewKey" },
+    { SPDM_KEY_UPDATE_OPERATIONS_UPDATE_KEY, "UpdateKey" },
+    { SPDM_KEY_UPDATE_OPERATIONS_UPDATE_ALL_KEYS, "UpdateAllkeys" },
+    { SPDM_KEY_UPDATE_OPERATIONS_VERIFY_NEW_KEY, "VerifyNewKey" },
 };
 
 value_string_entry_t m_spdm_end_session_attribute_string_table[] = {
@@ -486,6 +486,37 @@ uint32_t spdm_dump_get_measurement_summary_hash_size(
     }
 
     return 0;
+}
+
+/* Determine the secured message version of a session being established.
+ *
+ * The session keys are derived using the negotiated *secured message* version (for example
+ * SECURED_SPDM_VERSION_12, 0x12), which is independent of the SPDM message version (for example
+ * SPDM_MESSAGE_VERSION_14, 0x14). The Responder reports the selected secured message version in
+ * the version-selection element of the KEY_EXCHANGE_RSP / PSK_EXCHANGE_RSP opaque data, so parse
+ * it from there. If the opaque data does not carry a version selection, fall back to the default
+ * mapping from the SPDM version (SPDM 1.0/1.1 -> secured 1.0, SPDM 1.2 -> secured 1.1,
+ * SPDM 1.3+ -> secured 1.2). */
+spdm_version_number_t spdm_dump_get_secured_message_version(
+    uint8_t spdm_version, const void *opaque_data, size_t opaque_length)
+{
+    spdm_version_number_t secured_message_version = 0;
+    libspdm_return_t status;
+
+    status = libspdm_process_opaque_data_version_selection_data(
+        m_spdm_context, opaque_length, (void *)opaque_data, &secured_message_version);
+    if ((status == LIBSPDM_STATUS_SUCCESS) && (secured_message_version != 0)) {
+        return secured_message_version;
+    }
+
+    /* No version selection in the opaque data: use the default mapping. */
+    if (spdm_version >= SPDM_MESSAGE_VERSION_13) {
+        return SECURED_SPDM_VERSION_12 << SPDM_VERSION_NUMBER_SHIFT_BIT;
+    } else if (spdm_version == SPDM_MESSAGE_VERSION_12) {
+        return SECURED_SPDM_VERSION_11 << SPDM_VERSION_NUMBER_SHIFT_BIT;
+    } else {
+        return SECURED_SPDM_VERSION_10 << SPDM_VERSION_NUMBER_SHIFT_BIT;
+    }
 }
 
 void dump_spdm_get_version(const void *buffer, size_t buffer_size)
@@ -1247,7 +1278,7 @@ void dump_spdm_digests(const void *buffer, size_t buffer_size)
         }
     } else {
         if (m_multi_key_conn_req && (m_current_session_info != NULL)) {
-            libspdm_append_message_encap_d(m_spdm_context, m_current_session_info, true,
+            libspdm_append_message_encap_d(m_current_session_info,
                                            buffer, message_size);
         }
     }
@@ -2282,7 +2313,7 @@ void dump_spdm_vendor_defined_response(const void *buffer, size_t buffer_size)
 
     if (!m_param_quite_mode) {
         if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
-            printf("(LargeReq=0x%02x, ", spdm_response->header.param1 & SPDM_VENDOR_DEFINED_RESONSE_LARGE_RESP);
+            printf("(LargeReq=0x%02x, ", spdm_response->header.param1 & SPDM_VENDOR_DEFINED_RESPONSE_LARGE_RESP);
         } else {
             printf("(");
         }
@@ -2542,8 +2573,15 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
         /* this might happen if a session is terminated without EndSession*/
         libspdm_free_session_id(m_spdm_context, m_cached_session_id);
     }
+    /* The session keys use the negotiated secured message version, which the Responder selects
+     * in the KEY_EXCHANGE_RSP opaque data (and is not the same as the SPDM message version). */
+    opaque_data = (uint8_t *)((size_t)buffer + sizeof(spdm_key_exchange_response_t) +
+                              exchange_data_size + measurement_summary_hash_size +
+                              sizeof(uint16_t));
     m_current_session_info = libspdm_assign_session_id(
-        m_spdm_context, m_cached_session_id, false);
+        m_spdm_context, m_cached_session_id,
+        spdm_dump_get_secured_message_version(spdm_response->header.spdm_version,
+                                              opaque_data, opaque_length), false);
     LIBSPDM_ASSERT(m_current_session_info != NULL);
     if (m_current_session_info == NULL) {
         return;
@@ -2965,8 +3003,14 @@ void dump_spdm_psk_exchange_rsp(const void *buffer, size_t buffer_size)
         /* this might happen if a session is terminated without EndSession*/
         libspdm_free_session_id(m_spdm_context, m_cached_session_id);
     }
+    /* The session keys use the negotiated secured message version, which the Responder selects
+     * in the PSK_EXCHANGE_RSP opaque data (and is not the same as the SPDM message version). */
+    opaque_data = (uint8_t *)(spdm_response + 1) + measurement_summary_hash_size +
+                  spdm_response->context_length;
     m_current_session_info = libspdm_assign_session_id(
-        m_spdm_context, m_cached_session_id, true);
+        m_spdm_context, m_cached_session_id,
+        spdm_dump_get_secured_message_version(spdm_response->header.spdm_version,
+                                              opaque_data, spdm_response->opaque_length), true);
     LIBSPDM_ASSERT(m_current_session_info != NULL);
     if (m_current_session_info == NULL) {
         return;
@@ -3234,7 +3278,7 @@ void dump_spdm_key_update(const void *buffer, size_t buffer_size)
     if (m_encapsulated) {
         LIBSPDM_ASSERT(m_current_session_info != NULL);
         switch (((spdm_message_header_t *)buffer)->param1) {
-        case SPDM_KEY_UPDATE_OPERATIONS_TABLE_UPDATE_KEY:
+        case SPDM_KEY_UPDATE_OPERATIONS_UPDATE_KEY:
             libspdm_create_update_session_data_key(
                 libspdm_get_secured_message_context_via_session_info(
                     m_current_session_info),
@@ -3243,13 +3287,13 @@ void dump_spdm_key_update(const void *buffer, size_t buffer_size)
         }
     } else {
         switch (((spdm_message_header_t *)buffer)->param1) {
-        case SPDM_KEY_UPDATE_OPERATIONS_TABLE_UPDATE_KEY:
+        case SPDM_KEY_UPDATE_OPERATIONS_UPDATE_KEY:
             libspdm_create_update_session_data_key(
                 libspdm_get_secured_message_context_via_session_info(
                     m_current_session_info),
                 LIBSPDM_KEY_UPDATE_ACTION_REQUESTER);
             break;
-        case SPDM_KEY_UPDATE_OPERATIONS_TABLE_UPDATE_ALL_KEYS:
+        case SPDM_KEY_UPDATE_OPERATIONS_UPDATE_ALL_KEYS:
             libspdm_create_update_session_data_key(
                 libspdm_get_secured_message_context_via_session_info(
                     m_current_session_info),
