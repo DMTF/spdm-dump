@@ -132,6 +132,11 @@ value_string_entry_t m_spdm_responder_capabilities_string_table[] = {
 size_t m_spdm_responder_capabilities_string_table_count =
     LIBSPDM_ARRAY_SIZE(m_spdm_responder_capabilities_string_table);
 
+/* SPDM 1.4 GET_CAPABILITIES extended flags (ExtFlags field). */
+value_string_entry_t m_spdm_capabilities_ext_flags_string_table[] = {
+    { SPDM_GET_CAPABILITIES_EXTENDED_RESPONSE_FLAGS_SLOT_MGMT_CAP, "SLOT_MGMT" },
+};
+
 value_string_entry_t m_spdm_hash_value_string_table[] = {
     { SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_256, "SHA_256" },
     { SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_384, "SHA_384" },
@@ -627,6 +632,9 @@ void dump_spdm_get_capabilities(const void *buffer, size_t buffer_size)
             SPDM_MESSAGE_VERSION_11) {
             printf("(Flags=0x%08x, CTExponent=0x%02x",
                    spdm_request->flags, spdm_request->ct_exponent);
+            if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+                printf(", ExtFlags=0x%04x", spdm_request->ext_flags);
+            }
             if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
                 printf(", DataTransSize=0x%08x, MaxSpdmMsgSize=0x%08x",
                        spdm_request->data_transfer_size, spdm_request->max_spdm_msg_size);
@@ -641,6 +649,15 @@ void dump_spdm_get_capabilities(const void *buffer, size_t buffer_size)
                         m_spdm_requester_capabilities_string_table),
                     spdm_request->flags);
                 printf(")");
+                if (spdm_request->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+                    printf("\n    ExtFlags(");
+                    dump_entry_flags_all(
+                        m_spdm_capabilities_ext_flags_string_table,
+                        LIBSPDM_ARRAY_SIZE(
+                            m_spdm_capabilities_ext_flags_string_table),
+                        spdm_request->ext_flags);
+                    printf(")");
+                }
             }
         } else {
             printf("() ");
@@ -696,6 +713,9 @@ void dump_spdm_capabilities(const void *buffer, size_t buffer_size)
     if (!m_param_quite_mode) {
         printf("(Flags=0x%08x, CTExponent=0x%02x",
                spdm_response->flags, spdm_response->ct_exponent);
+        if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+            printf(", ExtFlags=0x%04x", spdm_response->ext_flags);
+        }
         if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_12) {
             printf(", DataTransSize=0x%08x, MaxSpdmMsgSize=0x%08x",
                    spdm_response->data_transfer_size, spdm_response->max_spdm_msg_size);
@@ -710,6 +730,15 @@ void dump_spdm_capabilities(const void *buffer, size_t buffer_size)
                     m_spdm_responder_capabilities_string_table),
                 spdm_response->flags);
             printf(")");
+            if (spdm_response->header.spdm_version >= SPDM_MESSAGE_VERSION_14) {
+                printf("\n    ExtFlags(");
+                dump_entry_flags_all(
+                    m_spdm_capabilities_ext_flags_string_table,
+                    LIBSPDM_ARRAY_SIZE(
+                        m_spdm_capabilities_ext_flags_string_table),
+                    spdm_response->ext_flags);
+                printf(")");
+            }
         }
     }
 
