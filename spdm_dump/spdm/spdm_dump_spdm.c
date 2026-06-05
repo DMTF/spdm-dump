@@ -430,6 +430,35 @@ value_string_entry_t m_spdm_key_pair_pqc_asym_algo_string_table[] = {
     { SPDM_KEY_PAIR_PQC_ASYM_ALGO_CAP_SLH_DSA_SHAKE_256F, "SLH_DSA_SHAKE_256F" },
 };
 
+value_string_entry_t m_spdm_slot_management_subcode_string_table[] = {
+    { SPDM_SLOT_MANAGEMENT_SUBCODE_SUPPORTED_SUBCODES, "SupportedSubCodes" },
+    { SPDM_SLOT_MANAGEMENT_SUBCODE_GET_BANK_INFO, "GetBankInfo" },
+    { SPDM_SLOT_MANAGEMENT_SUBCODE_GET_BANK_DETAILS, "GetBankDetails" },
+    { SPDM_SLOT_MANAGEMENT_SUBCODE_GET_CERTIFICATE_CHAIN, "GetCertificateChain" },
+    { SPDM_SLOT_MANAGEMENT_SUBCODE_GET_CSR, "GetCSR" },
+    { SPDM_SLOT_MANAGEMENT_SUBCODE_MANAGE_BANK, "ManageBank" },
+    { SPDM_SLOT_MANAGEMENT_SUBCODE_MANAGE_SLOT, "ManageSlot" },
+    { SPDM_SLOT_MANAGEMENT_SUBCODE_SET_CERTIFICATE, "SetCertificate" },
+};
+
+value_string_entry_t m_spdm_slot_management_bank_attribute_string_table[] = {
+    { SPDM_SLOT_MANAGEMENT_BANK_ATTRIBUTE_SELECTED, "Selected" },
+    { SPDM_SLOT_MANAGEMENT_BANK_ATTRIBUTE_CONFIG_ALGO, "ConfigAlgo" },
+};
+
+value_string_entry_t m_spdm_slot_management_slot_attribute_string_table[] = {
+    { SPDM_SLOT_MANAGEMENT_SLOT_ATTRIBUTE_PROVISIONED, "Provisioned" },
+    { SPDM_SLOT_MANAGEMENT_SLOT_ATTRIBUTE_WRITE_PROTECTED, "WriteProtected" },
+};
+
+value_string_entry_t m_spdm_slot_management_manage_bank_operation_string_table[] = {
+    { SPDM_SLOT_MANAGEMENT_MANAGE_BANK_OPERATION_CONFIG_ALGO, "ConfigAlgo" },
+};
+
+value_string_entry_t m_spdm_slot_management_manage_slot_operation_string_table[] = {
+    { SPDM_SLOT_MANAGEMENT_MANAGE_SLOT_OPERATION_ERASE, "Erase" },
+};
+
 value_string_entry_t m_spdm_chunk_send_attribute_string_table[] = {
     { SPDM_CHUNK_SEND_REQUEST_ATTRIBUTE_LAST_CHUNK,
       "LastChunk" },
@@ -4067,6 +4096,339 @@ void dump_spdm_set_key_pair_info_ack(const void *buffer, size_t buffer_size)
     printf("\n");
 }
 
+void dump_spdm_slot_management_subcode(uint8_t sub_code)
+{
+    printf("(SubCode=0x%02x(", sub_code);
+    dump_entry_value(
+        m_spdm_slot_management_subcode_string_table,
+        LIBSPDM_ARRAY_SIZE(m_spdm_slot_management_subcode_string_table),
+        sub_code);
+    printf(")");
+}
+
+void dump_spdm_slot_management(const void *buffer, size_t buffer_size)
+{
+    const spdm_slot_management_request_t *spdm_request;
+    uint8_t sub_code;
+    const uint8_t *mgmt_struct;
+    size_t mgmt_struct_size;
+
+    printf("SPDM_SLOT_MANAGEMENT ");
+
+    if (buffer_size < sizeof(spdm_slot_management_request_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_request = buffer;
+    sub_code = spdm_request->header.param1;
+
+    if (!m_param_quite_mode) {
+        dump_spdm_slot_management_subcode(sub_code);
+
+        /* The SubCode request structure (if any) starts at mgmt_struct_offset. */
+        if ((spdm_request->mgmt_struct_offset >= sizeof(spdm_slot_management_request_t)) &&
+            ((size_t)spdm_request->mgmt_struct_offset < buffer_size)) {
+            mgmt_struct = (const uint8_t *)buffer + spdm_request->mgmt_struct_offset;
+            mgmt_struct_size = buffer_size - spdm_request->mgmt_struct_offset;
+
+            switch (sub_code) {
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_GET_BANK_DETAILS:
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_GET_CERTIFICATE_CHAIN: {
+                const spdm_slot_management_slot_address_struct_t *slot_address;
+                if (mgmt_struct_size >= sizeof(spdm_slot_management_slot_address_struct_t)) {
+                    slot_address = (const void *)mgmt_struct;
+                    printf(", BankID=0x%02x, SlotID=0x%02x",
+                           slot_address->bank_id,
+                           slot_address->slot_id & SPDM_SLOT_MANAGEMENT_SLOT_ID_MASK);
+                }
+                break;
+            }
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_MANAGE_BANK: {
+                const spdm_slot_management_manage_bank_struct_t *manage_bank;
+                if (mgmt_struct_size >= sizeof(spdm_slot_management_manage_bank_struct_t)) {
+                    manage_bank = (const void *)mgmt_struct;
+                    printf(", BankID=0x%02x, Operation=0x%02x(",
+                           manage_bank->slot_address.bank_id, manage_bank->operation);
+                    dump_entry_value(
+                        m_spdm_slot_management_manage_bank_operation_string_table,
+                        LIBSPDM_ARRAY_SIZE(
+                            m_spdm_slot_management_manage_bank_operation_string_table),
+                        manage_bank->operation);
+                    printf("), SelectAsymAlgo=0x%08x(", manage_bank->select_asym_algo);
+                    dump_entry_flags(
+                        m_spdm_key_pair_asym_algo_string_table,
+                        LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_asym_algo_string_table),
+                        manage_bank->select_asym_algo);
+                    printf(")");
+                }
+                break;
+            }
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_MANAGE_SLOT: {
+                const spdm_slot_management_manage_slot_struct_t *manage_slot;
+                if (mgmt_struct_size >= sizeof(spdm_slot_management_manage_slot_struct_t)) {
+                    manage_slot = (const void *)mgmt_struct;
+                    printf(", BankID=0x%02x, SlotID=0x%02x, Operation=0x%02x(",
+                           manage_slot->slot_address.bank_id,
+                           manage_slot->slot_address.slot_id & SPDM_SLOT_MANAGEMENT_SLOT_ID_MASK,
+                           manage_slot->operation);
+                    dump_entry_value(
+                        m_spdm_slot_management_manage_slot_operation_string_table,
+                        LIBSPDM_ARRAY_SIZE(
+                            m_spdm_slot_management_manage_slot_operation_string_table),
+                        manage_slot->operation);
+                    printf(")");
+                }
+                break;
+            }
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_GET_CSR: {
+                const spdm_slot_management_get_csr_struct_t *get_csr;
+                if (mgmt_struct_size >= sizeof(spdm_slot_management_get_csr_struct_t)) {
+                    get_csr = (const void *)mgmt_struct;
+                    printf(", BankID=0x%02x, SlotID=0x%02x, KeyPairID=0x%02x",
+                           get_csr->slot_address.bank_id,
+                           get_csr->slot_address.slot_id & SPDM_SLOT_MANAGEMENT_SLOT_ID_MASK,
+                           get_csr->key_pair_id);
+                    printf(", RequestAttributes=0x%02x(CertModel=",
+                           get_csr->request_attributes);
+                    dump_entry_value(
+                        m_spdm_cert_model_string_table,
+                        LIBSPDM_ARRAY_SIZE(m_spdm_cert_model_string_table),
+                        get_csr->request_attributes &
+                        SPDM_GET_CSR_REQUEST_ATTRIBUTES_CERT_MODEL_MASK);
+                    printf(", Tag=0x%02x, Overwrite=%x)",
+                           (get_csr->request_attributes &
+                            SPDM_GET_CSR_REQUEST_ATTRIBUTES_CSR_TRACKING_TAG_MASK) >>
+                           SPDM_GET_CSR_REQUEST_ATTRIBUTES_CSR_TRACKING_TAG_OFFSET,
+                           (get_csr->request_attributes &
+                            SPDM_GET_CSR_REQUEST_ATTRIBUTES_OVERWRITE) >> 7);
+                    printf(", RequesterInfoLen=0x%04x", get_csr->requester_info_length);
+                    printf(", OpaqueDataLen=0x%04x", get_csr->opaque_data_length);
+                }
+                break;
+            }
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_SET_CERTIFICATE: {
+                const spdm_slot_management_set_certificate_struct_t *set_cert;
+                if (mgmt_struct_size >= sizeof(spdm_slot_management_set_certificate_struct_t)) {
+                    set_cert = (const void *)mgmt_struct;
+                    printf(", BankID=0x%02x, SlotID=0x%02x, CertModel=0x%02x(",
+                           set_cert->slot_address.bank_id,
+                           set_cert->slot_address.slot_id & SPDM_SLOT_MANAGEMENT_SLOT_ID_MASK,
+                           set_cert->cert_attributes &
+                           SPDM_SLOT_MANAGEMENT_SET_CERTIFICATE_ATTRIBUTE_CERT_MODEL_MASK);
+                    dump_entry_value(
+                        m_spdm_cert_model_string_table,
+                        LIBSPDM_ARRAY_SIZE(m_spdm_cert_model_string_table),
+                        set_cert->cert_attributes &
+                        SPDM_SLOT_MANAGEMENT_SET_CERTIFICATE_ATTRIBUTE_CERT_MODEL_MASK);
+                    printf("), CertLen=0x%08x", set_cert->cert_length);
+                }
+                break;
+            }
+            default:
+                /* SupportedSubCodes and GetBankInfo have no request structure. */
+                break;
+            }
+        }
+        printf(")");
+    }
+
+    printf("\n");
+}
+
+void dump_spdm_slot_management_rsp(const void *buffer, size_t buffer_size)
+{
+    const spdm_slot_management_response_t *spdm_response;
+    uint8_t sub_code;
+    const uint8_t *mgmt_struct;
+    size_t mgmt_struct_size;
+
+    printf("SPDM_SLOT_MANAGEMENT_RESP ");
+
+    if (buffer_size < sizeof(spdm_slot_management_response_t)) {
+        printf("\n");
+        return;
+    }
+
+    spdm_response = buffer;
+    sub_code = spdm_response->header.param1;
+
+    if (!m_param_quite_mode) {
+        dump_spdm_slot_management_subcode(sub_code);
+
+        /* ManageBank, ManageSlot and SetCertificate have no response structure
+         * (mgmt_struct_offset == 0). */
+        if ((spdm_response->mgmt_struct_offset >= sizeof(spdm_slot_management_response_t)) &&
+            ((size_t)spdm_response->mgmt_struct_offset < buffer_size)) {
+            mgmt_struct = (const uint8_t *)buffer + spdm_response->mgmt_struct_offset;
+            mgmt_struct_size = buffer_size - spdm_response->mgmt_struct_offset;
+
+            switch (sub_code) {
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_SUPPORTED_SUBCODES: {
+                const spdm_slot_management_supported_subcodes_struct_t *resp;
+                if (mgmt_struct_size >=
+                    sizeof(spdm_slot_management_supported_subcodes_struct_t)) {
+                    resp = (const void *)mgmt_struct;
+                    printf(", SubCodeBitmap=");
+                    dump_data(resp->sub_code_bitmap, sizeof(resp->sub_code_bitmap));
+                }
+                break;
+            }
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_GET_BANK_INFO: {
+                const spdm_slot_management_bank_info_struct_t *resp;
+                const spdm_slot_management_bank_element_struct_t *element;
+                uint8_t index;
+                if (mgmt_struct_size >= sizeof(spdm_slot_management_bank_info_struct_t)) {
+                    resp = (const void *)mgmt_struct;
+                    printf(", RespLength=0x%04x, NumBankElements=0x%02x",
+                           resp->resp_length, resp->num_bank_elements);
+                    element = (const void *)((const uint8_t *)resp +
+                                             sizeof(spdm_slot_management_bank_info_struct_t));
+                    for (index = 0; index < resp->num_bank_elements; index++) {
+                        if ((const uint8_t *)(element + 1) >
+                            mgmt_struct + mgmt_struct_size) {
+                            break;
+                        }
+                        printf(", Bank[%d](ElementLength=0x%02x, BankID=0x%02x, SlotMask=0x%02x, ModifiableSlotMask=0x%02x)",
+                               index, element->element_length, element->bank_id,
+                               element->slot_mask, element->modifiable_slot_mask);
+                        element++;
+                    }
+                }
+                break;
+            }
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_GET_BANK_DETAILS: {
+                const spdm_slot_management_bank_details_struct_t *resp;
+                const uint8_t *ptr;
+                const uint8_t *end;
+                uint8_t pqc_len;
+                uint32_t pqc_value;
+                uint32_t hash_size;
+                uint8_t index;
+                uint16_t slot_index;
+                const char *pqc_names[3] = {
+                    "PqcAsymAlgoCapabilities", "CurrentPqcAsymAlgo", "AvailablePqcAsymAlgo"
+                };
+                if (mgmt_struct_size >= sizeof(spdm_slot_management_bank_details_struct_t)) {
+                    resp = (const void *)mgmt_struct;
+                    end = mgmt_struct + mgmt_struct_size;
+                    printf(", RespLength=0x%04x, BankID=0x%02x, NumSlotElements=0x%04x",
+                           resp->resp_length, resp->bank_id, resp->num_slot_elements);
+                    printf(", BankAttributes=0x%02x(", resp->bank_attributes);
+                    dump_entry_flags(
+                        m_spdm_slot_management_bank_attribute_string_table,
+                        LIBSPDM_ARRAY_SIZE(m_spdm_slot_management_bank_attribute_string_table),
+                        resp->bank_attributes);
+                    /* The asym algorithm fields use the same key pair AsymAlgo encoding as
+                     * KEY_PAIR_INFO. */
+                    printf("), AsymAlgoCapabilities=0x%08x(", resp->asym_algo_capabilities);
+                    dump_entry_flags(
+                        m_spdm_key_pair_asym_algo_string_table,
+                        LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_asym_algo_string_table),
+                        resp->asym_algo_capabilities);
+                    printf("), CurrentAsymAlgo=0x%08x(", resp->current_asym_algo);
+                    dump_entry_flags(
+                        m_spdm_key_pair_asym_algo_string_table,
+                        LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_asym_algo_string_table),
+                        resp->current_asym_algo);
+                    printf("), AvailableAsymAlgo=0x%08x(", resp->available_asym_algo);
+                    dump_entry_flags(
+                        m_spdm_key_pair_asym_algo_string_table,
+                        LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_asym_algo_string_table),
+                        resp->available_asym_algo);
+                    printf(")");
+
+                    /* The PQC algorithm fields are length-prefixed (length byte + value):
+                     * PqcAsymAlgoCapabilities, CurrentPqcAsymAlgo, AvailablePqcAsymAlgo,
+                     * followed by 4 reserved bytes, then the SlotElement array. They use the
+                     * same key pair PqcAsymAlgo encoding as KEY_PAIR_INFO. */
+                    ptr = (const uint8_t *)(resp + 1);
+                    for (index = 0; index < 3; index++) {
+                        if (ptr + 1 > end) {
+                            break;
+                        }
+                        pqc_len = *ptr;
+                        ptr += 1;
+                        if (ptr + pqc_len > end) {
+                            break;
+                        }
+                        pqc_value = dump_spdm_read_bytes_le(ptr, pqc_len);
+                        printf(", %s(Len=0x%02x, 0x%08x(", pqc_names[index], pqc_len, pqc_value);
+                        dump_entry_flags(
+                            m_spdm_key_pair_pqc_asym_algo_string_table,
+                            LIBSPDM_ARRAY_SIZE(m_spdm_key_pair_pqc_asym_algo_string_table),
+                            pqc_value);
+                        printf("))");
+                        ptr += pqc_len;
+                    }
+                    /* Reserved (4 bytes). */
+                    ptr += 4;
+
+                    /* SlotElement array; each element is the fixed structure followed by a
+                     * digest of the negotiated hash size. */
+                    hash_size = libspdm_get_hash_size(m_spdm_base_hash_algo);
+                    for (slot_index = 0; slot_index < resp->num_slot_elements; slot_index++) {
+                        const spdm_slot_management_slot_element_struct_t *slot_element;
+                        if (ptr + sizeof(spdm_slot_management_slot_element_struct_t) +
+                            hash_size > end) {
+                            break;
+                        }
+                        slot_element = (const void *)ptr;
+                        printf(", Slot[%d](ElementLength=0x%04x, SlotID=0x%02x, SlotAttributes=0x%02x(",
+                               slot_index, slot_element->element_length,
+                               slot_element->slot_id, slot_element->slot_attributes);
+                        dump_entry_flags(
+                            m_spdm_slot_management_slot_attribute_string_table,
+                            LIBSPDM_ARRAY_SIZE(m_spdm_slot_management_slot_attribute_string_table),
+                            slot_element->slot_attributes);
+                        printf("), KeyPairID=0x%02x, CertificateInfo=0x%02x(",
+                               slot_element->key_pair_id, slot_element->certificate_info);
+                        dump_entry_value(
+                            m_spdm_cert_model_string_table,
+                            LIBSPDM_ARRAY_SIZE(m_spdm_cert_model_string_table),
+                            slot_element->certificate_info & SPDM_CERTIFICATE_INFO_CERT_MODEL_MASK);
+                        printf("), KeyUsage=0x%04x(", slot_element->key_usage);
+                        dump_entry_flags(
+                            m_spdm_key_usage_value_string_table,
+                            LIBSPDM_ARRAY_SIZE(m_spdm_key_usage_value_string_table),
+                            slot_element->key_usage);
+                        printf("), SlotSize=0x%08x", slot_element->slot_size);
+                        printf(", Digest(");
+                        dump_data((const uint8_t *)slot_element +
+                                  sizeof(spdm_slot_management_slot_element_struct_t), hash_size);
+                        printf("))");
+                        ptr += sizeof(spdm_slot_management_slot_element_struct_t) + hash_size;
+                    }
+                }
+                break;
+            }
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_GET_CERTIFICATE_CHAIN: {
+                const spdm_slot_management_get_certificate_chain_struct_t *resp;
+                if (mgmt_struct_size >=
+                    sizeof(spdm_slot_management_get_certificate_chain_struct_t)) {
+                    resp = (const void *)mgmt_struct;
+                    printf(", CertChainLen=0x%08x", resp->cc_length);
+                }
+                break;
+            }
+            case SPDM_SLOT_MANAGEMENT_SUBCODE_GET_CSR: {
+                const spdm_slot_management_csr_struct_t *resp;
+                if (mgmt_struct_size >= sizeof(spdm_slot_management_csr_struct_t)) {
+                    resp = (const void *)mgmt_struct;
+                    printf(", CSRLen=0x%08x", resp->csr_length);
+                }
+                break;
+            }
+            default:
+                break;
+            }
+        }
+        printf(")");
+    }
+
+    printf("\n");
+}
+
 void dump_spdm_get_endpoint_info(const void *buffer, size_t buffer_size)
 {
     const spdm_get_endpoint_info_request_t *spdm_request;
@@ -4582,6 +4944,8 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       dump_spdm_key_pair_info },
     { SPDM_SET_KEY_PAIR_INFO_ACK, "SPDM_SET_KEY_PAIR_INFO_ACK",
       dump_spdm_set_key_pair_info_ack },
+    { SPDM_SLOT_MANAGEMENT_RESP, "SPDM_SLOT_MANAGEMENT_RESP",
+      dump_spdm_slot_management_rsp },
     { SPDM_GET_ENDPOINT_INFO, "SPDM_GET_ENDPOINT_INFO",
       dump_spdm_get_endpoint_info },
     { SPDM_CHUNK_SEND_ACK, "SPDM_CHUNK_SEND_ACK",
@@ -4626,6 +4990,8 @@ dispatch_table_entry_t m_spdm_dispatch[] = {
       dump_spdm_get_key_pair_info },
     { SPDM_SET_KEY_PAIR_INFO, "SPDM_SET_KEY_PAIR_INFO",
       dump_spdm_set_key_pair_info },
+    { SPDM_SLOT_MANAGEMENT, "SPDM_SLOT_MANAGEMENT",
+      dump_spdm_slot_management },
     { SPDM_ENDPOINT_INFO, "SPDM_ENDPOINT_INFO",
       dump_spdm_endpoint_info },
     { SPDM_CHUNK_SEND, "SPDM_CHUNK_SEND",
