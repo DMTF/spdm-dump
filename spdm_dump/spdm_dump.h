@@ -35,6 +35,13 @@
 #include "stdlib.h"
 #include "string.h"
 
+/* libspdm only defines LIBSPDM_MAX_CERT_CHAIN_SIZE when LIBSPDM_RECORD_TRANSCRIPT_DATA_SUPPORT
+ * is enabled. spdm_dump uses it to bound the certificate chain buffers regardless of that
+ * setting, so provide the same default here when libspdm does not define it. */
+#ifndef LIBSPDM_MAX_CERT_CHAIN_SIZE
+#define LIBSPDM_MAX_CERT_CHAIN_SIZE 0x1000
+#endif /* LIBSPDM_MAX_CERT_CHAIN_SIZE */
+
 typedef void (*dump_message_func)(const void *buffer, size_t buffer_size);
 
 typedef struct {

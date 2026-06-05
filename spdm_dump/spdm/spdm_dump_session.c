@@ -256,15 +256,18 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                      &parameter,
                                      m_local_used_cert_chain_buffer,
                                      m_local_used_cert_chain_buffer_size);
-                    ((libspdm_context_t *)spdm_context)->
-                    connection_info.local_used_cert_chain_slot_id = 0xFF;
+                    ((libspdm_session_info_t *)session_info)->
+                    local_used_cert_chain_slot_id = 0xFF;
                 } else {
-                    ((libspdm_context_t *)spdm_context)->connection_info.local_used_cert_chain_buffer =
-                        m_local_used_cert_chain_buffer;
-                    ((libspdm_context_t *)spdm_context)->connection_info.local_used_cert_chain_buffer_size =
-                        m_local_used_cert_chain_buffer_size;
-                    ((libspdm_context_t *)spdm_context)->
-                    connection_info.local_used_cert_chain_slot_id = m_requester_cert_chain_slot_id;
+                    parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
+                    parameter.additional_data[0] = m_requester_cert_chain_slot_id;
+                    libspdm_set_data(spdm_context,
+                                     LIBSPDM_DATA_LOCAL_PUBLIC_CERT_CHAIN,
+                                     &parameter,
+                                     m_local_used_cert_chain_buffer,
+                                     m_local_used_cert_chain_buffer_size);
+                    ((libspdm_session_info_t *)session_info)->
+                    local_used_cert_chain_slot_id = m_requester_cert_chain_slot_id;
                 }
             }
             if (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] == NULL ||
@@ -284,8 +287,8 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                  &parameter,
                                  m_peer_cert_chain_buffer,
                                  m_peer_cert_chain_buffer_size);
-                ((libspdm_context_t *)spdm_context)->
-                connection_info.peer_used_cert_chain_slot_id = 0xFF;
+                ((libspdm_session_info_t *)session_info)->
+                peer_used_cert_chain_slot_id = 0xFF;
             } else {
                 parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
                 parameter.additional_data[0] = m_responder_cert_chain_slot_id;
@@ -294,6 +297,8 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                  &parameter,
                                  m_peer_cert_chain_buffer,
                                  m_peer_cert_chain_buffer_size);
+                ((libspdm_session_info_t *)session_info)->
+                peer_used_cert_chain_slot_id = m_responder_cert_chain_slot_id;
             }
         } else {
             if (m_responder_cert_chain_buffer[m_responder_cert_chain_slot_id] == NULL ||
@@ -313,15 +318,18 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                  &parameter,
                                  m_local_used_cert_chain_buffer,
                                  m_local_used_cert_chain_buffer_size);
-                ((libspdm_context_t *)spdm_context)->
-                connection_info.local_used_cert_chain_slot_id = 0xFF;
+                ((libspdm_session_info_t *)session_info)->
+                local_used_cert_chain_slot_id = 0xFF;
             } else {
-                ((libspdm_context_t *)spdm_context)->connection_info.local_used_cert_chain_buffer =
-                    m_local_used_cert_chain_buffer;
-                ((libspdm_context_t *)spdm_context)->connection_info.local_used_cert_chain_buffer_size =
-                    m_local_used_cert_chain_buffer_size;
-                ((libspdm_context_t *)spdm_context)->
-                connection_info.local_used_cert_chain_slot_id = m_responder_cert_chain_slot_id;
+                parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
+                parameter.additional_data[0] = m_responder_cert_chain_slot_id;
+                libspdm_set_data(spdm_context,
+                                 LIBSPDM_DATA_LOCAL_PUBLIC_CERT_CHAIN,
+                                 &parameter,
+                                 m_local_used_cert_chain_buffer,
+                                 m_local_used_cert_chain_buffer_size);
+                ((libspdm_session_info_t *)session_info)->
+                local_used_cert_chain_slot_id = m_responder_cert_chain_slot_id;
             }
             if (need_mut_auth && mut_auth_requested) {
                 if (m_requester_cert_chain_buffer[m_requester_cert_chain_slot_id] == NULL ||
@@ -341,8 +349,8 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                      &parameter,
                                      m_peer_cert_chain_buffer,
                                      m_peer_cert_chain_buffer_size);
-                    ((libspdm_context_t *)spdm_context)->
-                    connection_info.peer_used_cert_chain_slot_id = 0xFF;
+                    ((libspdm_session_info_t *)session_info)->
+                    peer_used_cert_chain_slot_id = 0xFF;
                 } else {
                     parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
                     parameter.additional_data[0] = m_requester_cert_chain_slot_id;
@@ -351,6 +359,8 @@ libspdm_return_t spdm_dump_session_data_provision(void *spdm_context,
                                      &parameter,
                                      m_peer_cert_chain_buffer,
                                      m_peer_cert_chain_buffer_size);
+                    ((libspdm_session_info_t *)session_info)->
+                    peer_used_cert_chain_slot_id = m_requester_cert_chain_slot_id;
                 }
             }
         }
