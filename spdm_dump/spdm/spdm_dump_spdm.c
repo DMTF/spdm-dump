@@ -2430,7 +2430,7 @@ void dump_spdm_key_exchange_rsp(const void *buffer, size_t buffer_size)
         exchange_data_size = libspdm_get_dhe_pub_key_size(m_spdm_dhe_named_group);
     }
     if (m_spdm_kem_alg != 0) {
-        exchange_data_size = libspdm_get_kem_encap_key_size(m_spdm_kem_alg);
+        exchange_data_size = libspdm_get_kem_cipher_text_size(m_spdm_kem_alg);
     }
     if (m_spdm_base_asym_algo != 0) {
         signature_size = libspdm_get_asym_signature_size(m_spdm_base_asym_algo);
