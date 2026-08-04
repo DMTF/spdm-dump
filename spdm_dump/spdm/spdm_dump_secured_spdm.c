@@ -1,6 +1,6 @@
 /**
  *  Copyright Notice:
- *  Copyright 2021-2022 DMTF. All rights reserved.
+ *  Copyright 2021-2026 DMTF. All rights reserved.
  *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/spdm-dump/blob/main/LICENSE.md
  **/
 
@@ -69,11 +69,29 @@ void dump_spdm_opaque_supported_version(const void *buffer, size_t buffer_size)
     printf(") ");
 }
 
+void dump_spdm_opaque_aead_limit(const void *buffer, size_t buffer_size)
+{
+    const secured_message_opaque_element_aead_limit_t *aead_limit;
+
+    if (buffer_size <
+        sizeof(secured_message_opaque_element_aead_limit_t)) {
+        return;
+    }
+
+    aead_limit = buffer;
+
+    printf("AEAD_LIMIT ");
+
+    printf("(AeadLimitExponent=0x%02x) ", aead_limit->aead_limit_exponent);
+}
+
 dispatch_table_entry_t m_spdm_opaque_dispatch[] = {
     { SECURED_MESSAGE_OPAQUE_ELEMENT_SMDATA_ID_VERSION_SELECTION,
       "VERSION_SELECTION", dump_spdm_opaque_version_selection },
     { SECURED_MESSAGE_OPAQUE_ELEMENT_SMDATA_ID_SUPPORTED_VERSION,
       "SUPPORTED_VERSION", dump_spdm_opaque_supported_version },
+    { SECURED_MESSAGE_OPAQUE_ELEMENT_SMDATA_ID_AEAD_LIMIT,
+      "AEAD_LIMIT", dump_spdm_opaque_aead_limit },
 };
 
 void dump_spdm_opaque_data(uint8_t spdm_version, const uint8_t *opaque_data, uint16_t opaque_length)
