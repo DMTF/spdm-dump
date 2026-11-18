@@ -39,7 +39,27 @@
  * is enabled. spdm_dump uses it to bound the certificate chain buffers regardless of that
  * setting, so provide the same default here when libspdm does not define it. */
 #ifndef LIBSPDM_MAX_CERT_CHAIN_SIZE
+/* MLDSA - 0x8000, SLHDSA - 0x28000 */
+#if ((LIBSPDM_SLH_DSA_SHA2_128S_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHAKE_128S_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHA2_128F_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHAKE_128F_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHA2_192S_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHAKE_192S_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHA2_192F_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHAKE_192F_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHA2_256S_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHAKE_256S_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHA2_256F_SUPPORT) || \
+    (LIBSPDM_SLH_DSA_SHAKE_256F_SUPPORT))
+#define LIBSPDM_MAX_CERT_CHAIN_SIZE 0x28000
+#elif ((LIBSPDM_ML_DSA_44_SUPPORT) || \
+    (LIBSPDM_ML_DSA_65_SUPPORT) || \
+    (LIBSPDM_ML_DSA_87_SUPPORT))
+#define LIBSPDM_MAX_CERT_CHAIN_SIZE 0x8000
+#else
 #define LIBSPDM_MAX_CERT_CHAIN_SIZE 0x1000
+#endif
 #endif /* LIBSPDM_MAX_CERT_CHAIN_SIZE */
 
 typedef void (*dump_message_func)(const void *buffer, size_t buffer_size);
